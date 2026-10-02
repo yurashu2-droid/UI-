@@ -1,0 +1,427 @@
+/* =====================================================================
+   RAID OS 98 — reference: Hypnospace Outlaw.
+   Rule 1: every piece of game UI is part of a fictional 90s operating system.
+   Rule 2: the OS frame is strict and uniform; only web pages inside windows are chaotic.
+   Rule 3: bevels press in, windows have title bars, progress is chunky blocks.
+   ===================================================================== */
+/* ===== Eras: the OS chrome modernises as the server is upgraded ===== */
+html body.ui2, html body.ui2 .era-98 {
+  --os-face: #c3c3c3; --os-btn: #c3c3c3; --os-bar: #c3c3c3;
+  --os-light: #ffffff; --os-hi: #dfdfdf; --os-shadow: #818181; --os-dark: #0a0a0a;
+  --os-title: linear-gradient(90deg, #0b1f8f, #1a78c9); --os-title-off: linear-gradient(90deg, #7b7b7b, #b3b3b3);
+  --os-title-ink: #ffffff; --os-accent: #0b1f8f; --os-desk: #1f6f78;
+  --os-rs: 0; --os-rw: 0;
+  --os-font: "MS UI Gothic", "Meiryo UI", "Yu Gothic UI", "Segoe UI", sans-serif;
+  --os-wall: radial-gradient(#ffffff12 1px, transparent 1px) 0 0 / 4px 4px, radial-gradient(#00000018 1px, transparent 1px) 2px 2px / 4px 4px, #1f6f78;
+  --raised: inset -1px -1px var(--os-dark), inset 1px 1px var(--os-light), inset -2px -2px var(--os-shadow), inset 2px 2px var(--os-hi);
+  --pressed: inset 1px 1px var(--os-dark), inset -1px -1px var(--os-light), inset 2px 2px var(--os-shadow), inset -2px -2px var(--os-hi);
+  --sunken: inset 1px 1px var(--os-shadow), inset -1px -1px var(--os-light), inset 2px 2px var(--os-dark), inset -2px -2px var(--os-hi);
+  --window: inset -1px -1px var(--os-dark), inset 1px 1px var(--os-hi), inset -2px -2px var(--os-shadow), inset 2px 2px var(--os-light);
+}
+html body.ui2.era-xp, html body.ui2 .era-xp {
+  --os-face: #ece9d8; --os-btn: linear-gradient(#ffffff, #ece9d8 85%, #d6d0c5);
+  --os-bar: linear-gradient(#3168d5, #4993e6 10%, #2157d7 50%, #1941a5);
+  --os-light: #ffffff; --os-hi: #f5f4ea; --os-shadow: #aca899; --os-dark: #716f64;
+  --os-title: linear-gradient(180deg, #0a5fe0 0%, #3d95ff 9%, #0058ee 45%, #0047d8 88%, #003dbb 100%);
+  --os-title-off: linear-gradient(180deg, #7a96df, #a6b9ea); --os-title-ink: #ffffff; --os-accent: #316ac5; --os-desk: #3a7bd5;
+  --os-rs: 3px; --os-rw: 8px 8px 0 0;
+  --os-font: Tahoma, "Meiryo UI", "Yu Gothic UI", sans-serif;
+  --os-wall: radial-gradient(ellipse 150% 55% at 45% 108%, #6fb33f 0 45%, #4a9129 46%, transparent 47%), linear-gradient(#2d6fd6, #8fc2f4 72%);
+  --raised: inset 0 0 0 1px #003c74, inset 0 -2px 0 #d6d0c5;
+  --pressed: inset 0 0 0 1px #003c74, inset 0 2px 3px #00000033;
+  --sunken: inset 0 0 0 1px #7f9db9;
+  --window: inset 0 0 0 1px #0831d9, inset 0 0 0 3px #3d7bf0;
+}
+html body.ui2.era-aero, html body.ui2 .era-aero {
+  --os-face: #f0f0f0; --os-btn: linear-gradient(#f7f7f7 0 45%, #dddddd 50%, #ebebeb);
+  --os-bar: linear-gradient(#233548e6, #0b1420f2);
+  --os-light: #ffffff; --os-hi: #fafafa; --os-shadow: #a0a0a0; --os-dark: #707070;
+  --os-title: linear-gradient(#cfe7ffd9, #8dbdecb3 50%, #6aa6dfb3 51%, #9ccdf3d9); --os-title-off: linear-gradient(#e5e5e5, #cfcfcf);
+  --os-title-ink: #0b1b2e; --os-accent: #2a78d8; --os-desk: #0b4a6a;
+  --os-rs: 4px; --os-rw: 9px;
+  --os-font: "Segoe UI", "Meiryo", "Yu Gothic UI", sans-serif;
+  --os-wall: radial-gradient(ellipse at 18% 82%, #57c7ff99, transparent 55%), radial-gradient(ellipse at 82% 18%, #7dff9f66, transparent 50%), linear-gradient(135deg, #062a5c, #0b5a6a 60%, #0a7a4a);
+  --raised: inset 0 0 0 1px #707070, inset 0 1px 0 1px #ffffffcc;
+  --pressed: inset 0 0 0 1px #2c628b, inset 0 2px 4px #00000033;
+  --sunken: inset 0 0 0 1px #abadb3, inset 0 1px 2px #00000012;
+  --window: 0 0 0 1px #3a5f8a99, 0 10px 28px #00000055;
+}
+html body.ui2.era-flat, html body.ui2 .era-flat {
+  --os-face: #f3f3f3; --os-btn: #e1e1e1; --os-bar: #1f1f1f;
+  --os-light: #ffffff; --os-hi: #ffffff; --os-shadow: #d0d0d0; --os-dark: #bdbdbd;
+  --os-title: #2b579a; --os-title-off: #9aa9bf; --os-title-ink: #ffffff; --os-accent: #2b579a; --os-desk: #0063b1;
+  --os-rs: 2px; --os-rw: 2px;
+  --os-font: "Segoe UI", "Yu Gothic UI", "Meiryo", sans-serif;
+  --os-wall: linear-gradient(120deg, #0063b1 0 48%, #005a9e 48% 70%, #004e8c 70%);
+  --raised: 0 1px 2px #00000026; --pressed: inset 0 0 0 2px #2b579a;
+  --sunken: inset 0 0 0 1px #cfcfcf; --window: 0 2px 12px #00000033;
+}
+html body.ui2.era-art, html body.ui2 .era-art {
+  /* RAID OS 2025: the title's language — ink, smoked glass, cream type, orange/blue light. */
+  --os-face: #15141fb8; --os-btn: #ffffff12; --os-bar: #0b0a12cc;
+  --os-light: #ffffff26; --os-hi: #ffffff14; --os-shadow: #000000; --os-dark: #000000;
+  --os-title: linear-gradient(90deg, #ffffff10, #ffffff04); --os-title-off: #ffffff08; --os-title-ink: #f2ece0; --os-accent: #ff4f1f; --os-desk: #07070b;
+  --os-rs: 12px; --os-rw: 18px;
+  --os-font: "Inter", "Segoe UI Variable Text", "Segoe UI", "Yu Gothic UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --os-wall: radial-gradient(60% 55% at 22% 25%, #3a36ff55, transparent 70%), radial-gradient(50% 45% at 80% 75%, #ff4f1f40, transparent 70%), #07070b;
+  --raised: inset 0 1px 0 #ffffff1f, 0 0 0 1px #ffffff14; --pressed: inset 0 0 0 1px #ff4f1fb0, inset 0 2px 8px #0008;
+  --sunken: inset 0 0 0 1px #ffffff14, inset 0 2px 8px #0006; --window: 0 0 0 1px #ffffff1c, inset 0 1px 0 #ffffff1f, 0 24px 60px #000a;
+  --cream: #f2ece0; --cream-2: #f2ece0a6; --glass-line: #ffffff17;
+}
+
+html body.ui2 { font-family: var(--os-font); font-size: 13px; color: #000; background: var(--os-desk); }
+html body.ui2 button, html body.ui2 input, html body.ui2 select { font-family: var(--os-font); }
+
+/* ---------- Desktop wallpaper (the workspace) ---------- */
+html body.ui2 .canvas-scroll,
+html body.ui2.battle-mode .canvas-scroll { background: var(--os-wall); background-attachment: local; }
+html body.ui2 .workspace { height: calc(100vh - 38px); gap: 0; }
+
+/* ---------- Taskbar (was the top bar) ---------- */
+html body.ui2 .topbar {
+  position: fixed; left: 0; right: 0; bottom: 0; top: auto; height: 38px; z-index: 60;
+  background: var(--os-bar); color: #000; box-shadow: inset 0 1px var(--os-hi), inset 0 2px var(--os-light);
+  gap: 6px; padding: 3px 4px;
+}
+html body.ui2 .tb-brand { order: 0; }
+html body.ui2 .tb-brand, html body.ui2 #menu-button {
+  height: 30px; padding: 0 10px; background: var(--os-btn); box-shadow: var(--raised); border: 0; border-radius: var(--os-rs); color: #000;
+  font: 700 13px var(--os-font); display: flex; align-items: center; gap: 6px;
+}
+html body.ui2 .tb-brand { display: none; }
+html body.ui2 #menu-button::before { content: ""; width: 16px; height: 16px; background: conic-gradient(#ff3b30 0 25%, #34c759 0 50%, #0a84ff 0 75%, #ffcc00 0); }
+html body.ui2 .tb-actions { order: 0; margin-right: 6px; }
+html body.ui2 #menu-button { font-size: 0; }
+html body.ui2 #menu-button::after { content: "スタート"; font: 700 13px var(--os-font); }
+html body.ui2 .tb-run, html body.ui2 .tb-stats {
+  height: 30px; box-shadow: var(--sunken); padding: 0 10px; gap: 12px; color: #000; background: var(--os-face);
+}
+html body.ui2 .tb-run { order: 1; }
+html body.ui2 .tb-stats { order: 2; margin-left: auto; }
+html body.ui2 .tb-round small, html body.ui2 .tb-load small, html body.ui2 .tb-money small { color: #000; font: 12px var(--os-font); letter-spacing: 0; }
+html body.ui2 .tb-round b { font: 700 16px var(--os-font); }
+html body.ui2 .tb-round span { color: #333; }
+html body.ui2 .tb-ladder i { width: 14px; height: 10px; border-radius: var(--os-rs); background: #fff; box-shadow: inset 1px 1px #818181; }
+html body.ui2 .tb-ladder i.win { background: #2fb47c; }
+html body.ui2 .tb-ladder i.lose { background: #d0021b; }
+html body.ui2 .tb-ladder i.now { background: var(--os-accent); box-shadow: none; }
+html body.ui2 .tb-lives { color: #d0021b; font-size: 15px; }
+html body.ui2 .tb-lives span { color: #9a9a9a; }
+/* Money is a LED counter, like a 1999 hit counter. */
+html body.ui2 .tb-money { font: 700 17px "Courier New", monospace; color: #9dff6a; background: #102010; padding: 1px 8px; box-shadow: var(--sunken); }
+html body.ui2 .tb-money small { color: #6fa35a; font-size: 11px; }
+html body.ui2 .tb-money b { color: #c8ff9a; }
+/* Capacity is a chunky Win9x progress bar. */
+html body.ui2 .load-bar { width: 130px; height: 16px; background: #fff; border-radius: var(--os-rs); box-shadow: var(--sunken); padding: 2px; }
+html body.ui2 .load-bar i { background: repeating-linear-gradient(90deg, var(--os-accent) 0 7px, transparent 7px 9px); border-radius: var(--os-rs); }
+html body.ui2 .tb-load.over .load-bar i { background: repeating-linear-gradient(90deg, #b8860b 0 7px, transparent 7px 9px); }
+html body.ui2 .load-bar em { background: repeating-linear-gradient(90deg, #d0021b 0 7px, transparent 7px 9px); }
+html body.ui2 .tb-load b { color: #000; font: 700 13px var(--os-font); }
+html body.ui2 .tb-load.over b { color: #d0021b; }
+html body.ui2 .tb-speed { background: none; color: #0b6b1f; border-radius: var(--os-rs); font: 700 12px var(--os-font); padding: 0; }
+html body.ui2 .tb-load.over .tb-speed { color: #d0021b; background: none; }
+html body.ui2 .tb-mode b, html body.ui2 .tb-mode small { color: #000; }
+/* The publish button: the one loud button in the OS. */
+html body.ui2 .tb-primary {
+  order: 3; height: 30px; border-radius: var(--os-rs); background: var(--os-btn); color: #000; box-shadow: var(--raised);
+  font: 700 14px var(--os-font); padding: 0 16px; margin-left: 4px;
+}
+html body.ui2 .tb-primary:active { box-shadow: var(--pressed); transform: none; }
+html body.ui2 .tb-primary.is-ready { background: #fffbe0; animation: osBlink 1.2s steps(2) infinite; }
+@keyframes osBlink { 50% { background: var(--os-face); } }
+html body.ui2 .tb-primary.is-ready::after { display: none; }
+
+/* ---------- Windows: side panels become OS windows with title bars ---------- */
+html body.ui2 .left-panel, html body.ui2 .right-panel {
+  background: var(--os-face); border: 0; box-shadow: var(--window); padding: 3px;
+}
+html body.ui2 .panel-head {
+  background: var(--os-title); color: var(--os-title-ink); padding: 3px 6px; margin: 0 0 4px; display: flex; align-items: center; min-height: 24px;
+}
+html body.ui2 .panel-head b { font: 700 13px var(--os-font); color: var(--os-title-ink); display: inline; }
+html body.ui2 .panel-head small { color: var(--os-title-ink); font-size: 12px; opacity: .92; display: block; line-height: 1.45; padding: 2px 0; }
+html body.ui2 .panel-head small .unlock { color: #ffe680; }
+html body.ui2 .library-list { background: var(--os-face); padding: 4px; gap: 8px; }
+html body.ui2 .library-list::-webkit-scrollbar, html body.ui2 .right-panel::-webkit-scrollbar, html body.ui2 .canvas-scroll::-webkit-scrollbar, html body.ui2 #stash-list::-webkit-scrollbar { width: 16px; height: 16px; background: #e0e0e0; }
+html body.ui2 ::-webkit-scrollbar-thumb { background: var(--os-face); box-shadow: var(--raised); }
+html body.ui2 ::-webkit-scrollbar-button { display: block; height: 16px; background: var(--os-face); box-shadow: var(--raised); }
+
+/* Crawled site = a small browser window. */
+html body.ui2 .crawl-site { border: 0; border-radius: var(--os-rs); background: var(--os-face); box-shadow: var(--window); padding: 3px; }
+html body.ui2 .cs-bar { height: 22px; background: var(--os-title); border: 0; padding: 0 4px; gap: 6px; }
+html body.ui2 .cs-name { color: var(--os-title-ink); font: 700 12px var(--os-font); }
+html body.ui2 .cs-url { background: #fff; border-radius: var(--os-rs); box-shadow: var(--sunken); color: #000; font: 11px "Courier New", monospace; }
+html body.ui2 .cs-body { background: #fff; box-shadow: var(--sunken); padding: 6px; margin-top: 3px; }
+html body.ui2 .crawl-site.server .cs-body { background: #000; }
+
+/* Shop items: a UI specimen + properties, no rounded cards or pastel pills. */
+html body.ui2 .shop-card, html body.ui2 .crawl-site .shop-card {
+  border: 1px dotted #7a7a7a; border-radius: var(--os-rs); background: #fff; box-shadow: none; padding: 7px 8px; transform: none !important;
+}
+html body.ui2 .shop-card:hover { border: 1px solid var(--os-accent); background: #f4f6ff; box-shadow: none; }
+html body.ui2 .shop-card.pending, html body.ui2 .shop-card.tut-target { outline: 2px dashed var(--os-accent); outline-offset: 1px; border-color: var(--os-accent); animation: none; }
+html body.ui2 .sc-top { font-size: 12px; color: #000; gap: 6px; }
+html body.ui2 .sc-kind, html body.ui2 .sc-weight {
+  border-radius: var(--os-rs); background: none; padding: 0; font: 700 12px var(--os-font); color: #000;
+}
+html body.ui2 .sc-kind::before { content: "■ "; }
+html body.ui2 .kind-attack { color: #c00; } html body.ui2 .kind-shield { color: #0050a0; }
+html body.ui2 .kind-heal { color: #0a7a2a; } html body.ui2 .kind-income { color: #946200; }
+html body.ui2 .kind-passive, html body.ui2 .kind-reactive { color: #5a3aa8; } html body.ui2 .kind-echo { color: #7b2aa8; }
+html body.ui2 .sc-weight { font-weight: 400; color: #444; }
+html body.ui2 .sc-weight::before { content: "・"; }
+html body.ui2 .sc-price { font: 700 16px "Courier New", monospace; color: #000; }
+html body.ui2 .shop-card.poor .sc-price { color: #c00; text-decoration: line-through; }
+html body.ui2 .sc-visual { background: #fafafa; box-shadow: inset 0 0 0 1px #d6d6d6; padding: 0 4px; margin: 6px 0; }
+html body.ui2 .sc-name { font: 700 14px var(--os-font); }
+html body.ui2 .sc-desc { font-size: 12.5px; color: #222; }
+html body.ui2 .sc-match { border-radius: var(--os-rs); background: #ffffe1; color: #000; border: 1px solid #000; font-weight: 400; padding: 0 5px; }
+html body.ui2 .sc-match::before { content: "★ "; color: #0b6b1f; }
+html body.ui2 .sc-buy, html body.ui2 .plan-card .sc-buy {
+  border-radius: var(--os-rs); background: var(--os-btn); color: #000; box-shadow: var(--raised); border: 0; font: 700 12px var(--os-font); padding: 4px 10px;
+}
+html body.ui2 .sc-buy:active { box-shadow: var(--pressed); }
+html body.ui2 .shop-card.sold { background: repeating-linear-gradient(45deg, #eee 0 6px, #fff 6px 12px); color: #777; border-style: dotted; }
+html body.ui2 .plan-card { border-radius: var(--os-rs); background: #000; border: 1px solid #3f3; color: #3f3; font-family: "Courier New", monospace; }
+html body.ui2 .pc-main b, html body.ui2 .pc-cap, html body.ui2 .pc-cap small { color: #3f3; font-family: "Courier New", monospace; }
+html body.ui2 .pc-cap strong { color: #fff; }
+html body.ui2 .cs-note { color: #3f3; font-family: "Courier New", monospace; }
+
+/* Buttons across the OS */
+html body.ui2 .reroll, html body.ui2 .side-btn, html body.ui2 .sel-actions button, html body.ui2 .skin-chip,
+html body.ui2 .modal-footer button, html body.ui2 .result-actions button, html body.ui2 .menu-grid button,
+html body.ui2 .bb-buttons button, html body.ui2 .canvas-float button, html body.ui2 .view-back {
+  border: 0 !important; border-radius: var(--os-rs) !important; background: var(--os-btn) !important; color: #000 !important;
+  box-shadow: var(--raised) !important; font-family: var(--os-font); font-weight: 700;
+}
+html body.ui2 .reroll:active, html body.ui2 .side-btn:active, html body.ui2 .sel-actions button:active,
+html body.ui2 .modal-footer button:active, html body.ui2 .result-actions button:active, html body.ui2 .menu-grid button:active,
+html body.ui2 .bb-buttons button:active, html body.ui2 .bb-buttons button.active { box-shadow: var(--pressed) !important; }
+html body.ui2 .modal-footer button.primary, html body.ui2 .result-actions button.primary { outline: 1px solid #000; outline-offset: -5px; }
+html body.ui2 .sel-actions .sell { color: #c00 !important; }
+html body.ui2 .shop-foot { background: var(--os-face); border: 0; padding: 4px; }
+html body.ui2 .stash-panel { background: var(--os-face); border-top: 0; padding: 4px; }
+html body.ui2 .stash-head { font: 700 12px var(--os-font); color: #000; }
+html body.ui2 .stash-head span { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); }
+html body.ui2 #stash-list { background: #fff; box-shadow: var(--sunken); padding: 4px; min-height: 34px; }
+html body.ui2 .stash-item { border-radius: var(--os-rs); border: 1px dotted #555; background: #fff; }
+
+/* Right panel sections become group boxes with a title bar. */
+html body.ui2 .inspector { padding: 2px; background: var(--os-face); }
+html body.ui2 .side-sec { background: var(--os-face); border: 0; border-radius: var(--os-rs); box-shadow: var(--window); padding: 3px 8px 8px; margin-bottom: 6px; }
+html body.ui2 .side-sec h3 { background: var(--os-title); color: var(--os-title-ink); margin: 0 -5px 8px; padding: 3px 6px; font: 700 13px var(--os-font); }
+html body.ui2 .side-sec h3 small { color: var(--os-title-ink); opacity: .8; }
+html body.ui2 .side-sec h4 { font: 700 12px var(--os-font); color: #000; border-bottom: 1px solid var(--os-shadow); box-shadow: 0 1px var(--os-light); padding-bottom: 2px; }
+html body.ui2 .side-sec.sel-card { box-shadow: var(--window); border: 0; }
+html body.ui2 .sel-card h2 { font: 700 17px var(--os-font); }
+html body.ui2 .sel-kicker { color: #000; }
+html body.ui2 .sel-desc { color: #000; font-size: 13px; background: #fff; box-shadow: var(--sunken); padding: 6px 8px; }
+html body.ui2 .sel-stats div { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); }
+html body.ui2 .sel-stats small { color: #444; }
+html body.ui2 .sel-connect { border-radius: var(--os-rs); background: #ffffe1; border: 1px solid #000; color: #000; }
+html body.ui2 .sel-connect b { color: #000; }
+html body.ui2 .sel-bonus li { color: #0b6b1f; }
+html body.ui2 .traits { background: #fff; box-shadow: var(--sunken); padding: 2px 6px; }
+html body.ui2 .trait { border-bottom: 1px dotted #aaa; }
+html body.ui2 .trait.on { background: #e8f7ea; margin: 0 -6px; padding: 7px 6px; border-radius: var(--os-rs); box-shadow: inset 3px 0 0 #0b6b1f; }
+html body.ui2 .trait > small { color: #555; }
+html body.ui2 .trait.on > small { color: #0b6b1f; }
+html body.ui2 .pips em { border-radius: var(--os-rs); background: #fff; box-shadow: inset 1px 1px #818181, inset -1px -1px #fff; }
+html body.ui2 .link-row { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); }
+html body.ui2 .link-row b { color: var(--os-accent); }
+html body.ui2 .link-row small { color: #0b6b1f; }
+html body.ui2 .hint { border-radius: var(--os-rs); background: #ffffe1; border: 1px solid #000; color: #000; }
+html body.ui2 .opp .enemy-thumbnail { border-radius: var(--os-rs); border: 0; box-shadow: var(--sunken); }
+html body.ui2 .opp-meta span { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); color: #000; }
+html body.ui2 .opp-tip { color: #000; }
+html body.ui2 .muted { color: #333; }
+html body.ui2 .fav { border-radius: var(--os-rs) !important; }
+
+/* ---------- The page window: RAID OS's own browser ---------- */
+html body.ui2 .browser-paper { border-radius: var(--os-rs) !important; background: var(--os-face) !important; box-shadow: var(--window), 6px 6px 0 #00000055 !important; padding: 3px; }
+html body.ui2 .browser-tabs { background: var(--os-title); height: 24px; border: 0; padding-left: 6px; }
+html body.ui2 .traffic-lights { display: none; }
+html body.ui2 .browser-tab { background: none; color: var(--os-title-ink); font: 700 12px var(--os-font); border-radius: var(--os-rs); width: auto; }
+html body.ui2 .browser-tab > span, html body.ui2 .browser-plus { display: none; }
+html body.ui2 .address-bar { background: var(--os-face); border: 0; }
+html body.ui2 .address-field { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); color: #000; font-family: "Courier New", monospace; }
+html body.ui2 .address-controls { color: #000; }
+html body.ui2 .frame-caption .frame-name b { color: #fff; text-shadow: 1px 1px #000; }
+html body.ui2 .frame-caption .frame-name small { color: #d8f0f2; }
+html body.ui2 .health-track { border-radius: var(--os-rs) !important; background: #fff !important; box-shadow: var(--sunken); height: 14px !important; }
+html body.ui2 .health-track > i { border-radius: var(--os-rs) !important; background: repeating-linear-gradient(90deg, #0b8f3a 0 8px, transparent 8px 10px) !important; top: 2px; bottom: 2px; left: 2px; }
+html body.ui2 .frame-caption.enemy .health-track > i { background: repeating-linear-gradient(90deg, #c00 0 8px, transparent 8px 10px) !important; }
+html body.ui2 .health-track > b { display: none; }
+html body.ui2 .health-meta .hp-num { color: #fff !important; text-shadow: 1px 1px #000; }
+html body.ui2 .canvas-float { border-radius: var(--os-rs); background: var(--os-face); box-shadow: var(--window); border: 0; }
+
+/* ---------- Battle: the stage is still the desktop; bars are OS windows ---------- */
+html body.ui2 .battle-bar { background: var(--os-face); box-shadow: var(--window); color: #000; border: 0; }
+html body.ui2 #battle-clock { color: #9dff6a; background: #102010; padding: 2px 8px; box-shadow: var(--sunken); }
+html body.ui2 .battle-bar .tug span { color: #000; }
+html body.ui2 .battle-bar .tug-track { border-radius: var(--os-rs); background: repeating-linear-gradient(90deg, #c00 0 8px, #fff 8px 10px); box-shadow: var(--sunken); }
+html body.ui2 .tug-track i { background: repeating-linear-gradient(90deg, #0b8f3a 0 8px, #fff 8px 10px); }
+html body.ui2 .battle-log { background: #000 !important; border: 0 !important; box-shadow: var(--sunken); }
+html body.ui2 .log-col { color: #c0c0c0; font-family: "MS Gothic", "Courier New", monospace; }
+html body.ui2 .traffic-hub .hub-serp { border-radius: var(--os-rs); box-shadow: var(--window), 4px 4px 0 #0005; border: 0; background: #fff; }
+html body.ui2 .traffic-hub .hub-label { color: #fff; text-shadow: 1px 1px #000; }
+html body.ui2 .hub-q { border-radius: var(--os-rs); box-shadow: var(--sunken); border: 0; }
+
+/* ---------- Dialogs ---------- */
+html body.ui2 #modal { border-radius: var(--os-rs); background: var(--os-face); box-shadow: var(--window), 8px 8px 0 #00000066; padding: 3px; }
+html body.ui2 #modal::backdrop { background: #00000040; backdrop-filter: none; }
+html body.ui2 #modal[open] { animation: osOpen .16s steps(4); }
+@keyframes osOpen { from { transform: scale(.6); opacity: .4; } }
+html body.ui2 .modal-inner { padding: 0 10px 12px; }
+html body.ui2 .modal-head { background: var(--os-title); margin: 0 -10px 12px; padding: 3px 4px 3px 8px; align-items: center; }
+html body.ui2 .modal-kicker { display: none; }
+html body.ui2 .modal-inner h2, html body.ui2 .result h2 { font: 700 13px var(--os-font) !important; color: var(--os-title-ink) !important; margin: 0; text-shadow: none !important; }
+html body.ui2 .modal-head button { width: 20px; height: 18px; background: var(--os-face); box-shadow: var(--raised); color: #000; font: 700 12px Arial; line-height: 1; padding: 0; }
+html body.ui2 .modal-inner p { color: #000; }
+html body.ui2 .res-share b { color: #0b6b1f; } html body.ui2 .res-share .foe b { color: #c00; }
+html body.ui2 .res-bar { border-radius: var(--os-rs); background: repeating-linear-gradient(90deg, #c00 0 10px, #fff 10px 12px); box-shadow: var(--sunken); }
+html body.ui2 .res-bar i { background: repeating-linear-gradient(90deg, #0b8f3a 0 10px, #fff 10px 12px); }
+html body.ui2 .res-money, html body.ui2 .res-mvp > div { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); }
+html body.ui2 .res-money .sum b { color: #000; font-family: "Courier New", monospace; }
+html body.ui2 .res-mvp em { border-radius: var(--os-rs); background: var(--os-accent); color: #fff; }
+html body.ui2 .reward-card { border: 0; border-radius: var(--os-rs); background: var(--os-face); box-shadow: var(--raised); }
+html body.ui2 .reward-card:hover { box-shadow: var(--raised), 0 0 0 2px var(--os-accent); transform: none; }
+html body.ui2 .rc-vis { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); }
+html body.ui2 .reward-card em { border-radius: var(--os-rs); background: #ffffe1; border: 1px solid #000; color: #000; }
+html body.ui2 .menu-grid button.on { outline: 1px dotted #000; outline-offset: -6px; }
+html body.ui2 .howto > div { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); }
+html body.ui2 .howto > div > b { border-radius: var(--os-rs); background: var(--os-accent); }
+html body.ui2 .text-input, html body.ui2 .select-input { border-radius: var(--os-rs); border: 0; box-shadow: var(--sunken); background: #fff; }
+
+/* ---------- The assistant: tutorial hints come from a 90s help character ---------- */
+html body.ui2 .coach {
+  background: #ffffe1; color: #000; border-radius: var(--os-rs); border: 1px solid #000; box-shadow: 4px 4px 0 #00000066;
+  font: 14px var(--os-font); padding: 10px 12px 10px 64px; position: absolute;
+}
+html body.ui2 .coach::before {
+  content: ""; position: absolute; left: 10px; top: 50%; width: 42px; height: 42px; transform: translateY(-50%);
+  background:
+    radial-gradient(circle at 34% 38%, #000 0 3px, transparent 3.5px),
+    radial-gradient(circle at 66% 38%, #000 0 3px, transparent 3.5px),
+    radial-gradient(ellipse at 50% 68%, #000 0 30%, transparent 31%) 0 3px / 100% 100% no-repeat,
+    linear-gradient(#fff, #fff);
+  box-shadow: var(--raised), inset 0 0 0 1px #000;
+}
+html body.ui2 .coach::after { content: ""; position: absolute; left: 60px; bottom: -9px; width: 14px; height: 14px; background: #ffffe1; border-right: 1px solid #000; border-bottom: 1px solid #000; transform: rotate(45deg); }
+html body.ui2 .coach b { color: var(--os-accent); }
+html body.ui2 .coach-step { border-radius: var(--os-rs); background: var(--os-accent); color: #fff; font: 700 11px var(--os-font); }
+html body.ui2 .coach-next { border-radius: var(--os-rs) !important; background: var(--os-btn) !important; color: #000 !important; box-shadow: var(--raised); }
+html body.ui2 .coach-skip { color: #0000ee !important; }
+html body.ui2 .tut-drop { border-radius: var(--os-rs); border: 2px dashed var(--os-accent); background: color-mix(in srgb, var(--os-accent) 8%, transparent); animation: none; }
+html body.ui2 .tut-drop span { border-radius: var(--os-rs); background: var(--os-accent); font: 700 14px var(--os-font); }
+html body.ui2 .tut-target { outline: 2px dashed var(--os-accent) !important; animation: none !important; }
+
+/* ---------- Toasts are tray balloons ---------- */
+html body.ui2 .toast { top: auto; bottom: 48px; left: auto; right: 12px; transform: none; border-radius: var(--os-rs); background: #ffffe1; color: #000; border: 1px solid #000; box-shadow: 3px 3px 0 #0006; font: 13px var(--os-font); }
+html body.ui2 .toast.visible { transform: none; }
+
+/* Ceremony banner joins the OS: a tray notification window. */
+html body.ui2 .cer-banner { border-radius: var(--os-rs) !important; }
+
+/* Synergy pips keep their culture colour. */
+html body.ui2 .pips em.f { background: var(--c); box-shadow: inset 1px 1px #0006; }
+
+/* ---------- Ceremonies speak the same OS language ---------- */
+html body.ui2 .cer-overlay { font-family: var(--os-font); }
+html body.ui2 .cer-chrome { background: var(--os-title); color: var(--os-title-ink); font: 700 13px var(--os-font); letter-spacing: 0; padding: 4px 6px; }
+html body.ui2 .cer-intro, html body.ui2 .cer-overlay.cer-intro { background: var(--os-wall); }
+html body.ui2 .cer-map-window, html body.ui2 .cer-result-window {
+  border-radius: var(--os-rs); border: 0; background: var(--os-face); box-shadow: var(--window), 8px 8px 0 #0006; padding: 3px;
+}
+html body.ui2 .cer-banner {
+  border-radius: var(--os-rs) !important; background: var(--os-btn) !important; color: #000 !important; border: 0 !important;
+  box-shadow: var(--window), 5px 5px 0 #0006 !important; font-family: var(--os-font);
+}
+html body.ui2 .cer-banner-icon { color: var(--cer-accent, var(--os-accent)); }
+
+/* The site's back office is a Control Panel window, not a dark SaaS dashboard. */
+html body.ui2 .admin-dock { background: var(--os-face); color: #000; border-top: 0; box-shadow: inset 0 2px var(--os-light); font-family: var(--os-font); }
+html body.ui2 .ad-head { background: var(--os-title); color: var(--os-title-ink); border: 0; height: 24px; }
+html body.ui2 .ad-head b { color: var(--os-title-ink); font: 700 12px var(--os-font); }
+html body.ui2 .ad-head small { color: var(--os-title-ink); opacity: .8; font: 11px var(--os-font); }
+html body.ui2 .ad-status { color: #9dff6a; }
+html body.ui2 .admin-widget { border-radius: var(--os-rs); border: 0; background: #fff; box-shadow: var(--sunken); color: #000; }
+html body.ui2 .aw-top b { color: #000; }
+html body.ui2 .aw-top em { border-radius: var(--os-rs); border-color: #888; color: #333; }
+html body.ui2 .aw-metric { color: #0b6b1f; font-family: "Courier New", monospace; }
+html body.ui2 .admin-empty { border-radius: var(--os-rs); border: 1px dashed #777; color: #444; background: transparent; }
+html body.ui2 .admin-dock.is-slim { box-shadow: none; }
+html body.ui2 .admin-dock.is-slim .ad-head { background: var(--os-title-off); }
+html body.ui2 .slow-banner { background: #ffffe1; color: #000; border-top: 2px solid #000 !important; font: 700 14px var(--os-font); }
+html body.ui2 .slow-banner::before { content: "⚠ "; color: #c00; }
+
+/* VS: two OS windows face off over a dithered green/red desktop. */
+html body.ui2 .cer-versus { background: var(--os-wall); }
+html body.ui2 .cer-versus::before { background: radial-gradient(#ffffff18 1px, transparent 1px) 0 0/4px 4px, #125a3c; }
+html body.ui2 .cer-versus::after { background: radial-gradient(#ffffff14 1px, transparent 1px) 0 0/4px 4px, #6a1a26; }
+html body.ui2 .cer-site { background: var(--os-face); box-shadow: var(--window), 8px 8px 0 #0007; padding: 3px 12px 12px; color: #000; }
+html body.ui2 .cer-side-label { margin: 0 -9px 10px; padding: 4px 8px; background: linear-gradient(90deg, #0b6b3a, #2fb47c); color: #fff !important; font: 700 13px var(--os-font); letter-spacing: 0; }
+html body.ui2 .cer-site-foe .cer-side-label { background: linear-gradient(90deg, #8a0f1f, #e5484d); }
+html body.ui2 .cer-site-browser { border: 0; box-shadow: var(--sunken); transform: none; padding: 2px; }
+html body.ui2 .cer-site-foe .cer-site-browser { transform: none; }
+html body.ui2 .cer-faction { color: #333; font: 12px var(--os-font); }
+html body.ui2 .cer-site-name { color: #000; font-family: var(--os-font); }
+html body.ui2 .cer-stat { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); border: 0; color: #000; }
+html body.ui2 .cer-stat-label { color: #333; }
+html body.ui2 .cer-tags { color: var(--os-accent); font: 700 12px var(--os-font); }
+html body.ui2 .cer-deploy-text { color: #000; }
+html body.ui2 .cer-upload-track { border-radius: var(--os-rs); background: #fff; box-shadow: var(--sunken); padding: 2px; }
+html body.ui2 .cer-upload-fill { border-radius: var(--os-rs); background: repeating-linear-gradient(90deg, var(--os-accent) 0 8px, transparent 8px 10px); }
+html body.ui2 .cer-round-label { font-family: var(--os-font); background: var(--os-face); color: #000; box-shadow: var(--raised); padding: 4px 16px; border: 0; }
+html body.ui2 .cer-foe-tip { background: #ffffe1; color: #000; border: 1px solid #000; padding: 6px 12px; font: 13px var(--os-font); box-shadow: 3px 3px 0 #0006; }
+html body.ui2 .cer-fight { font-family: var(--os-font); border: 0; box-shadow: var(--raised), 6px 6px 0 #0007; background: var(--os-face); color: #000; }
+
+/* Every ceremony sits on the same RAID OS desktop. */
+html body.ui2 .cer-overlay { background: var(--os-wall); }
+html body.ui2 .cer-era-note { color: #d8f0f2; }
+
+html:has(.cer-overlay), html:has(.cer-overlay) body { overflow: hidden !important; }
+
+/* Windows get the era's window radius. */
+html body.ui2 .left-panel, html body.ui2 .right-panel, html body.ui2 .crawl-site, html body.ui2 .side-sec,
+html body.ui2 .browser-paper, html body.ui2 #modal, html body.ui2 .cer-map-window, html body.ui2 .cer-result-window,
+html body.ui2 .cer-site, html body.ui2 .traffic-hub .hub-serp { border-radius: var(--os-rw) !important; overflow: hidden; }
+html body.ui2 .panel-head, html body.ui2 .side-sec h3, html body.ui2 .cs-bar, html body.ui2 .browser-tabs, html body.ui2 .modal-head { border-radius: var(--os-rw) var(--os-rw) 0 0; }
+
+/* Era-specific flourishes */
+html body.ui2.era-xp #menu-button:not(.os-ghost *), html body.ui2 .os-ghost.era-xp #menu-button { background: linear-gradient(#57b857, #3c9e3c 45%, #2a7a2a) !important; color: #fff; border-radius: 0 14px 14px 0; box-shadow: inset 0 1px #9be09b, 1px 0 2px #0006; font-style: italic; }
+html body.ui2.era-aero .topbar:not(.os-ghost *), html body.ui2 .os-ghost.era-aero .topbar { backdrop-filter: blur(10px); }
+html body.ui2.era-aero #menu-button:not(.os-ghost *), html body.ui2 .os-ghost.era-aero #menu-button { border-radius: 50% !important; width: 34px; padding: 0; justify-content: center; background: radial-gradient(circle at 50% 30%, #9fd8ff, #1e6fd9 60%, #0b3a8a) !important; box-shadow: 0 0 10px #57c7ffaa, inset 0 1px #fff8; }
+html body.ui2.era-aero #menu-button:not(.os-ghost *)::after, html body.ui2 .os-ghost.era-aero #menu-button::after { display: none; }
+html body.ui2.era-aero .panel-head:not(.os-ghost *), html body.ui2 .os-ghost.era-aero .panel-head, html body.ui2.era-aero .side-sec h3:not(.os-ghost *), html body.ui2 .os-ghost.era-aero .side-sec h3, html body.ui2.era-aero .cs-bar:not(.os-ghost *), html body.ui2 .os-ghost.era-aero .cs-bar, html body.ui2.era-aero .modal-head:not(.os-ghost *), html body.ui2 .os-ghost.era-aero .modal-head, html body.ui2 .era-aero .browser-tabs { backdrop-filter: blur(6px); text-shadow: 0 0 8px #fff; }
+html body.ui2.era-flat #menu-button:not(.os-ghost *), html body.ui2 .os-ghost.era-flat #menu-button { background: #2b579a !important; color: #fff; box-shadow: none; }
+html body.ui2.era-flat .topbar .tb-run:not(.os-ghost *), html body.ui2 .os-ghost.era-flat .topbar .tb-run, html body.ui2.era-flat .topbar .tb-stats:not(.os-ghost *), html body.ui2 .os-ghost.era-flat .topbar .tb-stats { background: #2d2d2d; color: #fff; box-shadow: none; }
+html body.ui2.era-flat .topbar .tb-round b:not(.os-ghost *), html body.ui2 .os-ghost.era-flat .topbar .tb-round b, html body.ui2.era-flat .topbar .tb-round small:not(.os-ghost *), html body.ui2 .os-ghost.era-flat .topbar .tb-round small, html body.ui2.era-flat .topbar .tb-round span:not(.os-ghost *), html body.ui2 .os-ghost.era-flat .topbar .tb-round span, html body.ui2.era-flat .topbar .tb-load b:not(.os-ghost *), html body.ui2 .os-ghost.era-flat .topbar .tb-load b, html body.ui2.era-flat .topbar .tb-load small:not(.os-ghost *), html body.ui2 .os-ghost.era-flat .topbar .tb-load small { color: #fff; }
+
+/* OS upgrade: a frozen copy of the old OS sits on top and is shaved away by the dot wave (src/upgrade.ts). */
+html body.ui2 .os-ghost { position: fixed; inset: 0; z-index: 1390; pointer-events: none; overflow: hidden; background: var(--os-desk); font-family: var(--os-font); font-size: 13px; color: #000; }
+html body.ui2 .os-ghost .cer-overlay { display: none; }
+
+/* Captions above page windows follow the wallpaper's brightness. */
+html body.ui2.era-aero .panel-head small .unlock:not(.os-ghost *), html body.ui2 .os-ghost.era-aero .panel-head small .unlock { color: #0a6b2a; }
+
+/* ===== Modern-web layer (src/modern.ts): unlocked by era ===== */
+@property --os-ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+/* Aero+: a soft light follows the pointer across windows and cards. */
+html body.ui2:is(.era-aero, .era-flat, .era-art) :is(.shop-card, .crawl-site, .side-sec) { position: relative; }
+html body.ui2:is(.era-aero, .era-flat, .era-art) :is(.shop-card, .crawl-site, .side-sec)::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 5;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), #ffffff38, transparent 65%);
+  mix-blend-mode: soft-light;
+}
+html body.ui2:is(.era-aero, .era-flat, .era-art) :is(.shop-card, .crawl-site, .side-sec):hover::after { opacity: 1; }
+/* Flat+: the publish button gets a spinning conic border and a springy magnetic pull (translate set in JS). */
+html body.ui2:is(.era-flat, .era-art) .tb-primary { position: relative; transition: translate .35s cubic-bezier(.2,.9,.25,1.3); }
+html body.ui2:is(.era-flat, .era-art) .tb-primary::before {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit; padding: 2px; pointer-events: none;
+  background: conic-gradient(from var(--os-ang), transparent 0 45%, #fff 55%, var(--os-accent) 62%, transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: os-ang 2.6s linear infinite;
+}
+@keyframes os-ang { to { --os-ang: 360deg; } }
+@media (prefers-reduced-motion: reduce) { html body.ui2 .tb-primary::before { animation: none; } }

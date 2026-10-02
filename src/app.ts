@@ -1,0 +1,2562 @@
+import D from "./data.js";
+import C from "./document.js";
+import E from "./engine.js";
+import R from "./run.js";
+import V from "./components.js";
+import UIRaidEditor from "./editor.js";
+import UIRaidEffects from "./effects.js";
+import UIRaidTraffic from "./traffic.js";
+import audio from "./audio.js";
+import particles from "./particles.js";
+import * as Cer from "./ceremony.js";
+import { playOsUpgrade } from "./upgrade.js";
+import * as Title from "./title.js";
+import { initModernUI } from "./modern.js";
+import { BUILDS } from "./builds.js";
+import * as Lab from "./buildlab.js";
+import { mountCrawler, type Mood } from "./crawler.js";
+import { mountBasket } from "./basket.js";
+import { createWindowManager } from "./wm.js";
+import { defaultWindowLayout } from "./window-layout.js";
+import { renderHackSites, layoutHackSites, inspectCard, type ItemInfo } from "./hacksite.js";
+import { beginExtract } from "./extract.js";
+import { RECIPES } from "./fusion.js";
+
+import type {
+  Run,
+  Item,
+  PartDefinition,
+  BattleSummary,
+  Mode,
+  SideName,
+  Theme,
+  Faction,
+} from "./types.js";
+type DocumentInfo = ReturnType<typeof C.analyze>;
+type EngineInfo = ReturnType<typeof E.analyze>;
+type Battle = InstanceType<typeof E.Battle>;
+
+function $<T extends HTMLElement = HTMLElement>(selector: string): T {
+  const element = document.querySelector<T>(selector);
+  if (!element) throw new Error("Missing application element: " + selector);
+  return element;
+}
+function $$<T extends HTMLElement = HTMLElement>(selector: string): T[] {
+  return [...document.querySelectorAll<T>(selector)];
+}
+function clone<T>(value: T): T {
+  // Only plain, JSON-serializable run data enters this clone.
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+function isFaction(value: string): value is Faction {
+  return Object.hasOwn(D.FACTIONS, value);
+}
+function isTheme(value: string): value is Theme {
+  return value === "mixed" || isFaction(value);
+}
+
+/* Application shell: a run of shop → build → publish → loot, around one editable web page. */
+
+const { esc, icon } = V,
+  P = D.PARTS;
+let run: Run,
+  view: "self" | "enemy" = "self",
+  preview = false,
+  manualZoom: number | null = null,
+  battle: Battle | null = null,
+  preBattle: Run | null = null,
+  paused = false,
+  speed = 1,
+  lastTime = 0,
+  settling = false,
+  saveOK = true,
+  toastTimer: ReturnType<typeof setTimeout> | undefined,
+  fitRAF = 0,
+  coachHidden = false;
+const memory: Partial<Record<Mode, Run>> = {};
+const fx = new UIRaidEffects(),
+  traffic = new UIRaidTraffic(fx);
+fx.traffic = traffic;
+document.body.classList.toggle("reduced-motion", fx.reduced);
+const KEY = "ui-raid-studio-v3-";
+function load(mode: Mode): Run {
+  try {
+    const raw = localStorage.getItem(KEY + mode);
+    if (raw) {
+      const v: unknown = JSON.parse(raw);
+      if (R.validateRun(v) && v.mode === mode) return v;
+    }
+  } catch {
+    saveOK = false;
+  }
+  return memory[mode] ? clone(memory[mode]) : R.newRun(mode);
+}
+function save() {
+  if (run.phase === "battle") return;
+  memory[run.mode] = clone(run);
+  try {
+    localStorage.setItem(KEY + run.mode, JSON.stringify(run));
+    localStorage.setItem(KEY + "mode", run.mode);
+  } catch {
+    saveOK = false;
+  }
+}
+function toast(message: string) {
+  clearTimeout(toastTimer);
+  $("#toast").textContent = message;
+  $("#toast").classList.add("visible");
+  toastTimer = setTimeout(() => $("#toast").classList.remove("visible"), 3200);
+}
+let startMode = "campaign";
+try {
+  startMode = localStorage.getItem(KEY + "mode") || "campaign";
+} catch {}
+run = load(startMode === "lab" ? "lab" : "campaign");
+const editor = new UIRaidEditor.Editor({
+  getRun: () => run,
+  getHost: () => $("#player-body"),
+  getOverlay: () => $("#editor-overlay"),
+  enabled: () =>
+    !battle &&
+    !preview &&
+    run.phase === "build" &&
+    view !== "enemy" &&
+    !$<HTMLDialogElement>("#modal").open,
+  onChange: () => {
+    save();
+    render();
+    afterBuildChange();
+  },
+  onSelect: () => {
+    renderSide();
+    renderShop();
+    renderCoach();
+    editor.drawSelection();
+  },
+  onToast: toast,
+  paint: (board, lifted) =>
+    V.render($("#player-body"), board, {
+      side: "player",
+      theme: run.page.theme,
+      selected: lifted.length ? [] : [...editor.selection],
+      lifted,
+    }),
+});
+
+/* ---------- Plain-language rules shown to the player ---------- */
+const KIND: Record<string, string> = {
+  attack: "攻撃",
+  shield: "防御",
+  heal: "回復",
+  income: "収益",
+  reactive: "連動",
+  passive: "補助",
+  echo: "再発動",
+};
+const GROUP_BONUS: Record<string, string> = {
+  "button-group": "速度 +12%",
+  "search-form": "威力 +30%",
+  "nav-row": "速度 +15%",
+  "nav-menu": "速度 +15%",
+  "media-stack": "シークバーで動画 +25%",
+  "commerce-stack": "購入ボタン +20%",
+  "search-stack": "サジェストで文字攻撃 +40%",
+};
+const has = (q: Item, tag: string) => P[q.type].tags.includes(tag),
+  isCtrl = (t: string) =>
+    ["button", "search", "field", "toggle"].includes(P[t].layout);
+// Support UIs only work next to the right kind of partner; these rules mirror the engine.
+const NEEDS: Record<string, { t: (item: Item) => boolean; x: string }> = {
+  yt_speed: {
+    t: (q) => P[q.type].cd > 0,
+    x: "動画など「時間で発動するUI」の隣に置くと2倍速",
+  },
+  am_prime: {
+    t: (q) => P[q.type].cd > 0 && has(q, "commerce"),
+    x: "購入ボタン・商品情報の隣に置くと1.5倍速",
+  },
+  gov_font: {
+    t: (q) => P[q.type].kind === "attack" && has(q, "text"),
+    x: "見出し・リンク・検索など文字で攻撃するUIの隣で威力 +50%",
+  },
+  go_suggest: {
+    t: (q) => P[q.type].kind === "attack" && has(q, "text"),
+    x: "検索窓の真下に付けると一体化。文字攻撃 +40%",
+  },
+  go_translate: {
+    t: (q) =>
+      P[q.type].kind === "attack" &&
+      has(q, "text") &&
+      P[q.type].faction !== "google",
+    x: "Google以外の文字攻撃UIの隣で威力 +25%",
+  },
+  am_quantity: {
+    t: (q) => ["am_buy", "am_product"].includes(q.type),
+    x: "購入ボタンの横にくっつけると威力 +20%",
+  },
+  am_rating: {
+    t: (q) => P[q.type].kind === "attack" && has(q, "commerce"),
+    x: "購入系UIの隣で威力 +20%",
+  },
+  go_tabs: {
+    t: (q) => has(q, "search") && P[q.type].cd > 0,
+    x: "検索窓・検索結果の隣で速度 +20%",
+  },
+  gov_breadcrumb: {
+    t: (q) => has(q, "document") && P[q.type].cd > 0,
+    x: "PDF・申請UIの隣で速度 +15%",
+  },
+  yt_caption: {
+    t: (q) => has(q, "video"),
+    x: "動画の操作列に入れるとシールドを貫通",
+  },
+  yt_ad: { t: (q) => has(q, "video"), x: "動画の隣に置くと、再生のたびに収益" },
+  yt_sub: {
+    t: (q) => has(q, "video"),
+    x: "動画の隣に置くと、3回再生ごとに収益",
+  },
+  yt_autoplay: {
+    t: (q) => has(q, "video"),
+    x: "動画の操作列に入れると、動画をもう一度再生",
+  },
+  yt_progress: {
+    t: (q) => q.type === "yt_play",
+    x: "動画の真下に付けると動画の威力 +25%",
+  },
+  go_ads: {
+    t: (q) => has(q, "text") && P[q.type].cd > 0,
+    x: "文字で攻撃するUIの隣で、発動のたび収益",
+  },
+  ab_counter: {
+    t: (q) => P[q.type].cd > 0,
+    x: "よく発動するUIの隣で、4回ごとに収益",
+  },
+  am_cart: {
+    t: (q) => has(q, "economy"),
+    x: "広告・カウンター・クーポンなど収益UIの隣で、お金が弾になる",
+  },
+  am_deal: {
+    t: (q) => ["am_buy", "am_product"].includes(q.type),
+    x: "購入ボタン・商品情報の隣で収益",
+  },
+  am_coupon: {
+    t: (q) => ["am_buy", "am_product"].includes(q.type),
+    x: "購入ボタン・商品情報の隣で収益",
+  },
+  go_page: {
+    t: (q) => P[q.type].kind === "attack" && has(q, "text"),
+    x: "文字攻撃UIの隣で、それをもう一度発動",
+  },
+  gov_page: {
+    t: (q) => P[q.type].kind === "attack" && has(q, "document"),
+    x: "PDF・送信ボタンの隣で、それをもう一度発動",
+  },
+};
+function connectText(t: string) {
+  const d = P[t];
+  if (NEEDS[t]) return NEEDS[t].x;
+  if (d.container)
+    return "内側にUIを入れられる。中のUIは親ごと動き、効果も上がる";
+  return (
+    {
+      button:
+        "ボタン同士を横にくっつけるとボタングループ。検索窓の右なら検索フォーム",
+      search: "右にボタンで検索フォーム、真下にサジェストで検索パネル",
+      field: "ボタンの横にくっつけると連結",
+      toggle: "動画の下の操作列に入れられる",
+      media: "真下にシークバー、その下に操作ボタンを付けると動画プレイヤー",
+      product: "真下に購入ボタンや数量を置くと商品購入欄",
+      link: "リンク同士を横か縦に並べるとナビゲーション（速度 +15%）",
+      heading: "文字攻撃。文字サイズ変更と組むと強い",
+      marquee: "右側か真下にある攻撃UIをもう一度発動",
+      rule: "上下に文字UIがあると防御 +2",
+      document: "PDF・申請UIと並べると強い",
+    }[d.layout] || "近く（隣接・同じまとまり）のUIと連携する"
+  );
+}
+function working(p: Item, info: EngineInfo) {
+  const n = NEEDS[p.type];
+  if (!n) return true;
+  if (p.type === "yt_progress")
+    return (info.member[p.id] || []).some((g) => g.kind === "media-stack");
+  return (info.near[p.id] || []).some((id) => {
+    const q = info.board.find((b) => b.id === id);
+    return q && n.t(q);
+  });
+}
+function shortDesc(d: PartDefinition) {
+  const s = d.desc.split("。")[0];
+  return s + "。";
+}
+function matchHint(t: string, info: EngineInfo) {
+  const d = P[t],
+    b = info.board,
+    hasAny = (f: (item: Item) => boolean) => b.some(f),
+    c = info.counts[d.faction] || 0;
+  if (
+    isCtrl(t) &&
+    d.layout !== "search" &&
+    hasAny((q) => q.type === "go_search")
+  )
+    return "検索窓とつながる";
+  if (
+    d.layout === "search" &&
+    hasAny((q) => isCtrl(q.type) && P[q.type].layout === "button")
+  )
+    return "ボタンとつながる";
+  if (t === "yt_progress" && hasAny((q) => q.type === "yt_play"))
+    return "動画とつながる";
+  if (d.tags.includes("media-control") && hasAny((q) => q.type === "yt_play"))
+    return "動画の操作列になる";
+  if (t === "go_suggest" && hasAny((q) => q.type === "go_search"))
+    return "検索窓とつながる";
+  if (
+    d.tags.includes("commerce") &&
+    t !== "am_product" &&
+    hasAny((q) => q.type === "am_product")
+  )
+    return "商品情報とつながる";
+  if (t === "am_product" && hasAny((q) => P[q.type].tags.includes("commerce")))
+    return "購入UIとつながる";
+  if (c === 2) return `${D.FACTIONS[d.faction].name}セットまであと1`;
+  if (NEEDS[t] && hasAny((q) => NEEDS[t].t(q))) return "今のページで効く";
+  if (isCtrl(t) && hasAny((q) => isCtrl(q.type))) return "ボタンと連結できる";
+  if (d.layout === "link" && hasAny((q) => P[q.type].layout === "link"))
+    return "リンクと並べてナビに";
+  if (d.container && b.length > 1) return "中にUIを入れられる";
+  return "";
+}
+function hints(info: EngineInfo) {
+  const out = [],
+    b = info.board,
+    grouped = (id: string) => (info.member[id] || []).length > 0,
+    kids = (id: string) =>
+      Object.values(info.parents).filter((v) => v === id).length;
+  for (const p of b) {
+    const d = P[p.type];
+    if (
+      p.type === "go_search" &&
+      !(info.member[p.id] || []).some((g) => g.kind === "search-form")
+    )
+      out.push("検索窓の右にボタンをくっつけると「検索フォーム」（威力 +30%）");
+    if (
+      p.type === "yt_play" &&
+      !(info.member[p.id] || []).some((g) => g.kind === "media-stack")
+    )
+      out.push(
+        "動画の真下にシークバーや操作ボタンを付けると「動画プレイヤー」になる",
+      );
+    if (
+      p.type === "am_product" &&
+      !(info.member[p.id] || []).some((g) => g.kind === "commerce-stack")
+    )
+      out.push(
+        "商品情報の真下に購入ボタンを置くと「商品購入欄」（購入ボタン +20%）",
+      );
+    if (d.container && !kids(p.id))
+      out.push(`${d.name}の内側にUIを入れられる（ドラッグで中へ）`);
+    if (NEEDS[p.type] && !working(p, info))
+      out.push(`${d.name}は今、働いていない：${NEEDS[p.type].x}`);
+  }
+  const loose = b.filter((p) => isCtrl(p.type) && !grouped(p.id));
+  if (loose.length >= 2)
+    out.push("ボタン同士を横にくっつけると「ボタングループ」（速度 +12%）");
+  const links = b.filter((p) => P[p.type].layout === "link" && !grouped(p.id));
+  if (links.length >= 2)
+    out.push("リンク同士を横か縦に並べると「ナビゲーション」（速度 +15%）");
+  for (const [f, n] of Object.entries(info.counts))
+    if (n === 2 && isFaction(f))
+      out.push(
+        `${D.FACTIONS[f].name}のUIをあと1つ置くとセット効果：${D.FACTIONS[f].set}`,
+      );
+  return [...new Set(out)];
+}
+
+/* ---------- Page frames & back office ---------- */
+function frameMarkup(
+  side: SideName,
+  theme: Theme,
+  name: string,
+  address: string,
+) {
+  const o = R.opponent(run);
+  return `<div class="frame-caption ${side === "enemy" ? "enemy" : ""}"><div class="frame-name"><i style="background:${side === "enemy" ? "#e5484d" : "#2fb47c"}"></i><b>${esc(name)}</b><small>${side === "enemy" ? (o.round ? `ROUND ${o.round} の相手` : "相手のサイト") : "あなたのサイト"}</small></div><div class="frame-health"><div class="health-meta"><span>HP</span></div><div class="health-track"><b style="width:100%"></b><i style="width:100%"></i></div></div></div><div class="frame-viewport"><div class="browser-paper site-theme-${theme}"><div class="browser-tabs"><span class="traffic-lights"><i></i><i></i><i></i></span><div class="browser-tab"><i style="background:${(theme === "mixed" ? undefined : D.FACTIONS[theme].color) || "#8baa94"}"></i>${esc(name)} <span>×</span></div><span class="browser-plus">＋</span></div><div class="address-bar"><span class="address-controls">‹　›　↻</span><div class="address-field"><span>▧</span> ${esc(address)} <i>☆</i></div><span class="address-menu">⋮</span></div><header class="site-header">${V.header(theme, name)}</header><div class="page-wrap"><div class="page-body" id="${side}-body"></div>${side === "player" ? '<div class="editor-overlay" id="editor-overlay"></div><div class="tut-layer" id="tut-layer"></div>' : ""}</div><footer class="site-footer"><span>${esc(name)}　/　UI MASHUP</span><span>ローカル試作 · 実際のサービスには接続しません</span></footer>${adminDock(side, name)}</div></div>`;
+}
+const INVADER = [
+  "..X.....X..",
+  "...X...X...",
+  "..XXXXXXX..",
+  ".XX.XXX.XX.",
+  "XXXXXXXXXXX",
+  "X.XXXXXXX.X",
+  "X.X.....X.X",
+  "...XX.XX...",
+];
+function invaderSvg(color: string, size = 18) {
+  return `<svg class="invader" width="${size}" height="${Math.round((size * 8) / 11)}" viewBox="0 0 11 8" shape-rendering="crispEdges" aria-hidden="true">${INVADER.flatMap((row, y) => [...row].map((c, x) => (c === "X" ? `<rect x="${x}" y="${y}" width="1" height="1" fill="${color}"/>` : ""))).join("")}</svg>`;
+}
+function adminViz(id: string, side: SideName) {
+  const c = side === "enemy" ? "#ff6b6b" : "#5fe3a1";
+  switch (id) {
+    case "server":
+      return '<div class="v-rack"><i></i><i></i><i></i></div><div class="v-load"><span></span></div>';
+    case "cdn":
+      return `<div class="v-cdn">${Array.from({ length: 14 }, (_, i) => `<i style="left:${((i * 37) % 92) + 4}%;top:${((i * 53) % 70) + 12}%"></i>`).join("")}</div>`;
+    case "backup":
+      return '<div class="v-backup"><span>▤</span><small>最終バックアップ<br>3分前</small></div>';
+    case "moderator":
+      return '<div class="v-mod"><span class="v-avatar">M</span><small>通報キューを監視中</small></div>';
+    case "captcha":
+      return '<div class="v-captcha"><i>✓</i><small>私はロボットでは<br>ありません</small></div>';
+    case "adnet":
+      return `<div class="v-bars">${[34, 52, 41, 66, 58, 80, 72].map((h) => `<i style="height:${h}%"></i>`).join("")}</div>`;
+    case "sns":
+      return '<div class="v-sns"><b>#UIRAID</b><small>トレンド入り</small></div>';
+    case "sakura":
+      return `<div class="v-inv">${Array.from({ length: 5 }, () => invaderSvg(c, 16)).join("")}</div>`;
+    case "troll":
+      return `<div class="v-inv troll">${Array.from({ length: 3 }, () => invaderSvg("#ff6b6b", 20)).join("")}</div>`;
+    default:
+      return "";
+  }
+}
+function adminDock(side: SideName, name: string) {
+  const o = R.opponent(run),
+    list = side === "player" ? run.admin || [] : o.admin,
+    editable = side === "player" && !battle,
+    open = side === "player" ? R.adminSlots(run) : D.ADMIN_SLOTS;
+  if (!list.length && (side === "enemy" || !open))
+    return `<section class="admin-dock is-slim"><div class="ad-head"><span class="ad-logo">⚙</span><b>管理画面</b><small>${side === "player" ? "[ロック] ROUND 3 で解放。対戦の報酬で設備（サーバー・CAPTCHA・AI運用など）が手に入ります" : "このサイトは運営設備なし"}</small></div></section>`;
+  const slots = Array.from({ length: D.ADMIN_SLOTS }, (_, i) => {
+    const id = list[i];
+    if (!id) {
+      if (side === "player" && i >= open)
+        return `<div class="admin-empty is-lock">[ロック] ROUND ${i === 0 ? 3 : 6}で解放</div>`;
+      return editable && run.mode === "lab"
+        ? `<button class="admin-empty" data-admin-add="${i}">＋ 設備を導入</button>`
+        : `<div class="admin-empty is-off">${side === "player" ? "対戦の報酬で設備を入手" : "なし"}</div>`;
+    }
+    const a = D.ADMIN[id];
+    return `<div class="admin-widget aw-${id}" data-admin="${id}" title="${esc(a.desc)}"><div class="aw-top"><b>${esc(a.name)}</b><em>${esc(a.tag)}</em>${editable ? `<button data-admin-remove="${id}" aria-label="${esc(a.name)}を外す">×</button>` : ""}</div><div class="aw-viz">${adminViz(id, side)}</div><div class="aw-metric">${editable ? esc(a.desc) : "待機中"}</div></div>`;
+  }).join("");
+  return `<section class="admin-dock"><div class="ad-head"><span class="ad-logo">⚙</span><b>管理画面</b><small>admin.${esc(String(name).replace(/\s/g, ""))} / 運営ダッシュボード</small><span class="ad-status"><i></i>${battle ? "稼働中" : "待機中"}</span></div><div class="ad-slots">${slots}</div></section>`;
+}
+function adminPicker() {
+  const owned = new Set(run.admin || []);
+  openModal(
+    `<div class="modal-inner">${modalHead("ADMIN / BACK OFFICE", "管理画面に設備を導入")}<p>ページのUIとは別に、サイトの裏側を強化します。</p><div class="admin-pick">${Object.entries(
+      D.ADMIN,
+    )
+      .map(
+        ([id, a]) =>
+          `<button data-admin-pick="${id}" ${owned.has(id) ? "disabled" : ""}><span class="ap-viz">${adminViz(id, "player")}</span><b>${esc(a.name)} <em>${esc(a.tag)}</em></b><small>${esc(a.desc)}</small></button>`,
+      )
+      .join("")}</div></div>`,
+  );
+}
+function renderFrames() {
+  const o = R.opponent(run);
+  $("#enemy-frame").className = "site-frame era-" + (ENEMY_ERA[o.faction] ?? "98");
+  $("#player-frame").innerHTML = frameMarkup(
+    "player",
+    run.page.theme,
+    run.page.name,
+    "local://" + run.page.name.replace(/\s/g, "-"),
+  );
+  $("#enemy-frame").innerHTML = frameMarkup(
+    "enemy",
+    o.faction,
+    o.pageName,
+    o.address,
+  );
+  V.render($("#player-body"), run.owned, {
+    side: "player",
+    theme: run.page.theme,
+    interactive: preview && !battle,
+    selected: [...editor.selection],
+  });
+  V.render($("#enemy-body"), R.enemyBoard(run), {
+    side: "enemy",
+    theme: o.faction,
+    interactive: preview && !battle,
+    decor: o.decor || [],
+  });
+  const pInfo = C.analyze(run.owned),
+    cap = R.capacity(run),
+    slow = pInfo.load > cap,
+    paper = $("#player-frame .browser-paper");
+  paper.classList.toggle("is-slow", slow);
+  if (slow) {
+    const pct = Math.round(R.pageSpeed(pInfo.load, cap) * 100);
+    paper
+      .querySelector(".page-wrap")!
+      .insertAdjacentHTML(
+        "beforeend",
+        `<div class="slow-banner">ページが重い（重さ ${pInfo.load} ／ 処理能力 ${cap}）— 表示速度 ${pct}%。UIの発動が遅くなり、待たされた閲覧者が離れていきます。</div>`,
+      );
+  }
+  $("#player-frame").hidden = !battle && view === "enemy";
+  $("#page-window").hidden = !battle && view === "enemy";
+  $("#enemy-frame").hidden = !battle && view !== "enemy";
+  $("#scene").classList.toggle("dual", !!battle);
+  $("#traffic-hub").hidden = !battle;
+  if (battle)
+    $("#traffic-hub").innerHTML =
+      `<div class="hub-label">共通の流入元</div><div class="hub-serp"><div class="hub-q">${icon("search")}<span>おもしろい サイト</span></div><div class="hub-meta">約 2 件（0.01 秒）</div><a class="hub-r you"><small>local://${esc(run.page.name)}</small><b>${esc(run.page.name)}</b><i id="hub-you">0人</i></a><a class="hub-r foe"><small>${esc(o.address)}</small><b>${esc(o.pageName)}</b><i id="hub-foe">0人</i></a><div class="hub-wait">検索結果で迷っている人<b id="hub-idle">0</b></div></div>`;
+  editor.drawSelection();
+  scheduleFit();
+}
+function scheduleFit() {
+  cancelAnimationFrame(fitRAF);
+  fitRAF = requestAnimationFrame(fit);
+}
+function fit() {
+  const canvas = $("#canvas-scroll"),
+    fitHost = !battle && view === "self" ? $("#page-window") : canvas,
+    visible = [$("#player-frame"), $("#enemy-frame")].filter((n) => !n.hidden),
+    dual = visible.length === 2,
+    vertical = innerWidth <= 820 && !!battle;
+  const ph = Math.max(
+      ...visible.map((f) =>
+        f.querySelector(".admin-dock.is-slim") ? 874 : 994,
+      ),
+    ),
+    rw = Math.max(
+      300,
+      fitHost.clientWidth -
+        44 -
+        (dual && !vertical ? 28 : 0) -
+        (battle && !vertical ? 194 : 0),
+    ),
+    rh = Math.max(300, fitHost.clientHeight - (battle ? 80 : 70));
+  let scale =
+    manualZoom ??
+    Math.min(rw / (960 * (dual && !vertical ? 2 : 1)), rh / ph, 1);
+  scale = Math.max(0.22, Math.min(1.5, scale));
+  for (const f of visible) {
+    const paper = f.querySelector<HTMLElement>(".browser-paper"),
+      port = f.querySelector<HTMLElement>(".frame-viewport");
+    if (!paper || !port) continue;
+    if (!battle && view === "self" && f.id === "player-frame") {
+      // The visible browser viewport is the window, with no fitting margins.
+      // zoom participates in layout, so scrolling follows the displayed page size.
+      port.style.width = "100%";
+      port.style.height = "100%";
+      f.style.width = "100%";
+      scale = manualZoom ?? f.getBoundingClientRect().width / 960;
+      paper.style.transform = "none";
+      paper.style.zoom = String(scale);
+      paper.style.position = "relative";
+      paper.style.minHeight = "";
+      // Measure after applying the new size: an old scrollbar must not leave
+      // a strip of empty space when resetting a previously short window.
+      if (manualZoom === null && port.clientWidth < f.clientWidth) {
+        scale = port.clientWidth / 960;
+        paper.style.zoom = String(scale);
+      }
+      continue;
+    }
+    paper.style.zoom = "";
+    paper.style.position = "";
+    paper.style.minHeight = "";
+    paper.style.transform = `scale(${scale})`;
+    port.style.width = 960 * scale + "px";
+    port.style.height = ph * scale + "px";
+    f.style.width = 960 * scale + "px";
+  }
+  $("#zoom-value").textContent =
+    (manualZoom ? "" : "FIT ") + Math.round(scale * 100) + "%";
+  const thumb = document.querySelector<HTMLElement>(
+    "#enemy-thumbnail .thumb-paper",
+  );
+  if (thumb)
+    thumb.style.transform = `scale(${$("#enemy-thumbnail").clientWidth / 960})`;
+  editor.drawSelection();
+}
+
+/* ---------- Top bar ---------- */
+function loadMeter(info: DocumentInfo) {
+  const cap = R.capacity(run),
+    load = info.load,
+    over = load > cap,
+    pct = Math.round(R.pageSpeed(load, cap) * 100);
+  return `<div class="tb-load ${over ? "over" : ""}" title="ページの重さ（UIの合計）と、サーバーの処理能力。重さが処理能力を超えると、UIの発動が遅くなり、待たされた閲覧者が離れていく。"><small>重さ / 処理能力</small><div class="load-bar"><i style="width:${Math.min(100, (load / cap) * 100)}%"></i>${over ? `<em style="width:${Math.min(60, ((load - cap) / cap) * 100)}%"></em>` : ""}</div><b>${load} / ${cap}</b><span class="tb-speed">${over ? `表示速度 ${pct}%` : "表示速度 100%"}</span></div>`;
+}
+function renderTopbar() {
+  const info = C.analyze(run.owned);
+  wm.setTitle("page", run.page.name);
+  if (run.mode === "campaign") {
+    const results: Record<number, string> = {};
+    for (const h of run.history)
+      if (h.round)
+        results[h.round - 1] = h.winner === "player" ? "win" : "lose";
+    $("#tb-run").innerHTML =
+      `<div class="tb-round"><small>ROUND</small><b>${Math.min(run.stage + 1, R.ROUNDS)}</b><span>/ ${R.ROUNDS}</span></div><div class="tb-ladder" title="各ラウンドの結果">${R.LADDER.map((_, i) => `<i class="${results[i] || (i === run.stage ? "now" : "")}"></i>`).join("")}</div><div class="tb-lives" title="ライフ：負けると1つ減る">${"♥".repeat(run.lives)}<span>${"♥".repeat(3 - run.lives)}</span></div>`;
+    $("#tb-stats").innerHTML =
+      `<div class="tb-money" title="資金：巡回先サイトからのUI移植と、サーバー契約に使う。対戦中の収益で増える。"><small>資金</small>$<b>${run.cash}</b></div>${loadMeter(info)}`;
+  } else {
+    $("#tb-run").innerHTML =
+      '<div class="tb-mode"><b>実験室</b><small>すべてのUIを無料で試せます</small></div>';
+    $("#tb-stats").innerHTML = loadMeter(info);
+  }
+  const b = $<HTMLButtonElement>("#battle-button");
+  b.disabled = !!battle;
+  b.classList.toggle(
+    "is-ready",
+    !battle &&
+      run.phase === "build" &&
+      run.owned.some((p) => C.placed(p) && P[p.type].kind === "attack"),
+  );
+  b.textContent =
+    run.mode === "lab"
+      ? "▶ テスト対戦"
+      : run.phase === "reward"
+        ? "報酬を受け取る"
+        : ["complete", "gameover"].includes(run.phase)
+          ? "結果を見る"
+          : "▶ 公開して対戦";
+  $<HTMLButtonElement>("#menu-button").disabled = !!battle;
+}
+
+/* ---------- Crawled sites: UI is copied from other websites, not bought from a store ---------- */
+const SITE_URL: Record<string, string> = {
+  youtube: "archive://youtube/watch?v=…",
+  amazon: "archive://amazon/dp/…",
+  google: "archive://google/search?q=…",
+  retro: "archive://homepage/~abe/",
+  gov: "archive://city.lg.jp/service/",
+};
+function shopCard(t: string, info: EngineInfo) {
+  const d = P[t],
+    f = D.FACTIONS[d.faction],
+    poor = run.mode === "campaign" && run.cash < d.price,
+    m = matchHint(t, info),
+    pend = editor.pending?.type === t;
+  return `<div class="shop-card ${poor ? "poor" : ""} ${pend ? "pending" : ""}" data-palette-type="${t}" tabindex="0" role="button" aria-label="${esc(d.name)}を自分のページへ移植"><div class="sc-top"><span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span><span class="sc-weight">重さ ${d.load}</span><span class="sc-price">${run.mode === "lab" ? "" : "$" + d.price}</span></div><div class="sc-visual"></div><b class="sc-name">${esc(d.name)}</b><p class="sc-desc">${esc(shortDesc(d))}</p><div class="sc-foot">${m ? `<span class="sc-match">◎ ${esc(m)}</span>` : ""}<button class="sc-buy" data-add-type="${t}">${run.mode === "lab" ? "置く" : "⧉ 移植"}</button></div></div>`;
+}
+function planCard(key: string, sold: boolean) {
+  const pl = R.PLANS[key],
+    cap = R.capacity(run),
+    poor = run.cash < pl.price;
+  if (sold) return '<div class="plan-card sold">契約済み</div>';
+  return `<div class="plan-card ${poor ? "poor" : ""}"><div class="pc-rack"><i></i><i></i><i></i></div><div class="pc-main"><b>${esc(pl.name)}</b><div class="pc-cap">処理能力 <strong>+${pl.cap}</strong><small>${cap} → ${cap + pl.cap}</small></div></div><div class="pc-foot"><span class="sc-price">$${pl.price}</span><button class="sc-buy" data-plan="${key}">契約する</button></div></div>`;
+}
+function renderShop() {
+  const host = $("#library-list"),
+    scroll = host.scrollTop,
+    info = E.analyze(run.owned),
+    lab = run.mode === "lab";
+  $("#library-toolbar").hidden = !lab;
+  $("#shop-foot").hidden = lab;
+  crawler.setEnabled(!lab && !fx.reduced);
+  if (lab || fx.reduced) {
+    basket.setEnabled(false);
+    $(".left-panel").classList.remove("hx-basket-on");
+  }
+  if (lab) {
+    const q = $<HTMLInputElement>("#library-query").value.trim().toLowerCase(),
+      family = $<HTMLSelectElement>("#family-filter").value;
+    const types = Object.values(P).filter(
+      (p) =>
+        (family === "all" || p.faction === family) &&
+        (!q ||
+          (p.name + " " + p.desc + " " + D.FACTIONS[p.faction].name)
+            .toLowerCase()
+            .includes(q)),
+    );
+    $("#shop-title").textContent = "UIライブラリ";
+    wm.setTitle("crawl", "UIライブラリ");
+    $("#shop-sub").textContent = `${types.length}種類・ドラッグしてページへ`;
+    let last = "",
+      html = "";
+    for (const p of types) {
+      if (last !== p.faction) {
+        html += `<div class="family-heading"><i style="background:${D.FACTIONS[p.faction].color}"></i><span>${esc(D.FACTIONS[p.faction].name)}</span></div>`;
+        last = p.faction;
+      }
+      html += shopCard(p.id, info);
+    }
+    host.innerHTML =
+      html || '<p class="empty-list">該当するUIがありません。</p>';
+  } else {
+    const nx = R.LADDER[run.stage + 1],
+      nf = nx && D.ENEMIES[nx.e].faction,
+      newF = nf && !R.shopFactions(run).has(nf) ? D.FACTIONS[nf].name : null;
+    $("#shop-title").textContent = "巡回先のサイト";
+    wm.setTitle("crawl", "巡回先のサイト");
+    $("#shop-sub").innerHTML =
+      `気に入ったUIを、自分のページへドラッグして<b>移植</b>（コピー）。移植には資金がかかります。${newF ? `<br><span class="unlock">次のラウンドから「${esc(newF)}」も巡回できる</span>` : ""}`;
+    const bySite: Record<string, { index: number; type: string; sold: boolean }[]> = {},
+      plans: Run["shop"] = [];
+    run.shop.forEach((s, index) => {
+      if (s.type.startsWith("plan:")) plans.push(s);
+      else (bySite[P[s.type].faction] ??= []).push({ index, type: s.type, sold: s.sold });
+    });
+    let html = "";
+    if (plans.length)
+      html += `<section class="crawl-site server"><div class="cs-bar"><span class="cs-dots"><i></i><i></i><i></i></span><span class="cs-name">レンタルサーバー</span><span class="cs-url">rental-server.example/plans</span></div><div class="cs-body">${plans.map((s) => planCard(s.type.slice(5), s.sold)).join("")}<p class="cs-note">処理能力が上がると、重いページでも速く表示できる。</p></div></section>`;
+    host.innerHTML = html;
+    renderHackSites(
+      host,
+      Object.entries(bySite).flatMap(([f, stock]) =>
+        isFaction(f)
+          ? [{ faction: f, name: D.FACTIONS[f].name, url: SITE_URL[f], color: D.FACTIONS[f].color, header: V.header(f, D.FACTIONS[f].name), stock }]
+          : [],
+      ),
+      { preview: (t) => V.palettePreview(t), info: (t) => itemInfo(t, info), favicon },
+    );
+    $("#reroll-button").innerHTML = `↻ 別のページを巡回 <b>$${R.REROLL}</b>`;
+    $<HTMLButtonElement>("#reroll-button").disabled =
+      run.phase !== "build" || run.cash < R.REROLL;
+  }
+  for (const card of host.querySelectorAll<HTMLElement>(
+    ".shop-card[data-palette-type]",
+  )) {
+    const t = card.dataset.paletteType!,
+      d = P[t],
+      n = V.palettePreview(t),
+      w = card.querySelector(".sc-visual")!.clientWidth || 240,
+      s = Math.min(w / d.w, 52 / d.h, 1);
+    n.style.transform = `scale(${s})`;
+    card.querySelector(".sc-visual")!.append(n);
+    for (const c of n.querySelectorAll<HTMLElement>("button,a,input,select"))
+      c.tabIndex = -1;
+  }
+  host.scrollTop = scroll;
+  if (!lab) syncCrawler();
+  renderStash();
+}
+/* ---------- RAID Crawler: the AI shopkeeper reads your page and the stolen stock ---------- */
+/* ---------- Hacked-site shop: inspect overlay, extraction, drop preview only over the page ---------- */
+function itemInfo(t: string, info = E.analyze(run.owned)): ItemInfo {
+  const d = P[t];
+  return {
+    name: d.name,
+    price: d.price,
+    kind: d.kind,
+    kindLabel: KIND[d.kind],
+    load: d.load,
+    desc: shortDesc(d),
+    match: matchHint(t, info) || null,
+    poor: run.mode === "campaign" && run.cash < d.price,
+    w: d.w,
+    h: d.h,
+  };
+}
+const dragProxy = document.createElement("div");
+dragProxy.className = "ex-proxy";
+dragProxy.setAttribute("aria-hidden", "true");
+document.body.append(dragProxy);
+let ownedAtEnter = 0;
+const pageBox = () => {
+  const b = document.getElementById("player-body");
+  if (!b) return null;
+  const rect = b.getBoundingClientRect();
+  return { rect, scale: rect.width / D.WIDTH };
+};
+$("#library-list").addEventListener("pointerover", (e) => {
+  const el = (e.target as Element).closest<HTMLElement>(".hs-el");
+  if (el?.dataset.paletteType) inspectCard(el, itemInfo(el.dataset.paletteType));
+});
+$("#library-list").addEventListener("pointerout", (e) => {
+  if (!(e.relatedTarget as Element | null)?.closest?.(".hs-el")) inspectCard(null);
+});
+$("#library-list").addEventListener("pointerdown", (e) => {
+  const el = (e.target as Element).closest<HTMLElement>(".hs-el");
+  if (!el || e.button !== 0 || (e.target as Element).closest("[data-add-type]")) return;
+  const t = el.dataset.paletteType;
+  if (!t || battle || run.phase !== "build") return;
+  e.stopPropagation(); // the editor must not start its own drag yet
+  e.preventDefault();
+  inspectCard(null);
+  beginExtract(el, t, e, {
+    preview: (type) => V.palettePreview(type),
+    size: (type) => ({ w: P[type].w, h: P[type].h }),
+    page: pageBox,
+    enterPage: (type, x, y, pointerId) => {
+      ownedAtEnter = run.owned.length;
+      dragProxy.dataset.paletteType = type;
+      // start the editor's drag from just off the cursor so the next real move activates its preview
+      dragProxy.dispatchEvent(new PointerEvent("pointerdown", { clientX: x + 6, clientY: y + 6, pointerId, bubbles: true, button: 0, buttons: 1, isPrimary: true, pointerType: "mouse" }));
+    },
+    leavePage: () => editor.cancelDrag(),
+    didPlace: () => run.owned.length > ownedAtEnter,
+    color: (type) => D.FACTIONS[P[type].faction].color,
+    onGrab: (type) => {
+      audio.sfx("steal", { volume: 1.1 });
+      crawler.say(`「${P[type].name}」を抜き取ったよ。君のページまで運んで。`, "happy");
+    },
+    onDone: (type, placed) => {
+      if (!placed) return;
+      audio.sfx("drop", { volume: 1.2 });
+      const id = [...editor.selection][0],
+        node = id ? $$<HTMLElement>(`#player-body .web-node[data-id="${id}"]`)[0] : undefined;
+      if (!node) return;
+      node.classList.add("hx-pop");
+      window.setTimeout(() => node.classList.remove("hx-pop"), 450);
+      const r = node.getBoundingClientRect();
+      particles.ring(r.left + r.width / 2, r.top + r.height / 2, D.FACTIONS[P[type].faction].color, Math.max(r.width, r.height) * 0.6);
+    },
+    reduced: () => fx.reduced,
+  });
+});
+
+/* ---------- RAID OS windows: the panels are movable, resizable desktop windows ---------- */
+const pageWindow = document.createElement("div"),
+  playerFrame = $("#player-frame");
+pageWindow.id = "page-window";
+playerFrame.before(pageWindow);
+pageWindow.append(playerFrame);
+const wm = createWindowManager($("#workspace"), $(".tb-actions"));
+const initialLayout = (w: number, h: number) => defaultWindowLayout(
+  w, h, playerFrame.querySelector<HTMLElement>(".browser-paper")?.offsetHeight || 994,
+);
+const clipWindow = document.createElement("section");
+clipWindow.className = "clip-window";
+clipWindow.append($(".stash-panel"));
+$("#workspace").append(clipWindow);
+wm.add($("#page-window"), {
+  id: "page",
+  title: run.page.name,
+  icon: "▧",
+  rect: (w, h) => initialLayout(w, h).page,
+  minW: 160,
+  minH: 160,
+});
+wm.add($(".left-panel"), { id: "crawl", title: "巡回先のサイト", icon: "◎", rect: (w, h) => initialLayout(w, h).crawl, minW: 150, minH: 160 });
+wm.add(clipWindow, { id: "clip", title: "クリップボード", icon: "▤", rect: (w, h) => initialLayout(w, h).clip, minW: 150, minH: 80 });
+wm.add($("#right-panel"), { id: "props", title: "プロパティ", icon: "◧", rect: (w, h) => initialLayout(w, h).props, minW: 150, minH: 160 });
+wm.onChange(() => {
+  scheduleFit();
+  layoutHackSites($("#library-list"));
+});
+const crawler = mountCrawler($(".left-panel"), $("#library-list"), () => fx.reduced);
+let basketHover = "";
+const basket = mountBasket(crawler.basketHost, {
+  preview: (t) => V.palettePreview(t),
+  size: (t) => ({ w: P[t].w, h: P[t].h }),
+  page: () => {
+    const b = document.getElementById("player-body");
+    if (!b) return null;
+    const rect = b.getBoundingClientRect();
+    return { rect, scale: rect.width / D.WIDTH };
+  },
+  hover: (t) => {
+    if (!t || t === basketHover) return;
+    basketHover = t;
+    const d = P[t],
+      hint = matchHint(t, E.analyze(run.owned)),
+      poor = run.cash < d.price;
+    crawler.say(
+      `「${d.name}」$${d.price}・${KIND[d.kind]}・重さ${d.load}。${shortDesc(d)}${hint ? `\n◎ ${hint}` : ""}${poor ? "\n…でも今の資金じゃ足りないね。" : ""}`,
+      poor ? "sad" : hint ? "happy" : "normal",
+    );
+  },
+  drop: (t, x, y) => {
+    editor.selection.clear();
+    editor.pending = { type: t };
+    const rect = $("#player-body").getBoundingClientRect();
+    const before = run.owned.length;
+    editor.placePending({ x, y, scale: rect.width / D.WIDTH, r: rect });
+    editor.pending = null;
+    if (run.owned.length === before) return; // could not fit / could not afford: it falls back into the basket
+    audio.sfx("drop", { volume: 1.2 });
+    const id = [...editor.selection][0],
+      node = id ? $$<HTMLElement>(`#player-body .web-node[data-id="${id}"]`)[0] : undefined;
+    if (!node) return;
+    node.classList.add("hx-pop");
+    window.setTimeout(() => node.classList.remove("hx-pop"), 450);
+    const r = node.getBoundingClientRect();
+    particles.ring(r.left + r.width / 2, r.top + r.height / 2, "#3df4ff", Math.max(r.width, r.height) * 0.6);
+  },
+  grab: (t) => {
+    audio.sfx("snap", { volume: 0.9 });
+    crawler.say(`「${P[t].name}」、ピンとさせたよ。そのままページへ運んで。`, "happy");
+  },
+  reduced: () => fx.reduced,
+});
+const listToggle = document.createElement("button");
+listToggle.type = "button";
+listToggle.className = "hxb-list";
+listToggle.textContent = "一覧で見る";
+listToggle.addEventListener("click", () => {
+  const open = $(".left-panel").classList.toggle("hx-list-open");
+  listToggle.textContent = open ? "一覧を閉じる" : "一覧で見る";
+});
+crawler.basketHost.append(listToggle);
+let crawlStage = -1,
+  crawlRerolls = -1,
+  crawlSold = new Set<number>(),
+  crawlTalk = 0;
+function fusionFor(t: string) {
+  const placedTypes = new Set(run.owned.filter(C.placed).map((q) => q.type));
+  return RECIPES.find((r) => (r.a === t && placedTypes.has(r.b)) || (r.b === t && placedTypes.has(r.a)));
+}
+function crawlerPitch(): [string, Mood] {
+  const info = E.analyze(run.owned),
+    stock = run.shop.filter((q) => !q.sold && !q.type.startsWith("plan:")).map((q) => q.type);
+  for (const t of stock) {
+    const r = fusionFor(t);
+    if (r) {
+      const other = r.a === t ? r.b : r.a;
+      return [`いいパーツ入ったよ。この「${P[t].name}」、君のページの「${P[other].name}」の隣に置いて公開すれば「${P[r.into].name}」に統合できる。`, "happy"];
+    }
+  }
+  for (const t of stock) {
+    const hint = matchHint(t, info);
+    if (hint) return [`「${P[t].name}」はおすすめ。${hint}。君のページと相性がいいよ。`, "happy"];
+  }
+  if (run.shop.some((q) => q.type.startsWith("plan:") && !q.sold))
+    return ["レンタルサーバーの契約書も抜いてきた。ページが重くなってきたなら考えて。", "sly"];
+  const cheap = stock.filter((t) => P[t].kind === "attack").sort((a, b) => P[a].price - P[b].price)[0];
+  if (cheap) return [`掘り出し物は「${P[cheap].name}」。$${P[cheap].price}で、ちゃんと働くよ。`, "normal"];
+  return ["今回はイマイチだね…。ハッキングし直す？", "sad"];
+}
+function crawlerTip(): [string, Mood] {
+  const info = E.analyze(run.owned),
+    cap = R.capacity(run),
+    o = R.opponent(run),
+    fusions = R.fusionPairs(run.owned),
+    afford = run.shop.filter((q) => !q.sold && !q.type.startsWith("plan:") && P[q.type].price <= run.cash).length;
+  const tips: [string, Mood][] = [
+    [`次の相手は「${o.pageName}」。${o.tip}`, "sly"],
+    [afford ? `いまの資金 $${run.cash} で買えるのは ${afford} 個。ドラッグで君のページへ移植できる。` : `資金 $${run.cash} じゃ今は何も買えないね。対戦で稼いでおいで。`, afford ? "normal" : "sad"],
+    info.load > cap
+      ? [`ページの重さ ${info.load} が処理能力 ${cap} を超えてる。表示が遅れて閲覧者が逃げるよ。`, "sad"]
+      : [`重さ ${info.load} / 処理能力 ${cap}。まだ余裕がある。`, "normal"],
+    fusions.length
+      ? [`公開すれば「${P[fusions[0].recipe.into].name}」に統合される組み合わせがあるね。${fusions[0].recipe.story}`, "happy"]
+      : ["特定のUI同士を隣に置いたまま公開すると、上位のUIに統合されるんだ。検索窓とサジェストとか、ね。", "sly"],
+    ["同じサイトのUIを3つ集めると、セット効果が付くよ。", "normal"],
+  ];
+  return tips[crawlTalk++ % tips.length];
+}
+function syncCrawler() {
+  const sold = new Set(run.shop.flatMap((q, i) => (q.sold ? [i] : [])));
+  const reason = crawlStage === -1 ? "first" : run.stage !== crawlStage ? "round" : run.rerolls !== crawlRerolls ? "reroll" : "same";
+  crawler.sync(`${run.stage}|${run.rerolls}|${run.shop.map((q) => q.type).join(",")}`, reason);
+  // The basket replaces the card list outside the tutorial (the tutorial points at list cards).
+  const basketOn = false; // on hold: the shop is being rebuilt as the hacked-site window
+  if (tutStep()) {
+    wm.show("crawl");
+    wm.show("clip");
+  }
+  $(".left-panel").classList.toggle("hx-basket-on", basketOn);
+  basket.setEnabled(basketOn);
+  if (basketOn)
+    basket.sync(
+      run.shop.flatMap((q, i) =>
+        q.sold || q.type.startsWith("plan:") ? [] : [{ key: `${run.stage}|${run.rerolls}|${i}|${q.type}`, type: q.type }],
+      ),
+    );
+  crawler.setHackLabel(`⟲ 再ハック <b>$${R.REROLL}</b>`, run.phase !== "build" || run.cash < R.REROLL);
+  if (reason !== "same") {
+    const [line, mood] = crawlerPitch();
+    crawler.say((reason === "reroll" ? "…侵入し直した。" : reason === "round" ? "新しいサイトに潜ってきた。" : "") + line, mood);
+  } else {
+    const bought = [...sold].find((i) => !crawlSold.has(i));
+    if (bought !== undefined) {
+      const t = run.shop[bought].type;
+      crawler.say(t.startsWith("plan:") ? "契約成立。サーバーが軽くなったね。" : `毎度。「${P[t].name}」、確かに渡したよ。`, "happy");
+    }
+  }
+  crawlStage = run.stage;
+  crawlRerolls = run.rerolls;
+  crawlSold = sold;
+}
+crawler.onTalk(() => {
+  const [line, mood] = crawlerTip();
+  crawler.say(line, mood);
+  audio.sfx("toggle", { volume: 0.6 });
+});
+crawler.onHack(() => {
+  if (run.cash < R.REROLL) {
+    crawler.say("資金が足りないね。次の対戦で稼いでおいで。", "sad");
+    audio.sfx("error");
+    return;
+  }
+  $("#reroll-button").click();
+});
+function renderStash() {
+  const stash = run.owned.filter((p) => !C.placed(p));
+  $("#stash-count").textContent = String(stash.length);
+  $("#stash-list").innerHTML =
+    stash
+      .map(
+        (p) =>
+          `<button class="stash-item" data-stash-id="${p.id}" title="ドラッグしてページへ"><i style="background:${D.FACTIONS[P[p.type].faction].color}"></i>${esc(P[p.type].name)}</button>`,
+      )
+      .join("") || '<span class="empty-list">なし</span>';
+}
+
+/* ---------- Right panel: selection, synergy, opponent ---------- */
+function selectionCard(sel: Item[], info: EngineInfo) {
+  if (!sel.length) return "";
+  if (sel.length > 1) {
+    const skinnable = sel.find((p) => D.SKINNABLE.includes(P[p.type].layout));
+    return `<section class="side-sec sel-card"><div class="sel-kicker">${sel.length}個を選択中</div><h2>まとめて操作</h2><p class="sel-desc">ドラッグで一緒に移動できます。同じ高さに揃えて横につなぐこともできます。</p><div class="sel-actions"><button data-editor-action="horizontal">横につなぐ</button><button data-editor-action="vertical">縦に揃える</button></div><div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : "まとめて売る"}</button></div>${skinnable ? `<details class="sel-more"><summary>見た目（時代）をまとめて変える</summary>${skinPicker(skinnable, true)}</details>` : ""}</section>`;
+  }
+  const p = sel[0],
+    d = P[p.type],
+    f = D.FACTIONS[d.faction],
+    m = info.mods[p.id] || { speed: 1, power: 1, notes: [] },
+    groups = info.member[p.id] || [],
+    parent = info.parents[p.id],
+    ok = working(p, info);
+  const notes = [...m.notes];
+  if (parent)
+    notes.unshift(
+      `${P[info.board.find((q) => q.id === parent)!.type].name}の内側`,
+    );
+  return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2><p class="sel-desc">${esc(d.desc)}</p>
+ <div class="sel-stats"><div><small>発動</small><b>${d.cd ? (d.cd / (m.speed || 1)).toFixed(1) + "秒ごと" : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
+ ${
+   notes.length || groups.length
+     ? `<ul class="sel-bonus">${groups.map((g) => `<li>≡ ${esc(E.groupNames[g.kind])}（${esc(GROUP_BONUS[g.kind] || "")}）</li>`).join("")}${notes
+         .filter((n) => !groups.some((g) => n.startsWith(E.groupNames[g.kind])))
+         .map((n) => `<li>✓ ${esc(n)}</li>`)
+         .join("")}</ul>`
+     : ""
+ }
+ ${ok ? "" : `<p class="sel-warn">⚠ 今は働いていません</p>`}<div class="sel-connect"><b>つなぎ方</b>${esc(connectText(p.type))}</div>
+ <details class="sel-more"><summary>見た目（時代）・表示テキストを変える</summary>${skinPicker(p)}<label class="field-label">表示テキスト<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="元のテキストを使用"></label></details>
+ <div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : `売る +$${R.sellValue(run, p.type)}`}</button></div></section>`;
+}
+// Each site culture gets a tiny favicon so it is recognisable at a glance, not only by colour.
+const FAVICON: Record<string, string> = { youtube: "▶", amazon: "a", google: "G", retro: "HP", gov: "公" };
+function favicon(f: string) {
+  return `<span class="fav fav-${f}" aria-hidden="true">${FAVICON[f] ?? "?"}</span>`;
+}
+function synergyPanel(info: EngineInfo) {
+  const counts = info.counts,
+    order = Object.keys(D.FACTIONS)
+      .filter(isFaction)
+      .sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+  const traits = order
+    .map((k) => {
+      const n = counts[k] || 0,
+        f = D.FACTIONS[k];
+      return `<div class="trait ${n >= 3 ? "on" : ""} ${n ? "" : "zero"}" style="--c:${f.color}">${favicon(k)}<b>${esc(f.name)}</b><span class="pips">${[0, 1, 2].map((i) => `<em class="${i < n ? "f" : ""}"></em>`).join("")}${n > 3 ? `<small>+${n - 3}</small>` : ""}</span><small>${n >= 3 ? "発動中：" : "3つで："}${esc(f.set)}</small></div>`;
+    })
+    .join("");
+  const links =
+    info.groups
+      .map(
+        (g) =>
+          `<div class="link-row"><b>≡ ${esc(E.groupNames[g.kind])}</b><span>${g.items.length}個</span><small>${esc(GROUP_BONUS[g.kind] || "")}</small></div>`,
+      )
+      .join("") +
+    Object.entries(
+      Object.values(info.parents).reduce<Record<string, number>>(
+        (a, v) => ((a[v] = (a[v] || 0) + 1), a),
+        {},
+      ),
+    )
+      .map(
+        ([id, n]) =>
+          `<div class="link-row"><b>▣ ${esc(P[info.board.find((q) => q.id === id)!.type].name)}</b><span>中に${n}個</span><small>${info.board.find((q) => q.id === id)!.type === "gov_form" ? "中のUI 速度 +20%" : "内包ボーナス"}</small></div>`,
+      )
+      .join("");
+  const tips = hints(info)
+    .slice(0, 4)
+    .map((h) => `<div class="hint">${esc(h)}</div>`)
+    .join("");
+  return `<section class="side-sec synergy"><h3>シナジー<small>効いている効果</small></h3><div class="traits">${traits}</div><h4>連結・内包</h4>${links || '<p class="muted">まだありません。UI同士をくっつけてみよう。</p>'}${tips ? `<h4>強くするヒント</h4>${tips}` : ""}</section>`;
+}
+function opponentCard() {
+  const o = R.opponent(run),
+    adm = o.admin.map((a) => D.ADMIN[a].name);
+  return `<section class="side-sec opp"><h3>${o.round ? `次の相手 <small>ROUND ${o.round}</small>` : "対戦相手"}</h3><div id="enemy-thumbnail" class="enemy-thumbnail" role="button" tabindex="0" aria-label="相手のサイトを大きく見る"></div><b class="opp-name">${esc(o.pageName)}</b><div class="opp-meta"><span>UI ${o.size}個</span><span>閲覧者の粘り ${o.hp}</span>${adm.length ? `<span>管理画面：${esc(adm.join("・"))}</span>` : ""}</div><p class="opp-tip">${esc(o.tip)}</p>${run.mode === "lab" ? `<select id="enemy-select" class="select-input">${enemyOptions(o.index)}</select><button id="open-builds" class="side-btn">理想形ビルド図鑑・相性表</button>` : ""}<button id="view-enemy" class="side-btn">相手のサイトをよく見る</button></section>`;
+}
+function renderSide() {
+  const host = $("#inspector"),
+    sel = editor.selected(),
+    info = E.analyze(run.owned);
+  $<HTMLButtonElement>("#undo-button").disabled =
+    !editor.history.length || !!battle;
+  $<HTMLButtonElement>("#redo-button").disabled =
+    !editor.future.length || !!battle;
+  host.innerHTML =
+    (preview
+      ? '<div class="side-sec note">プレビュー中：ページの検索窓やボタンを実際に触れます。</div>'
+      : "") +
+    selectionCard(sel, info) +
+    synergyPanel(info) +
+    opponentCard();
+  const o = R.opponent(run),
+    thumb = $("#enemy-thumbnail");
+  thumb.innerHTML = `<div class="thumb-paper site-theme-${o.faction}"><header class="site-header">${V.header(o.faction, o.pageName)}</header><div class="page-body"></div></div>`;
+  V.render(thumb.querySelector<HTMLElement>(".page-body")!, R.enemyBoard(run), {
+    side: "thumb",
+    theme: o.faction,
+    decor: o.decor || [],
+  });
+  scheduleFit();
+}
+function skinPicker(p: Item, all = false) {
+  const d = P[p.type];
+  if (!D.SKINNABLE.includes(d.layout))
+    return '<p class="muted">このUIは元サイトのデザインのまま使います（見た目の変更はボタン・入力欄・トグル・ページ送りのみ）。</p>';
+  const base = V.create(
+      { ...p, shape: "source", label: "" },
+      { preview: true },
+    ),
+    inner = base.firstElementChild,
+    cls = inner?.className || "native-button",
+    sample =
+      d.layout === "search"
+        ? "⌕ 検索"
+        : d.layout === "field"
+          ? "数量 ⌄"
+          : d.layout === "toggle"
+            ? "◐ ON"
+            : d.layout === "pagination"
+              ? '<button>1</button><button class="current">2</button><button>3</button>'
+              : "Aa";
+  return `<div class="skin-grid">${Object.entries(D.SKINS)
+    .map(
+      ([k, s]) =>
+        `<button ${all ? "data-skin-all" : "data-shape"}="${k}" class="skin-chip ${!all && p.shape === k ? "active" : ""}" title="${esc(s.name)}"><span class="skin-sample web-node shape-${k}" style="--node-color:${D.FACTIONS[d.faction].color}"><span class="${esc(cls)} skin-face">${sample}</span></span><small>${esc(s.name)}</small><i>${esc(s.era)}</i></button>`,
+    )
+    .join("")}</div>`;
+}
+
+/* ---------- Tutorial: a blank page, three purchases, one connection, one battle ---------- */
+function tutorialDone() {
+  try {
+    return localStorage.getItem(KEY + "tutorial") === "done";
+  } catch {
+    return false;
+  }
+}
+function finishTutorial() {
+  run.tutorial = 0;
+  try {
+    localStorage.setItem(KEY + "tutorial", "done");
+  } catch {}
+  save();
+  render();
+}
+interface TutorialStep {
+  n: number;
+  text: string;
+  label?: string;
+  next?: string;
+  card?: string;
+  panel?: boolean;
+  button?: boolean;
+  rect?: [number, number, number, number, string];
+}
+function tutStep(): TutorialStep | null {
+  if (run.mode !== "campaign" || !run.tutorial || preview || view === "enemy")
+    return null;
+  if (battle)
+    return run.tutorial === 1
+      ? {
+          n: 0,
+          label: "観戦のコツ",
+          text: "閲覧者（カーソル）の奪い合い。上のバーで<b>多い方が優勢</b>。点線は「あなたのUIが相手から人を連れてきた」印です。",
+        }
+      : null;
+  if (run.phase !== "build") return null;
+  if (run.tutorial === 2)
+    return {
+      n: 7,
+      text: "報酬のUIは左下の<b>手持ち</b>へ。巡回先には<b>戦ったサイトのUI</b>や、処理能力を増やす<b>レンタルサーバー</b>が並びます。ページが処理能力より<b>重い</b>と表示が遅くなり、閲覧者が離れていくので注意。",
+      next: "はじめる",
+    };
+  const placed = run.owned.filter(C.placed),
+    find = (t: string) => placed.find((p) => p.type === t),
+    info = C.analyze(run.owned),
+    h = find("ab_heading"),
+    l = find("ab_link"),
+    nav = find("ab_nav");
+  if (!h)
+    return {
+      n: 1,
+      card: "ab_heading",
+      text: "まだ真っ白なページ。左の<b>巡回先サイト</b>から<b>「大きな明朝見出し」</b>を、ページの上のほうへドラッグして<b>移植</b>しよう。",
+      rect: [32, 24, 576, 56, "ここに見出し"],
+    };
+  if (!l)
+    return {
+      n: 2,
+      card: "ab_link",
+      text: "見出しが付いた。次は<b>「青いハイパーリンク」</b>を見出しの下に置こう。",
+      rect: [32, Math.min(600, h.y + h.h + 24), 192, 32, "ここ"],
+    };
+  if (!nav)
+    return {
+      n: 3,
+      card: "ab_nav",
+      text: "<b>「旧式ナビリンク」</b>を、青いリンクの<b>すぐ右</b>にくっつけてみよう。",
+      rect: [Math.min(784, l.x + l.w), l.y, 176, l.h, "すぐ右"],
+    };
+  if (!(info.member[l.id] || []).some((g) => g.items.includes(nav.id)))
+    return {
+      n: 4,
+      text: "ナビを青いリンクの<b>真横</b>まで寄せると、ピタッと連結します。",
+      rect: [Math.min(784, l.x + l.w), l.y, nav.w, l.h, "ここまで寄せる"],
+    };
+  if (!run.tutorialAck)
+    return {
+      n: 5,
+      panel: true,
+      text: "連結した！ 右の<b>シナジー</b>に「ナビゲーション 速度 +15%」。さらに同じサイトのUIが3つで<b>セット効果</b>も発動中です。",
+      next: "次へ",
+    };
+  return {
+    n: 6,
+    button: true,
+    text: "準備完了。右上の<b>▶ 公開して対戦</b>で、相手のサイトと閲覧者を奪い合おう。",
+  };
+}
+function renderCoach() {
+  const el = $("#coach"),
+    s = tutStep();
+  for (const t of $$(".tut-target")) t.classList.remove("tut-target");
+  const layer = document.querySelector<HTMLElement>("#tut-layer");
+  if (layer) layer.innerHTML = "";
+  if (!s) {
+    el.hidden = true;
+    return;
+  }
+  el.hidden = false;
+  if (s.n !== lastTutorialStep) {
+    lastTutorialStep = s.n;
+    audio.sfx("tutorial");
+  }
+  el.classList.toggle("in-battle", !!battle);
+  el.innerHTML = `<span class="coach-step">${s.label || (s.n <= 6 ? `STEP ${s.n}` : "TIPS")}</span><span class="coach-text">${s.text}</span>${s.next ? `<button id="tut-next" class="coach-next">${s.next}</button>` : ""}${battle ? "" : '<button id="tut-skip" class="coach-skip">スキップ</button>'}`;
+  if (s.card)
+    document
+      .querySelector(`#library-list [data-palette-type="${s.card}"]`)
+      ?.classList.add("tut-target");
+  if (s.panel)
+    document.querySelector("#inspector .synergy")?.classList.add("tut-target");
+  if (s.button)
+    $<HTMLButtonElement>("#battle-button").classList.add("tut-target");
+  if (s.rect && layer) {
+    const [x, y, w, hh, label] = s.rect;
+    layer.innerHTML = `<div class="tut-drop" style="left:${x}px;top:${y}px;width:${w}px;height:${hh}px"><span>${esc(label)}</span></div>`;
+  }
+}
+/* ---------- OS eras: the chrome modernises as the server grows ---------- */
+type Era = "98" | "xp" | "aero" | "flat" | "art";
+const ERAS: Era[] = ["98", "xp", "aero", "flat", "art"];
+const ERA_NAME: Record<Era, string> = {
+  "98": "RAID OS 98",
+  xp: "RAID OS XP",
+  aero: "RAID OS Aero",
+  flat: "RAID OS Flat",
+  art: "RAID OS 2025 Art",
+};
+const ERA_ACCENT: Record<Era, string> = { "98": "#0b1f8f", xp: "#316ac5", aero: "#2a78d8", flat: "#2b579a", art: "#ff4f1f" };
+// Each rival site runs on a server of its own era.
+const ENEMY_ERA: Record<string, Era> = { retro: "98", gov: "xp", amazon: "aero", google: "flat", youtube: "art" };
+function eraFor(cap: number, mode: Mode): Era {
+  if (mode === "lab") return "art";
+  return cap >= 42 ? "art" : cap >= 32 ? "flat" : cap >= 24 ? "aero" : cap >= 17 ? "xp" : "98";
+}
+let appliedEra: Era | null = null,
+  eraInstant = true,
+  upgrading = false;
+function setEraClass(e: Era) {
+  for (const x of ERAS) document.body.classList.toggle("era-" + x, x === e);
+  appliedEra = e;
+}
+function syncEra() {
+  const e = eraFor(R.capacity(run), run.mode);
+  if (upgrading) return;
+  if (e === appliedEra) {
+    // Entering a run may keep the same era. Consume the initial-render flag
+    // here too, so the next server purchase still plays the upgrade wave.
+    eraInstant = false;
+    return;
+  }
+  if (!appliedEra || eraInstant || battle || ERAS.indexOf(e) < ERAS.indexOf(appliedEra)) {
+    setEraClass(e);
+    eraInstant = false;
+    return;
+  }
+  const from = appliedEra;
+  upgrading = true;
+  void playOsUpgrade({
+    fromClass: "era-" + from,
+    accent: ERA_ACCENT[e],
+    reduced: fx.reduced,
+    swap: () => {
+      setEraClass(e);
+      scheduleFit();
+    },
+  }).then(() => {
+    upgrading = false;
+    Cer.showBanner("OSアップグレード！", `${ERA_NAME[e]} にアップデートしました`, ERA_ACCENT[e]);
+    syncEra();
+  });
+}
+function render() {
+  syncEra();
+  document.body.classList.toggle("preview-mode", preview);
+  document.body.classList.toggle("battle-mode", !!battle);
+  document.body.classList.toggle("battling", !!battle && !paused);
+  $("#battle-controls").hidden = !battle;
+  $("#battle-log").hidden = !battle;
+  $("#canvas-float").hidden = !!battle || view === "enemy";
+  const back = $("#back-to-page");
+  back.hidden = !!battle || !(view === "enemy" || preview);
+  back.textContent = preview ? "✎ 編集に戻る" : "← 自分のサイトに戻る";
+  renderTopbar();
+  renderFrames();
+  if (!battle) {
+    renderShop();
+    renderSide();
+    markFusions();
+  } else {
+    crawler.setEnabled(false);
+    basket.setEnabled(false);
+    fx.update(battle);
+  }
+  renderCoach();
+}
+/* ---------- UI fusion (統合): preview badges before a battle, ceremony after it ---------- */
+let pendingFusions: ReturnType<typeof R.fuse> = [];
+function markFusions() {
+  for (const n of $$("#player-body .fuse-badge")) n.remove();
+  for (const n of $$("#player-body .will-fuse")) n.classList.remove("will-fuse");
+  if (view !== "self" || preview) return;
+  for (const { recipe, a, b } of R.fusionPairs(run.owned)) {
+    const into = P[recipe.into].name;
+    [a, b].forEach((it, i) => {
+      const node = $$<HTMLElement>(`#player-body .web-node[data-id="${it.id}"]`)[0];
+      if (!node) return;
+      node.classList.add("will-fuse");
+      if (i === 0) {
+        const badge = document.createElement("span");
+        badge.className = "fuse-badge";
+        badge.textContent = `⚗ 次の公開後に統合 → ${into}`;
+        badge.title = `${P[a.type].name} ＋ ${P[b.type].name} → ${into}\n${recipe.story}`;
+        node.append(badge);
+      }
+    });
+  }
+}
+function celebrateFusions() {
+  const list = pendingFusions;
+  pendingFusions = [];
+  list.forEach((f, i) =>
+    window.setTimeout(() => {
+      const d = P[f.item.type],
+        color = D.FACTIONS[d.faction].color;
+      Cer.showBanner("UI統合！", `${P[f.from[0]].name} ＋ ${P[f.from[1]].name} → ${d.name}　${f.recipe.story}`, color);
+      audio.sfx("snap", { volume: 1.3 });
+      audio.sfx("levelup", { volume: 0.9 });
+      const node = $$<HTMLElement>(`#player-body .web-node[data-id="${f.item.id}"]`)[0];
+      if (!node) return;
+      node.classList.add("just-fused");
+      window.setTimeout(() => node.classList.remove("just-fused"), 1600);
+      const r = node.getBoundingClientRect();
+      particles.setActivate(r, color);
+      particles.burst(r.left + r.width / 2, r.top + r.height / 2);
+      particles.ring(r.left + r.width / 2, r.top + r.height / 2, color, Math.max(r.width, r.height) * 0.7);
+    }, 500 + i * 900),
+  );
+}
+
+/* ---------- Modals ---------- */
+function openModal(html: string) {
+  $("#modal-content").innerHTML = html;
+  if (!$<HTMLDialogElement>("#modal").open)
+    $<HTMLDialogElement>("#modal").showModal();
+}
+function closeModal() {
+  $<HTMLDialogElement>("#modal").close();
+}
+function modalHead(kicker: string, title: string) {
+  return `<div class="modal-head"><div><div class="modal-kicker">${esc(kicker)}</div><h2>${esc(title)}</h2></div><button data-close-modal aria-label="閉じる">×</button></div>`;
+}
+function help() {
+  openModal(
+    `<div class="modal-inner">${modalHead("HOW TO PLAY", "遊び方")}<div class="howto"><div><b>1</b><p><strong>他のサイトからUIを移植する</strong>左の「巡回先のサイト」からUIをドラッグして、自分のページへコピー。移植には資金がかかり、資金は対戦中の収益で増えます。</p></div><div><b>2</b><p><strong>くっつけて連結する</strong>ボタン同士、検索窓＋ボタン、動画＋シークバー。連結すると強くなります。</p></div><div><b>3</b><p><strong>同じサイトのUIを3つ</strong>YouTube・Amazonなど、同じサイト文化のUIを3つ置くとセット効果。右の「シナジー」で確認。</p></div><div><b>4</b><p><strong>公開して対戦</strong>相手のサイトと閲覧者を奪い合います。勝つと相手のUIを奪えます。</p></div><div><b>5</b><p><strong>重さと処理能力</strong>UIを置くほどページは重くなります。サーバーの処理能力を超えると表示が遅くなり、閲覧者が待ちきれずに離れていく。巡回先にたまに出る「レンタルサーバー」で処理能力を増やそう。</p></div><div><b>6</b><p><strong>8つのサイトに挑む</strong>負けるとライフが1つ減ります（3つ）。</p></div></div><p class="muted">操作：Shift＋クリックで複数選択 / G：まとまりを選択 / Alt：くっつき無効 / Delete：手持ちへ / Ctrl+Z：元に戻す</p><div class="modal-footer"><button data-close-modal class="primary">わかった</button></div></div>`,
+  );
+}
+function menu() {
+  const hasCamp = (() => {
+    try {
+      return !!localStorage.getItem(KEY + "campaign");
+    } catch {
+      return false;
+    }
+  })();
+  openModal(`<div class="modal-inner">${modalHead("MENU", "メニュー")}<div class="menu-grid">
+ <button id="m-campaign" class="${run.mode === "campaign" ? "on" : ""}"><b>▶ ラン${hasCamp ? "を続ける" : "を始める"}</b><small>8つのサイトに挑む本編</small></button>
+ <button id="m-new-campaign"><b>↺ 新しいラン</b><small>真っ白なページから</small></button>
+ <button id="m-tutorial"><b>チュートリアル</b><small>最初から手順つきで</small></button>
+ <button id="m-lab" class="${run.mode === "lab" ? "on" : ""}"><b>実験室</b><small>全UIを無料で試す</small></button>
+ <button id="m-preview"><b>◉ サイトを触ってみる</b><small>検索窓やボタンを操作</small></button>
+ <button id="m-help"><b>？ 遊び方</b><small>ルールと操作</small></button>
+ <button id="m-settings"><b>✎ サイト名とヘッダー</b><small>${esc(run.page.name)}</small></button></div>
+ ${
+   run.mode === "lab"
+     ? `<div class="menu-row"><label>ページのお手本<select id="preset-select" class="select-input"><option value="">選んで読み込む</option><optgroup label="お手本">${Object.entries(D.PRESETS)
+         .map(([id, p]) => `<option value="${id}">${esc(p.name)}</option>`)
+         .join("")}</optgroup><optgroup label="理想形ビルド">${BUILDS.map((b) => `<option value="${b.id}">${esc(b.name)}</option>`).join("")}</optgroup></select></label><button id="m-builds" class="side-btn">理想形ビルド図鑑・相性表</button><button id="export-button" class="side-btn">構成を書き出す</button><button id="import-button" class="side-btn">読み込む</button></div>`
+     : ""
+ }
+ <div class="menu-row"><label><input id="motion-setting" type="checkbox" ${fx.reduced ? "checked" : ""}> モーションを抑える</label><button id="m-sound" class="side-btn">サウンド...</button><button id="m-wm-reset" class="side-btn">ウィンドウの配置を初期化</button><button id="m-title" class="side-btn">タイトルへ戻る</button></div></div>`);
+}
+/* ---------- Lab: archetype build book + live matchup table ---------- */
+function enemyOptions(selected: number) {
+  const opt = (e: { name: string }, i: number) =>
+    `<option value="${i}" ${i === selected ? "selected" : ""}>${esc(e.name)}</option>`;
+  const all = R.labEnemies().map((e, i) => [e, i] as const);
+  const sites = all.filter(([e]) => !e.id.startsWith("b_"));
+  const builds = all.filter(([e]) => e.id.startsWith("b_"));
+  return `<optgroup label="サイト">${sites.map(([e, i]) => opt(e, i)).join("")}</optgroup><optgroup label="理想形ビルド">${builds.map(([e, i]) => opt(e, i)).join("")}</optgroup>`;
+}
+function loadBuild(asPage?: string, asFoe?: string) {
+  if (battle) return;
+  if (run.mode !== "lab") switchMode("lab");
+  if (asFoe) {
+    const list = R.labEnemies();
+    run.stage = Math.max(0, list.findIndex((e) => e.id === asFoe));
+    closeModal();
+    save();
+    render();
+    toast(`対戦相手を「${list[run.stage].name}」にしました。`);
+    return;
+  }
+  const b = BUILDS.find((q) => q.id === asPage);
+  if (!b) return;
+  closeModal();
+  editor.commit(() => {
+    const stage = run.stage,
+      fresh = R.newRun("lab", b.id);
+    fresh.stage = stage;
+    fresh.admin = [...b.admin];
+    fresh.page.name = b.pageName;
+    fresh.page.theme = b.theme;
+    Object.assign(run, fresh);
+    editor.selection.clear();
+    return true;
+  }, `「${b.name}」を自分のページに読み込みました。Ctrl+Zで戻せます。`);
+}
+function buildBook() {
+  const cards = BUILDS.map((b) => {
+    const info = Lab.inspect(b.layout),
+      f = D.FACTIONS[b.faction];
+    return `<article class="bd-card" style="--c:${f.color}">
+      <header><span class="bd-fav fav fav-${b.faction}">${esc(f.short)}</span><div><h3>${esc(b.name.replace("【理想形】", ""))}</h3><p class="bd-concept">${esc(b.concept)}</p></div></header>
+      <ol class="bd-how">${b.how.map((h) => `<li>${esc(h)}</li>`).join("")}</ol>
+      <p class="bd-weak"><b>弱点</b>${esc(b.weakness)}</p>
+      <div class="bd-meta"><span>重さ ${info.load}</span><span>余白 ${Math.round(info.free * 100)}%</span>${info.groups.map((g) => `<span class="bd-g">${esc(g)}</span>`).join("")}${info.sets.map((x) => `<span class="bd-s">${esc(x)}</span>`).join("")}<span>管理画面：${b.admin.map((a) => esc(D.ADMIN[a]?.name ?? a)).join("・")}</span></div>
+      <div class="bd-actions"><button data-build-load="${b.id}" class="side-btn bd-primary">自分のページに読み込む</button><button data-build-foe="${b.id}" class="side-btn">対戦相手にする</button></div>
+    </article>`;
+  }).join("");
+  openModal(`<div class="modal-inner bd">${modalHead("BUILD BOOK", "理想形ビルド図鑑")}
+    <p class="muted">各ビルドは、エンジンが知っているシナジーが<strong>全部つながる</strong>ように手で組んだ“完成形”です。読み込んで中身を触る・相手にして戦う、の両方ができます。</p>
+    <div class="bd-grid">${cards}</div>
+    <h3 class="bd-h">相性表 <small>行が自分・列が相手。両者 閲覧者${Lab.MATCH_HP}・各自の管理画面つき。実際のエンジンで計算</small></h3>
+    <div id="bd-matrix" class="bd-matrix"><p class="muted">計算中…</p></div>
+    <div class="modal-footer"><button data-close-modal class="primary">閉じる</button></div></div>`);
+  window.setTimeout(() => {
+    const host = document.getElementById("bd-matrix");
+    if (!host) return;
+    const { list, cells, wins } = Lab.roundRobin();
+    const order = list.map((_, i) => i).sort((a, b) => wins[b] - wins[a]);
+    const head = `<tr><th></th>${order.map((j) => `<th class="${list[j].build ? "is-build" : ""}" title="${esc(list[j].name)}">${esc(list[j].name.slice(0, 5))}</th>`).join("")}<th>勝</th></tr>`;
+    const rows = order
+      .map((i) => {
+        const tds = order
+          .map((j) => {
+            const c = cells[i][j];
+            if (!c) return `<td class="bd-self">—</td>`;
+            const k = c.winner === "player" ? "w" : c.winner === "draw" ? "d" : "l";
+            return `<td class="bd-${k}" title="${esc(list[i].name)} vs ${esc(list[j].name)}：${c.time.toFixed(1)}秒 / 残り ${Math.round(c.hpA * 100)}% 対 ${Math.round(c.hpB * 100)}%">${k === "w" ? "勝" : k === "d" ? "分" : "負"}<small>${c.time.toFixed(0)}s</small></td>`;
+          })
+          .join("");
+        return `<tr><th class="${list[i].build ? "is-build" : ""}">${esc(list[i].name)}</th>${tds}<td class="bd-wins">${wins[i]}</td></tr>`;
+      })
+      .join("");
+    host.innerHTML = `<table>${head}${rows}</table>`;
+  }, 30);
+}
+function settings() {
+  openModal(
+    `<div class="modal-inner">${modalHead("SITE", "サイト名とヘッダー")}<label class="field-label">サイト名<input class="text-input" id="page-name" maxlength="40" value="${esc(run.page.name)}"></label><label class="field-label">ヘッダーのデザイン<select id="page-theme" class="select-input">${[["mixed", "ごちゃ混ぜ"], ...Object.entries(D.FACTIONS).map(([k, v]) => [k, v.name + "風"])].map(([v, t]) => `<option value="${v}" ${v === run.page.theme ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label><div class="modal-footer"><button data-close-modal class="primary">閉じる</button></div></div>`,
+  );
+}
+function resultModal(s: BattleSummary) {
+  const win = s.winner === "player",
+    camp = run.mode === "campaign",
+    v = s.visitors || { player: 0, enemy: 0 },
+    tot = Math.max(1, v.player + v.enemy),
+    best = (s.stats || []).filter((p) => p.damage > 0).slice(0, 3);
+  const next =
+    run.phase === "reward"
+      ? '<button id="reward-next" class="primary">報酬を受け取る</button>'
+      : run.phase === "gameover" || run.phase === "complete"
+        ? '<button id="finish-next" class="primary">ランの結果へ</button>'
+        : camp
+          ? `<button id="result-edit" class="primary">次のラウンドへ（ROUND ${run.stage + 1}）</button>`
+          : '<button id="result-replay">もう一度</button><button id="result-edit" class="primary">編集に戻る</button>';
+  openModal(`<div class="modal-inner result ${win ? "win" : "lose"}">${modalHead(s.round ? `ROUND ${s.round}` : "TEST BATTLE", win ? "勝利！ 閲覧者を奪い取った" : s.winner === "draw" ? "引き分け" : "敗北…閲覧者を奪われた")}
+ <div class="res-share"><div><small>あなた</small><b>${v.player}人</b></div><div class="res-bar"><i style="width:${(100 * v.player) / tot}%"></i></div><div class="foe"><small>${esc(s.enemy)}</small><b>${v.enemy}人</b></div></div>
+ ${camp ? `<div class="res-money"><div><span>基本収入</span><b>+$${s.base}</b></div><div><span>勝利ボーナス</span><b>+$${s.bonus}</b></div><div><span>サイト収益：戦闘中に稼いだ $${s.rawIncome} の半分（上限 $10）</span><b>+$${s.income}</b></div><div class="sum"><span>所持金</span><b>$${run.cash}</b></div></div>${!win && run.lives > 0 ? `<p class="res-note">ライフ残り ${"♥".repeat(run.lives)}。次のラウンドに進みます。</p>` : ""}` : ""}
+ ${best.length ? `<h4>活躍したUI</h4><div class="res-mvp">${best.map((p, i) => `<div><em>${i + 1}</em><b>${esc(P[p.type]?.name || "UI")}</b><span>${s.visitors ? `約${Math.max(1, Math.round((p.damage / s.visitors.max) * s.visitors.base))}人を奪取` : Math.round(p.damage) + "ダメージ"} ・ ${p.fires}回発動</span></div>`).join("")}</div>` : ""}
+ <div class="result-actions">${next}</div></div>`);
+}
+function rewardModal() {
+  const pending = run.pending;
+  if (!pending) return;
+  audio.sfx("reward");
+  openModal(
+    `<div class="modal-inner">${modalHead("REWARD", "相手のサイトから1つ奪う")}<p>選んだUIは「手持ち」に入ります。設備は管理画面に入ります。</p><div class="reward-grid">${pending.loot
+      .map((k) => {
+        if (k.startsWith("admin:")) {
+          const id = k.slice(6),
+            a = D.ADMIN[id];
+          return `<button class="reward-card admin" data-loot="${k}"><span class="rc-tag">管理画面の設備</span><div class="rc-vis dark">${adminViz(id, "player")}</div><b>${esc(a.name)}</b><small>${esc(a.desc)}</small></button>`;
+        }
+        const d = P[k],
+          f = D.FACTIONS[d.faction];
+        return `<button class="reward-card" data-loot="${k}"><span class="rc-tag"><i style="background:${f.color}"></i>${esc(f.name)}・${KIND[d.kind]}</span><div class="rc-vis" data-loot-visual="${k}"></div><b>${esc(d.name)}</b><small>${esc(shortDesc(d))}</small><em>${esc(connectText(k))}</em></button>`;
+      })
+      .join(
+        "",
+      )}</div><div class="modal-footer"><button data-loot="skip">何も取らずに進む</button></div></div>`,
+  );
+  $$("[data-loot-visual]").forEach((el) => {
+    const p = P[el.dataset.lootVisual!],
+      n = V.palettePreview(p.id);
+    n.style.transform = `scale(${Math.min(190 / p.w, 70 / p.h, 1)})`;
+    el.append(n);
+  });
+}
+function finishModal() {
+  const done = run.phase === "complete";
+  openModal(
+    `<div class="modal-inner">${modalHead(done ? "RUN COMPLETE" : "RUN OVER", done ? "すべてのサイトに挑み終えた！" : "ライフが尽きた…")}<div class="res-money"><div><span>勝利数</span><b>${run.wins} / ${R.ROUNDS}</b></div><div><span>到達ラウンド</span><b>${Math.min(run.stage + 1, R.ROUNDS)}</b></div><div><span>最終ページのUI</span><b>${run.owned.filter(C.placed).length}個</b></div></div><p>最後に作ったページはそのまま残っています。</p><div class="result-actions"><button id="go-lab">実験室へ</button><button id="new-campaign" class="primary">新しいランを始める</button></div></div>`,
+  );
+}
+
+/* ---------- Battle ---------- */
+async function start() {
+  if (battle) return;
+  if (run.phase === "reward") {
+    rewardModal();
+    return;
+  }
+  if (["complete", "gameover"].includes(run.phase)) {
+    finishModal();
+    return;
+  }
+  preBattle = clone(run);
+  save();
+  const result = R.startBattle(run);
+  if (!result.ok) {
+    toast(result.error);
+    preBattle = null;
+    return;
+  }
+  battle = result.battle;
+  settling = false;
+  paused = false;
+  speed = 1;
+  fx.reset();
+  lastTime = performance.now();
+  preview = false;
+  view = "self";
+  manualZoom = null;
+  editor.selection.clear();
+  editor.pending = null;
+  coachHidden = true;
+  $("#pause-button").textContent = "一時停止";
+  $$("[data-speed]").forEach((b) =>
+    b.classList.toggle("active", b.dataset.speed === "1"),
+  );
+  battleStage = run.stage;
+  render();
+  const current = battle;
+  audio.setMusic("battle");
+  audio.setIntensity(0.2);
+  await Cer.showPublish(publishLog());
+  if (battle !== current) return;
+  await Cer.showVersus({
+    round: R.opponent(run).round,
+    totalRounds: R.ROUNDS,
+    you: siteCardYou(),
+    foe: siteCardFoe(),
+    foeTip: R.opponent(run).tip,
+    isBoss: R.opponent(run).round === R.ROUNDS,
+  });
+  if (battle !== current) return;
+  audio.sfx("versus");
+  particles.flash("#ffffff", 160, 0.3);
+  traffic.start(current);
+  lastTime = performance.now();
+  requestAnimationFrame(tick);
+}
+function tick(now: number) {
+  if (!battle) return;
+  const delta = Math.max(0, Math.min(0.1, (now - lastTime) / 1000));
+  lastTime = now;
+  traffic.speed = speed;
+  traffic.paused = paused;
+  if (!paused && !battle.result) {
+    const events = battle.step(delta * speed);
+    for (const ev of events) {
+      fx.emit(ev, battle);
+      traffic.event(ev);
+      battleSfx(ev as unknown as { kind: string; [k: string]: unknown }, battle);
+    }
+    battleIntensity(battle);
+    fx.update(battle);
+    $("#battle-clock").textContent = battle.elapsed.toFixed(1) + "s";
+  }
+  if (battle.result && !settling) {
+    settling = true;
+    const current = battle;
+    setTimeout(() => {
+      if (battle === current) finishBattle();
+    }, 2600);
+  } else if (!battle.result) requestAnimationFrame(tick);
+}
+function abort() {
+  if (!battle || battle.result) return;
+  battle = null;
+  settling = false;
+  fx.clear();
+  traffic.stop();
+  if (preBattle) run = preBattle;
+  preBattle = null;
+  preview = false;
+  view = "self";
+  paused = false;
+  save();
+  render();
+  toast("対戦をやめて、編集に戻りました。");
+}
+async function finishBattle() {
+  if (!battle) return;
+  const visitors = traffic.active
+    ? { ...traffic.final(), base: traffic.base.enemy, max: battle.enemy.maxHp }
+    : null;
+  const result = R.settleBattle(run, battle);
+  if (!result.ok) {
+    toast(result.error);
+    return;
+  }
+  if (run.phase !== "gameover") pendingFusions = R.fuse(run);
+  fx.update(battle);
+  document.body.classList.remove("battling");
+  editor.history = [];
+  editor.future = [];
+  const s = result.summary;
+  s.visitors = visitors;
+  save();
+  const win = s.winner === "player";
+  audio.setMusic(win ? "victory" : "defeat");
+  if (win) particles.confetti(2800);
+  const best = (s.stats || []).find((p) => p.damage > 0);
+  await Cer.showOutcome({
+    win,
+    draw: s.winner === "draw",
+    round: s.round ?? null,
+    you: visitors?.player ?? 0,
+    foe: visitors?.enemy ?? 0,
+    mvp: best ? P[best.type]?.name : undefined,
+  });
+  resultModal(s);
+}
+function leaveBattle() {
+  const advanced =
+    !!battle && run.mode === "campaign" && run.stage !== battleStage;
+  battle = null;
+  settling = false;
+  preBattle = null;
+  fx.clear();
+  traffic.stop();
+  particles.clear();
+  view = "self";
+  preview = false;
+  manualZoom = null;
+  closeModal();
+  render();
+  resetBuildSnap();
+  audio.setMusic("build");
+  if (advanced && run.phase === "build") void roundIntro().then(celebrateFusions);
+  else celebrateFusions();
+}
+function exportFile() {
+  const copy = clone(run);
+  const blob = new Blob([JSON.stringify(copy, null, 2)], {
+      type: "application/json",
+    }),
+    url = URL.createObjectURL(blob),
+    a = document.createElement("a");
+  a.href = url;
+  a.download = "ui-raid-page.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast("構成JSONを書き出しました。");
+}
+async function importFile(file: File | undefined) {
+  if (!file) return;
+  try {
+    if (file.size > 300000) throw new Error("構成ファイルが大きすぎます。");
+    const parsed: unknown = JSON.parse(await file.text());
+    if (!R.validateRun(parsed))
+      throw new Error("このバージョンの有効な構成JSONではありません。");
+    save();
+    run = parsed;
+    editor.reset();
+    preview = false;
+    view = "self";
+    save();
+    render();
+    toast("構成を読み込みました。");
+  } catch (e) {
+    toast(e instanceof Error ? e.message : "読み込めませんでした。");
+  }
+  $<HTMLInputElement>("#import-file").value = "";
+}
+function switchMode(mode: Mode, fresh = false, tutorial = !tutorialDone()) {
+  if (battle) return;
+  save();
+  run = fresh
+    ? R.newRun(mode, "mixed", { tutorial: mode === "campaign" && tutorial })
+    : load(mode);
+  preview = false;
+  view = "self";
+  editor.reset();
+  closeModal();
+  save();
+  eraInstant = true;
+  render();
+  resetBuildSnap();
+  audio.setMusic("build");
+  if (run.phase === "reward") rewardModal();
+  else if (["complete", "gameover"].includes(run.phase)) finishModal();
+  else if (fresh && mode === "campaign") void roundIntro();
+}
+
+/* ---------- Game feel: sound, particles and ceremonies around every decision ---------- */
+type BuildSnap = {
+  groups: Set<string>;
+  sets: Set<string>;
+  nested: Set<string>;
+  cash: number;
+  owned: number;
+  capacity: number;
+  pos: string;
+};
+function buildSnap(): BuildSnap {
+  const info = E.analyze(run.owned);
+  return {
+    groups: new Set(info.groups.map((g) => g.id)),
+    sets: new Set(
+      Object.entries(info.counts)
+        .filter(([, n]) => n >= 3)
+        .map(([f]) => f),
+    ),
+    nested: new Set(Object.keys(info.parents)),
+    cash: run.cash,
+    owned: run.owned.length,
+    capacity: R.capacity(run),
+    pos: run.owned
+      .filter(C.placed)
+      .map((p) => `${p.id}:${p.x},${p.y},${p.w},${p.h}`)
+      .join("|"),
+  };
+}
+let snap: BuildSnap | null = null;
+let lastPickRect: DOMRect | null = null;
+let lastTutorialStep: number | null = null;
+let battleStage = 0;
+function resetBuildSnap() {
+  snap = buildSnap();
+}
+function centerOf(r: DOMRect) {
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+function nodeRect(id: string) {
+  return (
+    document
+      .querySelector(`#player-body .web-node[data-id="${id}"]`)
+      ?.getBoundingClientRect() ?? null
+  );
+}
+function bumpMoney() {
+  const m = document.querySelector(".tb-money");
+  if (!m) return;
+  m.classList.remove("bump");
+  void (m as HTMLElement).offsetWidth;
+  m.classList.add("bump");
+  setTimeout(() => m.classList.remove("bump"), 320);
+}
+function afterBuildChange() {
+  const prev = snap,
+    next = buildSnap();
+  snap = next;
+  if (!prev || battle) return;
+  const info = E.analyze(run.owned);
+  let celebrated = false;
+  if (next.owned > prev.owned && next.cash < prev.cash) {
+    audio.sfx("buy");
+    bumpMoney();
+    const newest = run.owned[run.owned.length - 1],
+      to = nodeRect(newest.id) ?? $("#stash-list").getBoundingClientRect();
+    if (lastPickRect) particles.purchase(lastPickRect, to);
+  } else if (next.owned < prev.owned && next.cash > prev.cash) {
+    audio.sfx("sell");
+    bumpMoney();
+    const m = document.querySelector(".tb-money")?.getBoundingClientRect();
+    if (m) {
+      const c = centerOf(m);
+      particles.burst(c.x, c.y, { shape: "coin", count: 8, speed: 220 });
+    }
+  }
+  if (
+    next.capacity > prev.capacity &&
+    eraFor(prev.capacity, run.mode) === eraFor(next.capacity, run.mode)
+  ) {
+    audio.sfx("levelup");
+    const r = document.querySelector(".tb-load")?.getBoundingClientRect();
+    if (r) {
+      const c = centerOf(r);
+      particles.ring(c.x, c.y, "#5fb3ff", 140);
+      particles.burst(c.x, c.y, {
+        shape: ["square", "spark"],
+        colors: ["#5fb3ff", "#ffffff"],
+        count: 26,
+      });
+    }
+    Cer.showBanner(
+      "サーバー増強！",
+      `処理能力 ${prev.capacity} → ${next.capacity}`,
+      "#5fb3ff",
+    );
+    celebrated = true;
+  }
+  const fresh = info.groups.filter((g) => !prev.groups.has(g.id));
+  for (const g of fresh.slice(0, 2)) {
+    const el = document.querySelector(
+      `#player-body [data-group="${CSS.escape(g.id)}"]`,
+    );
+    const r = el?.getBoundingClientRect();
+    if (r) {
+      const c = centerOf(r);
+      particles.snap(c.x, c.y, "#8a7cea");
+    }
+  }
+  if (fresh.length) {
+    audio.sfx("snap");
+    const g = fresh[0];
+    Cer.showBanner(
+      `連結：${E.groupNames[g.kind]}`,
+      GROUP_BONUS[g.kind] || "",
+      "#6d5ce8",
+    );
+    celebrated = true;
+  } else {
+    const nest = [...next.nested].find((id) => !prev.nested.has(id));
+    const r = nest ? nodeRect(nest) : null;
+    if (r) {
+      const c = centerOf(r);
+      audio.sfx("snap");
+      particles.snap(c.x, c.y, "#1f8a70");
+      celebrated = true;
+    }
+  }
+  for (const f of [...next.sets].filter((f) => !prev.sets.has(f))) {
+    const fa = D.FACTIONS[f as Faction];
+    audio.sfx("set");
+    Cer.showBanner("セット効果 発動！", `${fa.name}×3 ─ ${fa.set}`, fa.color);
+    particles.setActivate($("#player-body").getBoundingClientRect(), fa.color);
+    celebrated = true;
+  }
+  if (!celebrated && next.pos !== prev.pos && next.owned === prev.owned) {
+    audio.sfx("drop");
+    const id = [...editor.selection][0],
+      r = id ? nodeRect(id) : null;
+    if (r) particles.dropDust(r);
+  }
+}
+function audioSettings() {
+  openModal(
+    `<div class="modal-inner">${modalHead("SOUND", "サウンド")}<div class="audio-row"><span>音楽</span><input type="range" id="vol-music" min="0" max="100" value="${Math.round(audio.musicVolume * 100)}"><b>${Math.round(audio.musicVolume * 100)}</b></div><div class="audio-row"><span>効果音</span><input type="range" id="vol-sfx" min="0" max="100" value="${Math.round(audio.sfxVolume * 100)}"><b>${Math.round(audio.sfxVolume * 100)}</b></div><label class="audio-row"><span>ミュート</span><input type="checkbox" id="mute-all" ${audio.muted ? "checked" : ""}></label><div class="modal-footer"><button data-close-modal class="primary">閉じる</button></div></div>`,
+  );
+}
+// The publish log reads the actual page: parts, composites, set bonuses, pending fusions, load.
+function publishLog(): Cer.PublishLine[] {
+  const info = E.analyze(run.owned),
+    cap = R.capacity(run),
+    o = R.opponent(run),
+    lab = run.mode === "lab",
+    groups = [...new Set(info.groups.map((g) => E.groupNames[g.kind]))],
+    sets = info.sets.map((x) => `${D.FACTIONS[x.faction as Faction].name}×${x.count}`),
+    fusions = R.fusionPairs(run.owned),
+    score = Math.min(99, 38 + info.groups.length * 9 + info.sets.length * 14 + info.relations.length * 2),
+    slug = run.page.name.replace(/\s/g, "-");
+  const lines: Cer.PublishLine[] = [
+    { kind: "cmd", text: `raid publish ./${slug} --target ${o.address}` },
+    { kind: "step", text: `UIコンポーネントを束ねています（${info.board.length}個）` },
+    {
+      kind: "step",
+      text: groups.length ? `連結を解決: ${groups.slice(0, 3).join("・")}` : "連結を解決",
+      result: groups.length ? `ok (${info.groups.length})` : "なし",
+    },
+    { kind: "meter", text: sets.length ? `ui-synergy ${sets.join(" ")}` : "ui-synergy", value: score },
+  ];
+  for (const f of fusions.slice(0, 2))
+    lines.push({ kind: "info", text: `統合候補: ${P[f.a.type].name} ＋ ${P[f.b.type].name} → ${P[f.recipe.into].name}（公開後）` });
+  if (lab) lines.push({ kind: "step", text: `負荷チェック ${info.load}`, result: "実験室: 無制限" });
+  else if (info.load > cap)
+    lines.push({ kind: "warn", text: `負荷 ${info.load} / 処理能力 ${cap} — 表示が遅くなり、閲覧者が離れます` });
+  else lines.push({ kind: "step", text: `負荷チェック ${info.load} / ${cap}`, result: "ok" });
+  if ((run.admin || []).length)
+    lines.push({ kind: "step", text: `管理画面を起動: ${run.admin.map((a) => D.ADMIN[a]?.name ?? a).join("・")}` });
+  lines.push({ kind: "upload", text: "アップロード", result: `local://${slug}` });
+  lines.push({ kind: "done", text: "公開完了", result: `${o.pageName} に接続します…` });
+  return lines;
+}
+function siteCardYou(): Cer.SiteCard {
+  const info = E.analyze(run.owned),
+    cap = R.capacity(run),
+    sets = Object.entries(info.counts)
+      .filter(([, n]) => n >= 3)
+      .map(([f]) => D.FACTIONS[f as Faction].name + " セット");
+  return {
+    name: run.page.name,
+    url: "local://" + run.page.name.replace(/\s/g, "-"),
+    color: "#2fb47c",
+    stats: [
+      { label: "UI", value: info.board.length + "個" },
+      { label: "連結", value: String(info.groups.length) },
+      {
+        label: "重さ",
+        value: run.mode === "lab" ? String(info.load) : `${info.load}/${cap}`,
+      },
+    ],
+    tags: [...sets, ...info.groups.slice(0, 3).map((g) => E.groupNames[g.kind])],
+  };
+}
+function siteCardFoe(): Cer.SiteCard {
+  const o = R.opponent(run);
+  return {
+    name: o.pageName,
+    url: o.address,
+    color: "#e5484d",
+    faction: o.faction,
+    stats: [
+      { label: "UI", value: o.size + "個" },
+      { label: "閲覧者の粘り", value: String(o.hp) },
+      { label: "管理画面", value: o.admin.length ? o.admin.length + "個" : "なし" },
+    ],
+    tags: o.admin.map((a) => D.ADMIN[a].name),
+  };
+}
+function ladderResults() {
+  const results: Record<number, "win" | "lose"> = {};
+  for (const h of run.history)
+    if (h.round) results[h.round - 1] = h.winner === "player" ? "win" : "lose";
+  return results;
+}
+async function roundIntro() {
+  if (run.mode !== "campaign" || run.phase !== "build") return;
+  const results = ladderResults(),
+    prevF = run.stage
+      ? R.shopFactions({ ...run, stage: run.stage - 1 })
+      : new Set<string>(),
+    unlocked = run.stage
+      ? [...R.shopFactions(run)]
+          .filter((f) => !prevF.has(f))
+          .map((f) => D.FACTIONS[f as Faction].name)
+      : [];
+  audio.sfx("reward");
+  await Cer.showRoundIntro({
+    round: run.stage + 1,
+    totalRounds: R.ROUNDS,
+    ladder: R.LADDER.map((r, i) => {
+      const e = D.ENEMIES[r.e];
+      return {
+        name: e.pageName,
+        color: D.FACTIONS[e.faction].color,
+        state: results[i] ?? (i === run.stage ? "next" : "future"),
+        boss: i === R.ROUNDS - 1,
+      };
+    }),
+    unlocked,
+    lives: run.lives,
+    cash: run.cash,
+    capacity: R.capacity(run),
+    tip: R.opponent(run).tip,
+  });
+}
+function battleSfx(ev: { kind: string; [k: string]: unknown }, b: Battle) {
+  const side = ev.side === "player" ? "player" : "enemy",
+    pan = side === "player" ? -0.35 : 0.35;
+  if (ev.kind === "damage") {
+    if (ev.admin === "troll") return audio.sfx("block", { pan });
+    const src = b[side].parts.find((p) => p.id === ev.id);
+    audio.sfx(src && traffic.isBlock(src.type) ? "block" : "hit", { pan });
+    if (Math.random() < 0.35) audio.sfx("steal", { pan });
+  } else if (ev.kind === "income" && side === "player") audio.sfx("coin");
+  else if (ev.kind === "lag" && side === "player") audio.sfx("lag");
+  else if (ev.kind === "end") {
+    audio.sfx("crash");
+    const loser =
+      ev.winner === "player" ? "enemy" : ev.winner === "enemy" ? "player" : null;
+    if (loser) {
+      const paper = document.querySelector(`#${loser}-frame .browser-paper`);
+      if (paper)
+        particles.crash(
+          paper.getBoundingClientRect(),
+          loser === "enemy"
+            ? ["#e5484d", "#ffffff", "#9aa0ad"]
+            : ["#2fb47c", "#ffffff", "#9aa0ad"],
+        );
+      particles.shake($("#scene"), 14, 600);
+      particles.flash("#ffffff", 220, 0.4);
+    }
+  }
+}
+let leader: "player" | "enemy" | null = null;
+function battleIntensity(b: Battle) {
+  const n = traffic.counts(),
+    tot = n.player + n.enemy;
+  if (!tot) return;
+  // A lead change is the most dramatic moment of a fight: call it out.
+  if (b.elapsed < 0.5) leader = null;
+  const diff = n.player - n.enemy,
+    now = diff > 6 ? "player" : diff < -6 ? "enemy" : leader;
+  if (now && leader && now !== leader && b.elapsed > 3 && !b.result) {
+    Cer.showBanner(
+      now === "player" ? "逆転！" : "逆転された！",
+      now === "player" ? "あなたのサイトがリード" : "相手のサイトがリード",
+      now === "player" ? "#2fb47c" : "#e5484d",
+    );
+    audio.sfx(now === "player" ? "set" : "error");
+  }
+  leader = now;
+  const close = 1 - Math.abs(n.player - n.enemy) / tot,
+    danger = Math.min(b.player.hp / b.player.maxHp, b.enemy.hp / b.enemy.maxHp);
+  audio.setIntensity(Math.min(1, 0.2 + 0.55 * close + (danger < 0.3 ? 0.35 : 0)));
+}
+let titleIntroPlayed = false;
+function showTitleScreen() {
+  if (battle) return;
+  // The 1999 boot + upgrade intro plays once per session; later visits go straight to the 2025 title.
+  const intro = !titleIntroPlayed && !fx.reduced;
+  titleIntroPlayed = true;
+  audio.setMusic(intro ? "none" : "title");
+  const hasSave = (() => {
+    try {
+      const raw = localStorage.getItem(KEY + "campaign");
+      if (!raw) return false;
+      const v = JSON.parse(raw) as Partial<Run>;
+      return !!(v.history?.length || v.owned?.length);
+    } catch {
+      return false;
+    }
+  })();
+  const enter = (fn: () => void) => {
+    audio.unlock();
+    title.close();
+    fn();
+  };
+  const title = Title.showTitle({
+    hasSave,
+    intro,
+    onFirstInteraction: () => {
+      audio.unlock();
+      if (!intro) audio.setMusic("title");
+    },
+    onContinue: () => enter(() => switchMode("campaign")),
+    onNewRun: () => enter(() => switchMode("campaign", true)),
+    onTutorial: () => enter(() => switchMode("campaign", true, true)),
+    onLab: () => enter(() => switchMode("lab")),
+    onSettings: () => {
+      audio.unlock();
+      audioSettings();
+    },
+  });
+}
+function previewAction(e: MouseEvent) {
+  if (!(e.target instanceof Element)) return;
+  const act = e.target.closest<HTMLElement>("[data-ui]"),
+    body = e.target.closest(".browser-paper");
+  if (!body || !act) return;
+  if (act.tagName === "A") e.preventDefault();
+  if (!preview || battle) return;
+  const node = act.closest<HTMLElement>(".web-node");
+  if (node) fx.pulse(node);
+  const kind = act.dataset.ui ?? "";
+  if (kind === "subscribe") {
+    act.textContent =
+      act.textContent === "登録済み" ? "メンバーになる" : "登録済み";
+    act.classList.toggle("is-on");
+  } else if (kind === "like") {
+    const n = act.querySelector(".like-value");
+    if (n) n.textContent = String(Number(n.textContent) + 1);
+  } else if (["caption", "notify", "wish"].includes(kind)) {
+    act.classList.toggle("is-on");
+  } else if (kind === "play") {
+    node?.classList.toggle("video-paused");
+  } else if (["page", "tab", "font"].includes(kind)) {
+    for (const b of act.parentElement?.querySelectorAll("button") ?? [])
+      b.classList.remove("current");
+    act.classList.add("current");
+  } else if (kind === "accordion") {
+    const c = act.closest(".native-accordion"),
+      is = c?.classList.toggle("collapsed");
+    act.querySelector("span")!.textContent = is ? "＋" : "−";
+  } else if (kind === "buy") {
+    const cart = body.querySelector(".cart-state");
+    if (cart) cart.textContent = String(Number(cart.textContent) + 1);
+    toast("カートに追加しました（実際の購入はしません）。");
+  } else if (kind === "submit") {
+    const form = node?.closest(".node-gov_form")?.querySelector(".native-form");
+    if (form) form.classList.add("accepted");
+  } else if (kind === "link" || kind === "header" || kind === "download")
+    toast("ページ内のプレビューです。外部には移動しません。");
+}
+
+/* ---------- Events ---------- */
+document.addEventListener("click", (e) => {
+  if (!(e.target instanceof Element)) return;
+  previewAction(e);
+  if (e.target.closest("#enemy-thumbnail") && !battle) {
+    view = "enemy";
+    render();
+    return;
+  }
+  const target = e.target.closest("button");
+  if (!target) return;
+  if (target.hasAttribute("data-close-modal")) {
+    closeModal();
+    if (battle?.result) leaveBattle();
+    return;
+  }
+  if (target.dataset.editorAction) {
+    const a = target.dataset.editorAction;
+    if (a === "horizontal" || a === "vertical") editor.join(a);
+    else if (a === "stash" || a === "remove") editor[a]();
+    return;
+  }
+  if (target.dataset.shape) {
+    editor.update({ shape: target.dataset.shape });
+    return;
+  }
+  if (target.dataset.buildLoad || target.dataset.buildFoe) {
+    loadBuild(target.dataset.buildLoad, target.dataset.buildFoe);
+    return;
+  }
+  if (target.dataset.skinAll) {
+    editor.updateAll({ shape: target.dataset.skinAll });
+    return;
+  }
+  if (target.dataset.speed) {
+    speed = +target.dataset.speed;
+    $$("[data-speed]").forEach((b) =>
+      b.classList.toggle("active", b === target),
+    );
+    return;
+  }
+  if (target.dataset.plan) {
+    if (editor.commit(() => R.purchase(run, "plan:" + target.dataset.plan)))
+      toast(`サーバーを契約。処理能力が ${R.capacity(run)} になりました。`);
+    return;
+  }
+  if (target.dataset.adminAdd !== undefined) {
+    if (!battle && run.phase === "build") adminPicker();
+    return;
+  }
+  if (target.dataset.adminPick) {
+    const id = target.dataset.adminPick;
+    closeModal();
+    editor.commit(() => {
+      const list = run.admin || [];
+      if (list.length >= R.adminSlots(run) || list.includes(id))
+        return { ok: false, error: "スロットが埋まっています。" };
+      run.admin = [...list, id];
+      return true;
+    }, `管理画面に「${D.ADMIN[id].name}」を導入しました。`);
+    return;
+  }
+  if (target.dataset.adminRemove) {
+    const id = target.dataset.adminRemove;
+    editor.commit(() => {
+      run.admin = (run.admin || []).filter((a) => a !== id);
+      return true;
+    }, `「${D.ADMIN[id].name}」を外しました。`);
+    return;
+  }
+  if (target.dataset.loot) {
+    const k = target.dataset.loot,
+      pickRect = target.getBoundingClientRect(),
+      out = R.claimLoot(run, k === "skip" ? null : k);
+    if (!out.ok) {
+      toast(out.error);
+      return;
+    }
+    if (k !== "skip") {
+      audio.sfx("buy");
+      const c = pickRect;
+      particles.burst(c.left + c.width / 2, c.top + c.height / 2, {
+        shape: ["star", "pill", "square"],
+        colors: ["#f5c542", "#2fb47c", "#ffffff"],
+        count: 34,
+        speed: 420,
+      });
+    }
+    save();
+    leaveBattle();
+    if (run.phase === "complete") finishModal();
+    else
+      toast(
+        out.admin
+          ? `管理画面に「${D.ADMIN[out.admin].name}」を導入しました。`
+          : out.item
+            ? `「${P[out.item.type].name}」を手持ちに加えました。ページにドラッグして使おう。`
+            : `ROUND ${run.stage + 1} へ。`,
+      );
+    return;
+  }
+  switch (target.id) {
+    case "menu-button":
+      menu();
+      break;
+    case "battle-button":
+      void start();
+      break;
+    case "undo-button":
+      editor.undo();
+      break;
+    case "redo-button":
+      editor.redo();
+      break;
+    case "zoom-in":
+      manualZoom = Math.min(
+        1.5,
+        (manualZoom ??
+          parseInt(($("#zoom-value").textContent ?? "").replace("FIT ", "")) /
+            100) + 0.1,
+      );
+      scheduleFit();
+      break;
+    case "zoom-out":
+      manualZoom = Math.max(
+        0.25,
+        (manualZoom ??
+          parseInt(($("#zoom-value").textContent ?? "").replace("FIT ", "")) /
+            100) - 0.1,
+      );
+      scheduleFit();
+      break;
+    case "zoom-value":
+      manualZoom = null;
+      scheduleFit();
+      break;
+    case "view-enemy":
+      view = "enemy";
+      render();
+      break;
+    case "back-to-page":
+      view = "self";
+      preview = false;
+      render();
+      break;
+    case "dismiss-coach":
+      coachHidden = true;
+      renderCoach();
+      break;
+    case "reroll-button":
+      editor.commit(() => R.reroll(run));
+      break;
+    case "export-button":
+      exportFile();
+      break;
+    case "import-button":
+      $<HTMLInputElement>("#import-file").click();
+      break;
+    case "pause-button":
+      if (battle && !battle.result) {
+        paused = !paused;
+        $("#pause-button").textContent = paused ? "再開" : "一時停止";
+        document.body.classList.toggle("battling", !paused);
+      }
+      break;
+    case "abort-button":
+      abort();
+      break;
+    case "result-edit":
+      leaveBattle();
+      break;
+    case "result-replay":
+      leaveBattle();
+      void start();
+      break;
+    case "reward-next":
+      rewardModal();
+      break;
+    case "finish-next":
+      leaveBattle();
+      finishModal();
+      break;
+    case "new-campaign":
+      leaveBattle();
+      switchMode("campaign", true);
+      break;
+    case "go-lab":
+      leaveBattle();
+      switchMode("lab");
+      break;
+    case "m-campaign":
+      switchMode("campaign");
+      break;
+    case "m-new-campaign":
+      switchMode("campaign", true);
+      break;
+    case "m-lab":
+      switchMode("lab");
+      break;
+    case "m-builds":
+    case "open-builds":
+      buildBook();
+      break;
+    case "m-sound":
+      audioSettings();
+      break;
+    case "m-wm-reset":
+      manualZoom = null;
+      wm.reset();
+      closeModal();
+      toast("ウィンドウを初期の配置に戻しました。");
+      break;
+    case "m-title":
+      closeModal();
+      showTitleScreen();
+      break;
+    case "m-tutorial":
+      switchMode("campaign", true, true);
+      break;
+    case "tut-next": {
+      const s = tutStep();
+      if (s?.n === 5) {
+        run.tutorialAck = true;
+        save();
+        render();
+      } else if (s?.n === 7) finishTutorial();
+      break;
+    }
+    case "tut-skip":
+      finishTutorial();
+      break;
+    case "m-help":
+      help();
+      break;
+    case "m-settings":
+      settings();
+      break;
+    case "m-preview":
+      closeModal();
+      preview = true;
+      editor.selection.clear();
+      render();
+      break;
+  }
+});
+document.addEventListener("change", (e) => {
+  const el = e.target;
+  if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement))
+    return;
+  if (el.id === "part-label") {
+    editor.update({ label: el.value });
+    return;
+  }
+  if (el.id === "page-name") {
+    run.page.name = el.value.trim() || "mixspace.";
+    save();
+    render();
+    return;
+  }
+  if (el.id === "page-theme" && isTheme(el.value)) {
+    run.page.theme = el.value;
+    save();
+    render();
+    return;
+  }
+  if (el.id === "preset-select" && el.value) {
+    const id = el.value;
+    closeModal();
+    editor.commit(() => {
+      const stage = run.stage,
+        fresh = R.newRun("lab", id);
+      fresh.stage = stage;
+      fresh.admin = run.admin || [];
+      const build = BUILDS.find((b) => b.id === id);
+      if (build) {
+        fresh.admin = [...build.admin];
+        fresh.page.name = build.pageName;
+        fresh.page.theme = build.theme;
+      } else if (id === "commerce") {
+        fresh.page.theme = "amazon";
+        fresh.page.name = "mixstore.";
+      } else if (id === "form") {
+        fresh.page.theme = "gov";
+        fresh.page.name = "電子申請のページ";
+      }
+      Object.assign(run, fresh);
+      editor.selection.clear();
+      return true;
+    }, "お手本を読み込みました。Ctrl+Zで戻せます。");
+    return;
+  }
+  if (el.id === "enemy-select") {
+    run.stage = +el.value;
+    save();
+    render();
+    return;
+  }
+  if (el.id === "family-filter") renderShop();
+  if (el.id === "import-file" && el instanceof HTMLInputElement)
+    importFile(el.files?.[0]);
+  if (el.id === "motion-setting" && el instanceof HTMLInputElement) {
+    fx.reduced = el.checked;
+    particles.reduced = el.checked;
+    Cer.setReducedMotion(el.checked);
+    document.body.classList.toggle("reduced-motion", fx.reduced);
+  }
+  if (el.id === "mute-all" && el instanceof HTMLInputElement)
+    audio.setMuted(el.checked);
+  if (el.id === "sound-setting" && el instanceof HTMLInputElement) {
+    fx.sound = el.checked;
+    fx.tone("income");
+  }
+});
+$<HTMLInputElement>("#library-query").addEventListener("input", renderShop);
+document.addEventListener("input", (e) => {
+  if (!(e.target instanceof HTMLInputElement)) return;
+  if (e.target.id === "vol-music" || e.target.id === "vol-sfx") {
+    const v = Number(e.target.value) / 100;
+    if (e.target.id === "vol-music") audio.setMusicVolume(v);
+    else {
+      audio.setSfxVolume(v);
+      audio.sfx("coin");
+    }
+    const out = e.target.parentElement?.querySelector("b");
+    if (out) out.textContent = e.target.value;
+    return;
+  }
+  if (preview && e.target.matches(".native-seek input"))
+    e.target
+      .closest<HTMLElement>(".web-node")
+      ?.style.setProperty("--seek", String(Number(e.target.value) / 100));
+});
+document.addEventListener("submit", (e) => {
+  if (!(e.target instanceof HTMLFormElement)) return;
+  if (e.target.closest(".browser-paper")) {
+    e.preventDefault();
+    if (preview)
+      toast(
+        "「" +
+          (e.target.querySelector("input")?.value || "UI") +
+          "」を検索（ページ内の操作デモ）",
+      );
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (!(e.target instanceof HTMLElement)) return;
+  if (e.key === "Enter" && e.target.matches?.("[data-palette-type]"))
+    editor.add(e.target.dataset.paletteType!);
+  if (e.key === "Enter" && e.target.matches?.("#enemy-thumbnail") && !battle) {
+    view = "enemy";
+    render();
+  }
+  if (
+    e.code === "Space" &&
+    battle &&
+    !e.target.closest?.("input,button,select,textarea") &&
+    !$<HTMLDialogElement>("#modal").open
+  ) {
+    e.preventDefault();
+    $("#pause-button").click();
+  }
+});
+$<HTMLDialogElement>("#modal").addEventListener("cancel", () => {
+  if (battle?.result) setTimeout(leaveBattle, 0);
+});
+new ResizeObserver(scheduleFit).observe($("#canvas-scroll"));
+window.addEventListener("resize", scheduleFit);
+window.addEventListener("beforeunload", save);
+const appInspector = Object.freeze({
+  inspect: () => ({
+    run: clone(run),
+    view,
+    preview,
+    selected: [...editor.selection],
+    battle: battle
+      ? {
+          time: battle.elapsed,
+          result: battle.result,
+          playerHp: battle.player.hp,
+          enemyHp: battle.enemy.hp,
+          playerIncome: battle.player.income,
+        }
+      : null,
+  }),
+});
+declare global {
+  interface Window {
+    UIRaidApp: typeof appInspector;
+  }
+}
+window.UIRaidApp = appInspector;
+if (
+  run.mode === "campaign" &&
+  !run.history.length &&
+  !run.owned.length &&
+  !tutorialDone() &&
+  !run.tutorial
+)
+  run = R.newRun("campaign", "mixed", { tutorial: true });
+render();
+save();
+resetBuildSnap();
+particles.reduced = fx.reduced;
+Cer.setReducedMotion(fx.reduced);
+document.addEventListener(
+  "pointerdown",
+  (e) => {
+    audio.unlock();
+    if (!(e.target instanceof Element)) return;
+    const card = e.target.closest<HTMLElement>("[data-palette-type]");
+    if (card) {
+      lastPickRect = card.getBoundingClientRect();
+      audio.sfx("pick");
+      return;
+    }
+    if (!battle && e.target.closest("#player-body .web-node")) {
+      audio.sfx("pick");
+      return;
+    }
+    if (e.target.closest("button, [role=button], select")) audio.sfx("click");
+  },
+  true,
+);
+document.addEventListener("click", (e) => {
+  if (!(e.target instanceof Element)) return;
+  const add = e.target.closest<HTMLElement>("[data-add-type]");
+  if (add) lastPickRect = add.closest(".shop-card")?.getBoundingClientRect() ?? null;
+}, true);
+let lastHover: Element | null = null;
+document.addEventListener("pointerover", (e) => {
+  if (!(e.target instanceof Element)) return;
+  const card = e.target.closest(".shop-card, .reward-card, .plan-card, .tb-primary");
+  if (card && card !== lastHover) audio.sfx("hover");
+  lastHover = card;
+});
+initModernUI(() => fx.reduced);
+showTitleScreen();

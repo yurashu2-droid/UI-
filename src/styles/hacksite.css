@@ -1,0 +1,156 @@
+/* ===== Hacked-site shop (src/hacksite.ts) + extraction (src/extract.ts) ===== */
+.hs-site { margin-bottom: 12px; }
+.hs-devbar {
+  display: flex; align-items: center; gap: 8px; padding: 3px 8px; margin-top: 3px;
+  background: #242424; color: #9aa0a6; font: 11px "Cascadia Code", "Consolas", monospace; border-bottom: 1px solid #3c3c3c;
+}
+.hs-devbar b { color: #8ab4f8; font-weight: 700; }
+.hs-viewport { position: relative; overflow: hidden; background: #fff; box-shadow: var(--sunken, inset 0 0 0 1px #ccc); }
+.hs-page { position: absolute; left: 0; top: 0; width: 480px; transform-origin: 0 0; background: #fff; }
+.hs-page .site-header { width: 960px !important; transform: scale(.5); transform-origin: 0 0; margin-bottom: -34px; pointer-events: none; }
+.hs-body { position: relative; }
+
+/* every takeable element wears an "inspect element" highlight + label */
+.hs-el { position: absolute; cursor: grab; touch-action: none; outline: none; }
+.hs-box { position: absolute; inset: 0; overflow: hidden; border-radius: 2px; }
+.hs-box > * { pointer-events: none; }
+.hs-el::after {
+  content: ""; position: absolute; inset: -2px; pointer-events: none; border-radius: 3px;
+  outline: 1px dashed #3b82f6aa; background: #6fa8dc14; transition: background .12s, outline-color .12s;
+}
+.hs-el:hover::after, .hs-el:focus-visible::after { background: #6fa8dc55; outline: 2px solid #3b82f6; }
+.hs-el.is-match::after { outline-color: #f5b400; }
+.hs-tag {
+  position: absolute; left: -2px; top: -19px; height: 16px; display: flex; align-items: center; gap: 4px; max-width: calc(100% + 60px);
+  padding: 0 4px 0 5px; border-radius: 3px; background: #242424; color: #bdc1c6; white-space: nowrap; z-index: 2;
+  font: 10px/16px "Cascadia Code", "Consolas", monospace; box-shadow: 0 1px 3px #0006;
+}
+.hs-tag b { color: #c58af9; font-weight: 400; overflow: hidden; text-overflow: ellipsis; max-width: 96px; }
+.hs-tag small { color: #9aa0a6; font-size: 9.5px; }
+.hs-tag em { font-style: normal; font-weight: 700; color: #fde68a; }
+.hs-el.is-poor .hs-tag em { color: #ff8a80; text-decoration: line-through; }
+.hs-tag u { text-decoration: none; color: #f5b400; }
+.hs-kind { width: 7px; height: 7px; border-radius: 50%; background: #9aa0a6; flex: none; }
+.hs-el.kind-attack .hs-kind { background: #ff6b5a; } .hs-el.kind-shield .hs-kind { background: #7aa8ff; }
+.hs-el.kind-heal .hs-kind { background: #4ade80; } .hs-el.kind-income .hs-kind { background: #fbbf24; }
+.hs-el:is(.kind-passive, .kind-reactive) .hs-kind { background: #b69cff; } .hs-el.kind-echo .hs-kind { background: #e39cff; }
+.hs-add { margin-left: 2px; padding: 0 4px; border: 0; border-radius: 2px; background: #3c4043; color: #e8eaed; font: 10px/14px sans-serif; cursor: pointer; }
+.hs-add:hover { background: #1a73e8; }
+.hs-hole { position: absolute; }
+
+/* ---------- the scan (hacksite.ts scanHackSite) ---------- */
+.hs-scan { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 9; pointer-events: none; }
+/* before the head arrives: corrupted signal */
+.hs-noise { position: absolute; inset: 0; z-index: 2; pointer-events: none; display: none; background-size: 96px 64px; image-rendering: pixelated; mix-blend-mode: screen; }
+.hs-el.hs-pre .hs-noise { display: block; opacity: .9; animation: hs-static .16s steps(2) infinite; }
+.hs-el.hs-pre .hs-box { filter: grayscale(1) contrast(1.9) brightness(.5); transform: translateX(var(--jx, 3px)); clip-path: inset(8% 0 22% 0); }
+.hs-el.hs-pre .hs-tag, .hs-el.hs-pre::after { opacity: 0; }
+@keyframes hs-static { 50% { background-position: 37px 21px; transform: translateX(2px); } }
+/* the head passes: the UI snaps back out of the glitch, its label decodes in green */
+.hs-el.hs-resolve .hs-noise { display: block; animation: hs-static-out .32s steps(4) forwards; }
+.hs-el.hs-resolve .hs-box { animation: hs-restore .38s steps(7) both; }
+.hs-el.hs-resolve .hs-tag { animation: hs-tag-in .26s ease-out both; }
+.hs-el.hs-resolve::after { animation: hs-hl-in .7s ease-out both; }
+.hs-tag.hs-tag-live { background: #03140a; box-shadow: 0 0 0 1px #39ff8888, 0 0 14px #39ff8866; transition: background .5s, box-shadow .5s; }
+.hs-tag.hs-tag-live :is(b, small, em) { color: #9dffc0 !important; text-decoration: none !important; }
+@keyframes hs-restore {
+  0% { filter: grayscale(1) contrast(1.9) brightness(.6); clip-path: inset(0 0 64% 0); transform: translateX(6px); }
+  18% { clip-path: inset(30% 0 30% 0); transform: translateX(-5px); filter: drop-shadow(3px 0 #ff2bd6) drop-shadow(-3px 0 #27f3ff) grayscale(.6); }
+  36% { clip-path: inset(0 0 30% 0); transform: translateX(3px); }
+  54% { clip-path: inset(12% 0 0 0); transform: translateX(-2px); filter: drop-shadow(2px 0 #ff2bd6) drop-shadow(-2px 0 #27f3ff) brightness(1.5); }
+  72% { clip-path: inset(0); transform: translateX(1px); }
+  100% { clip-path: inset(0); transform: none; filter: none; }
+}
+@keyframes hs-static-out { 0% { opacity: .9; clip-path: inset(0); } 50% { opacity: .6; clip-path: inset(0 0 55% 0); } 100% { opacity: 0; clip-path: inset(0 0 100% 0); } }
+@keyframes hs-tag-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+@keyframes hs-hl-in { 0% { outline: 2px solid #39ff88; background: #39ff8840; } 100% { } }
+@media (prefers-reduced-motion: reduce) {
+  .hs-scan, .hs-noise { display: none !important; }
+  .hs-el.hs-pre .hs-box { filter: none; transform: none; clip-path: none; }
+  .hs-el.hs-pre .hs-tag, .hs-el.hs-pre::after { opacity: 1; }
+  .hs-el.hs-resolve :is(.hs-box, .hs-tag), .hs-el.hs-resolve::after { animation: none; }
+}
+
+/* ---------- the stolen spot: a ragged black pixel hole under glitch noise ---------- */
+.px-hole { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.px-hole canvas {
+  width: 100%; height: 100%; display: block; image-rendering: pixelated;
+  filter: drop-shadow(1.5px 0 #ff2bd6b0) drop-shadow(-1.5px 0 #27f3ffb0);
+  animation: px-jitter 2.6s steps(1) infinite;
+}
+.px-hole::before { /* scanlines + a travelling interference bar */
+  content: ""; position: absolute; inset: 0; mix-blend-mode: screen;
+  background: linear-gradient(transparent 0 46%, #27f3ff44 46% 52%, transparent 52%) 0 0 / 100% 300%,
+    repeating-linear-gradient(0deg, #ffffff10 0 1px, transparent 1px 3px);
+  animation: px-bar 1.7s linear infinite;
+}
+.px-hole::after { /* a torn slice that jumps sideways now and then */
+  content: ""; position: absolute; left: 0; right: 0; top: 30%; height: 18%; background: inherit;
+  box-shadow: inset 0 0 0 999px #05060855; animation: px-slice 2.2s steps(1) infinite;
+}
+@keyframes px-jitter { 0%, 100% { transform: none; } 8% { transform: translateX(2px); } 9% { transform: translateX(-1px); } 43% { transform: none; } 44% { transform: translate(-2px, 1px); } 46% { transform: none; } 71% { transform: translateX(3px); } 72% { transform: none; } }
+@keyframes px-bar { to { background-position: 0 300%, 0 0; } }
+@keyframes px-slice { 0%, 100% { transform: translateX(0); opacity: 0; } 12% { transform: translateX(6px); opacity: 1; top: 20%; } 14% { opacity: 0; } 55% { transform: translateX(-5px); opacity: 1; top: 62%; } 57% { opacity: 0; } }
+
+/* ---------- extraction: the dot wave eats the UI down to the hole (and rebuilds it on return) ---------- */
+.ex-wave { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1250; pointer-events: none; }
+.hs-el > .ex-hole { z-index: 0; }
+.hs-el > .hs-box { z-index: 1; }
+.ex-sampling .hs-box, .ex-sampling .hs-box * { pointer-events: auto !important; }
+.hs-el.ex-taking .hs-box {
+  -webkit-mask: radial-gradient(circle at var(--ex-x, 50%) var(--ex-y, 50%), transparent var(--ex-r, 0px), #000 calc(var(--ex-r, 0px) + 1px));
+  mask: radial-gradient(circle at var(--ex-x, 50%) var(--ex-y, 50%), transparent var(--ex-r, 0px), #000 calc(var(--ex-r, 0px) + 1px));
+}
+.hs-el.ex-restoring .hs-box {
+  -webkit-mask: radial-gradient(circle at 50% 50%, #000 var(--ex-r, 0px), transparent calc(var(--ex-r, 0px) + 1px));
+  mask: radial-gradient(circle at 50% 50%, #000 var(--ex-r, 0px), transparent calc(var(--ex-r, 0px) + 1px));
+}
+.hs-el:is(.ex-taking, .ex-restoring) .hs-tag, .hs-el:is(.ex-taking, .ex-restoring)::after { opacity: 0; transition: opacity .15s; }
+.hs-el.ex-taking { cursor: grabbing; }
+
+/* ---------- the copy in your hand glitches in (and out if it goes back) ---------- */
+.ex-carry {
+  position: fixed; left: 0; top: 0; z-index: 1240; pointer-events: none; transform-origin: 0 0;
+  border-radius: 3px; box-shadow: 0 0 0 2px #fff, 0 16px 40px #000a, 0 0 30px #27f3ff88; transition: opacity .1s;
+}
+.ex-carry.is-glitching > * { animation: ex-glitch-in .52s linear both; }
+.ex-carry.is-glitching-out > * { animation: ex-glitch-out .28s linear both; }
+@keyframes ex-glitch-in {
+  0% { opacity: 0; clip-path: inset(44% 0 44% 0); transform: translateX(-10px); filter: drop-shadow(4px 0 #ff2bd6) drop-shadow(-4px 0 #27f3ff) contrast(1.6); }
+  12% { opacity: 1; clip-path: inset(0 0 72% 0); transform: translateX(7px); }
+  24% { clip-path: inset(58% 0 0 0); transform: translateX(-5px); }
+  36% { clip-path: inset(18% 0 34% 0); transform: translateX(4px) skewX(-6deg); }
+  50% { clip-path: inset(0 0 0 0); transform: translateX(-3px); filter: drop-shadow(2px 0 #ff2bd6) drop-shadow(-2px 0 #27f3ff); }
+  62% { clip-path: inset(0 0 40% 0); transform: translateX(2px); }
+  72% { clip-path: inset(0); transform: none; }
+  84% { transform: translateX(-1px); filter: drop-shadow(1px 0 #ff2bd6) drop-shadow(-1px 0 #27f3ff); }
+  100% { clip-path: inset(0); transform: none; filter: none; }
+}
+@keyframes ex-glitch-out {
+  0% { opacity: 1; filter: drop-shadow(3px 0 #ff2bd6) drop-shadow(-3px 0 #27f3ff); }
+  35% { clip-path: inset(0 0 60% 0); transform: translateX(8px); }
+  70% { clip-path: inset(62% 0 0 0); transform: translateX(-10px); opacity: .6; }
+  100% { clip-path: inset(48% 0 48% 0); opacity: 0; }
+}
+.ex-carry.is-over-page { opacity: 0; }
+.ex-proxy { position: fixed; left: -20px; top: -20px; width: 1px; height: 1px; pointer-events: none; }
+
+/* DevTools-style hover card */
+.hs-card {
+  position: fixed; z-index: 1300; width: 260px; padding: 10px 12px; border-radius: 6px; pointer-events: none; opacity: 0; transform: translateY(4px);
+  background: #1f1f1f; color: #e8eaed; box-shadow: 0 0 0 1px #3c3c3c, 0 12px 30px #000a; font: 12px/1.5 "Yu Gothic UI", "Segoe UI", sans-serif;
+  transition: opacity .12s, transform .12s;
+}
+.hs-card.is-on { opacity: 1; transform: none; }
+.hs-card header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.hs-card header b { font-size: 13.5px; }
+.hs-card header em { font: 700 14px "Cascadia Code", "Consolas", monospace; color: #fde68a; font-style: normal; }
+.hs-card header em.poor { color: #ff8a80; }
+.hs-card-meta { display: flex; gap: 8px; color: #9aa0a6; font: 11px "Cascadia Code", "Consolas", monospace; }
+.hs-k.kind-attack { color: #ff6b5a; } .hs-k.kind-shield { color: #7aa8ff; } .hs-k.kind-heal { color: #4ade80; }
+.hs-k.kind-income { color: #fbbf24; } .hs-k:is(.kind-passive, .kind-reactive) { color: #b69cff; } .hs-k.kind-echo { color: #e39cff; }
+.hs-card p { margin: 6px 0 0; color: #bdc1c6; }
+.hs-card .hs-card-match { color: #f5b400; }
+.hs-card .hs-card-poor { color: #ff8a80; }
+.hs-card small { display: block; margin-top: 8px; color: #80868b; font-size: 10.5px; }
+@media (prefers-reduced-motion: reduce) { .ex-carry > *, .px-hole canvas, .px-hole::before, .px-hole::after { animation: none !important; } }

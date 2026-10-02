@@ -1,0 +1,74 @@
+# UI RAID Studio
+
+既存のゲームをViteの開発プロジェクトに分割したものです。画面・ゲームデータ・戦闘ルール・保存形式は元のHTMLを引き継いでいます。
+
+## 起動
+
+Node.js 22.12以降を使用します。依存関係の復元には次を実行してください。
+
+```sh
+npm ci
+npm run dev
+```
+
+ブラウザで http://127.0.0.1:5178/ を開きます。ポートは保存先が意図せず変わらないよう固定しています。使用中なら既存のこのプロジェクトのサーバーを利用するか、`vite.config.ts` で明示的に変更してください。
+
+分割後の `index.html` はダブルクリックせず、開発サーバーから開きます。従来の単一ファイル `UI_RAID_STUDIO.html` は、比較用として無変更で残しています。
+
+## 構成
+
+| ファイル | 役割 |
+| --- | --- |
+| `index.html` | 画面の土台 |
+| `src/main.ts` | TypeScriptの起動点 |
+| `src/data.ts` | UI・敵・プリセット・設備データ |
+| `src/document.ts` | 配置、内包、連結、スナップ |
+| `src/engine.ts` | DOMに依存しない固定ステップ戦闘 |
+| `src/run.ts` | ショップ、進行、報酬、保存データ検証 |
+| `src/components.ts` | ネイティブHTML部品の描画 |
+| `src/editor.ts` | 編集、ドラッグ、取り消し・やり直し |
+| `src/effects.ts` | UI演出、効果音 |
+| `src/traffic.ts` | 閲覧者カーソルと戦闘表示 |
+| `src/app.ts` | 画面、イベント、保存、各機能の接続 |
+| `src/audio.ts` | 手続き生成の音楽（タイトル・編集・対戦・勝敗）と効果音。Web Audio APIのみ |
+| `src/particles.ts` | UIの破片でできたパーティクル、画面の揺れ・フラッシュ |
+| `src/ceremony.ts` | タイトル画面、VS演出、勝敗演出、ラウンド紹介、通知バナー |
+| `src/styles/ceremony.css` / `polish.css` | 演出用CSS、全体のアートディレクション（暗いステージ・ファビコン等） |
+| `src/types.ts` | ゲームデータ・配置・戦闘・保存の共通型 |
+| `src/styles/game.css` | 元のCSSを順序・内容とも維持 |
+| `scripts/simulate.ts` | ブラウザ不要の戦闘比較ツール |
+
+今後の変更先は `src/` です。各モジュールは明示的な `import` / `export` を使い、グローバル変数の読み込み順には依存しません。ブラウザの `window.UIRaidApp.inspect()` は既存の読み取り用デバッグAPIとして残しています。
+
+### TypeScriptの適用範囲
+
+ゲーム本体の9モジュール、起動点、Vite設定、シミュレーションをすべてTypeScriptにしています。`strict: true` / `allowJs: false` でゲーム本体も型チェックの対象です。戦闘イベントと取引結果は種類・成功状態で型を区別し、DOM・編集状態・音声・Canvasにも型を付けています。読み込んだJSONは `unknown` として受け取り、保存データ検証後に使用します。
+
+ソース内の `.js` import指定はES Modulesの出力形式に合わせたものです。開発・ビルド時はVite/TypeScript、テスト時はtsxが対応する `.ts` ソースへ解決します。元HTMLは回帰比較用の固定資料で、現在のアプリからは読み込んでいません。
+
+## セーブを引き継ぐ
+
+保存キー `ui-raid-studio-v3-` とJSON形式は維持しています。ただし、以前の `file://`、別ブラウザ、別ポート、`localhost` と `127.0.0.1` の間ではブラウザ保存領域が異なります。
+
+1. 以前使っていたブラウザで元HTMLを開く。
+2. メニューの「JSONを書き出す」で保存する。
+3. 新しい画面のメニューの「JSONを読み込む」で取り込む。
+
+ランと実験室のセーブは別々なので、必要なモードごとに書き出してください。初回チュートリアルの完了フラグはブラウザ保存領域ごとです。
+
+## 検証・ビルド
+
+```sh
+npm test                  # 元HTMLとの比較、20通りの戦闘、進行・保存互換性
+npm run typecheck         # ゲーム本体・設定・シミュレーションすべての型チェック
+npm run simulate          # 4プリセット × 5対戦相手の結果を表で表示
+npm run simulate -- --json
+npm run build             # 型チェックと dist/ の生成
+npm run preview           # http://127.0.0.1:4173/ でビルド結果を確認
+```
+
+Windows PowerShellでnpmへのオプション転送がうまくいかない場合、JSON出力は `node node_modules/tsx/dist/cli.mjs scripts/simulate.ts --json` でも実行できます。
+
+`dist/` が配布用成果物です。静的HTTPサーバーで配信できます。相対アセットパスにしているため、後からElectronに組み込める構成です。Electronおよび固有名詞の置き換えは今回の変更には含めていません。
+
+戦闘比較テストは移行時の基準として元HTMLを読みます。今後ゲームバランスを意図的に変える場合は、比較テストの期待値・基準もその変更に合わせて見直してください。

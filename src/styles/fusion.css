@@ -1,0 +1,78 @@
+/* ===== UI fusion (統合): preview badge, merge flash, and the fused UIs themselves ===== */
+.web-node.will-fuse { outline: 2px dashed #f5c542; outline-offset: 2px; animation: fuse-pulse 1.4s ease-in-out infinite; }
+@keyframes fuse-pulse { 50% { outline-color: #ff9f1c; box-shadow: 0 0 0 4px #f5c54233, 0 0 24px #f5c54266; } }
+.fuse-badge {
+  position: absolute; left: 6px; top: 6px; z-index: 6; pointer-events: none; white-space: nowrap;
+  padding: 2px 9px; border-radius: 99px; background: #1b1c21e6; color: #ffd66b; font: 700 11px/1.5 "Yu Gothic UI", "Segoe UI", sans-serif;
+  box-shadow: 0 0 0 1px #f5c54299, 0 4px 14px #0006;
+}
+.web-node.just-fused { animation: fuse-born 1.5s cubic-bezier(.2,.9,.25,1.2); z-index: 5; }
+@keyframes fuse-born {
+  0% { transform: scale(.6); filter: brightness(3) saturate(0); }
+  35% { transform: scale(1.06); filter: brightness(1.6); box-shadow: 0 0 0 3px #fff, 0 0 60px var(--node-color); }
+  100% { transform: none; filter: none; }
+}
+
+/* インスタント検索 */
+.fused-instant { position: relative; }
+.fused-instant input { color: #202124; }
+.fused-instant .instant-ghost { position: absolute; left: 88px; color: #9aa0a6; pointer-events: none; font-size: 15px; display: none; }
+.fused-instant .instant-chip { margin-left: auto; padding: 1px 8px; border-radius: 99px; background: #e8f0fe; color: #1a73e8; font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+/* 1-Click 購入 */
+.fused-oneclick { background: linear-gradient(#ffb84d, #f08804) !important; color: #111 !important; font-weight: 700; gap: 8px; }
+.fused-oneclick .oneclick-cart { display: inline-flex; align-items: center; gap: 2px; padding: 1px 6px; border-radius: 99px; background: #0000001f; }
+.fused-oneclick .oneclick-cart .icon { width: 14px; height: 14px; }
+
+/* 埋め込みプレイヤー */
+.fused-embed .embed-tag { font-family: "Consolas", monospace; color: #9cdcfe; }
+.fused-embed .embed-seek { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: #ffffff33; }
+.fused-embed .embed-seek i { display: block; height: 100%; width: 34%; background: #ff0033; box-shadow: 0 0 8px #ff0033; }
+
+/* ニュース速報テロップ */
+.fused-ticker { background: #0a0a0a !important; color: #fff !important; border: 0 !important; display: flex; align-items: center; overflow: hidden; }
+.fused-ticker .ticker-flag { flex: none; z-index: 1; height: 100%; display: grid; place-items: center; padding: 0 12px; background: #d0021b; color: #fff; font-weight: 900; letter-spacing: .1em; }
+.fused-ticker > span { white-space: nowrap; animation: ticker-run 9s linear infinite; padding-left: 16px; }
+@keyframes ticker-run { from { transform: translateX(40%); } to { transform: translateX(-100%); } }
+
+/* ブログのコメント欄 */
+.fused-blog header { background: linear-gradient(#fff, #eef3f8) !important; color: #235 !important; }
+.fused-blog .blog-count { color: #e06666; }
+
+/* ワンストップ電子申請 */
+.fused-onestop { gap: 8px; }
+.fused-onestop .onestop-check { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 3px; background: #fff; color: #1a7f37; }
+.fused-onestop .onestop-check .icon { width: 14px; height: 14px; }
+
+/* reCAPTCHA */
+.fused-recaptcha {
+  width: 100%; height: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 0 10px;
+  background: #f9f9f9; border: 1px solid #d3d3d3; border-radius: 3px; box-shadow: 0 0 4px 1px #00000014; color: #222; font: 14px Roboto, "Segoe UI", sans-serif;
+}
+.fused-recaptcha input { position: absolute; opacity: 0; }
+.fused-recaptcha .rc-box { flex: none; width: 24px; height: 24px; border: 2px solid #c1c1c1; border-radius: 2px; background: #fff; }
+.fused-recaptcha input:checked + .rc-box { border-color: transparent; background: none; }
+.fused-recaptcha input:checked + .rc-box::after { content: "✔"; color: #009e55; font-size: 26px; line-height: 20px; }
+.fused-recaptcha .rc-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fused-recaptcha .rc-logo { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.fused-recaptcha .rc-logo i { width: 22px; height: 22px; border-radius: 50%; background: conic-gradient(#4a90e2 0 33%, #1c3aa9 0 66%, #aaa 0); }
+.fused-recaptcha .rc-logo small { font-size: 8px; line-height: 1.2; color: #555; text-align: center; }
+
+/* リターゲティング広告 */
+.fused-retarget { position: relative; }
+.fused-retarget .ad-kicker { background: #ff5a1f !important; color: #fff !important; }
+.fused-retarget .retarget-eye { position: absolute; right: 8px; top: 6px; color: #ff5a1f; animation: retarget-look 2.4s ease-in-out infinite; }
+@keyframes retarget-look { 50% { transform: translateX(-6px); } }
+
+/* メルマガ登録 */
+.fused-newsletter {
+  width: 100%; height: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 10px;
+  background: linear-gradient(90deg, #fff7e6, #fff); border: 1px solid #f0c36d; border-radius: 6px; color: #333; font-size: 13px;
+}
+.fused-newsletter b { white-space: nowrap; color: #c45500; }
+.fused-newsletter .nl-field { flex: 1; min-width: 0; padding: 3px 8px; border: 1px solid #ccc; border-radius: 4px; background: #fff; color: #999; overflow: hidden; white-space: nowrap; }
+.fused-newsletter .nl-btn { padding: 3px 10px; border-radius: 4px; background: #f0c14b; border: 1px solid #a88734; font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .web-node.will-fuse, .web-node.just-fused, .fused-ticker > span, .fused-retarget .retarget-eye { animation: none; }
+}

@@ -1,0 +1,246 @@
+/* =====================================================================
+   RAID OS 2025 — the final era speaks the title screen's language:
+   live WebGL wallpaper, smoked glass windows (backdrop-filter), cream type,
+   orange/blue light, pill controls, @property conic borders, soft glows.
+   Scoped to body.era-art; the website being built stays a real (white) page.
+   ===================================================================== */
+
+/* ---------- desktop ---------- */
+html body.ui2.era-art { color: var(--cream); background: var(--os-desk); }
+html body.ui2.era-art .os-wallpaper { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; display: block; }
+html body.ui2.era-art .workspace { position: relative; z-index: 1; }
+html body.ui2.era-art .canvas-scroll, html body.ui2.era-art.battle-mode .canvas-scroll { background: transparent !important; }
+html body.ui2.era-art ::selection { background: #ff4f1f66; color: #fff; }
+
+/* shared glass */
+html body.ui2.era-art :is(.left-panel, .right-panel, .crawl-site, .side-sec, .browser-paper, #modal, .canvas-float, .battle-bar,
+  .cer-map-window, .cer-result-window, .cer-site, .admin-dock, .reward-card, .coach, .toast, .cer-banner, .cer-round-label, .cer-foe-tip) {
+  -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* ---------- scrollbars: thin capsules ---------- */
+html body.ui2.era-art ::-webkit-scrollbar { width: 10px !important; height: 10px !important; background: transparent !important; }
+html body.ui2.era-art ::-webkit-scrollbar-thumb { background: #ffffff26 !important; border-radius: 99px; border: 2px solid transparent; background-clip: padding-box !important; box-shadow: none !important; }
+html body.ui2.era-art ::-webkit-scrollbar-button { display: none !important; }
+
+/* ---------- taskbar → a floating dock ---------- */
+html body.ui2.era-art .topbar {
+  left: 10px; right: 10px; bottom: 8px; height: 44px; border-radius: 16px; padding: 5px 6px; gap: 8px;
+  background: #0b0a12b8; color: var(--cream); box-shadow: 0 0 0 1px var(--glass-line), inset 0 1px 0 #ffffff1c, 0 18px 50px #000b;
+  -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
+}
+html body.ui2.era-art .workspace { height: calc(100vh - 60px); }
+html body.ui2.era-art #menu-button {
+  height: 34px; border-radius: 12px; padding: 0 14px; background: #ffffff10; color: var(--cream); box-shadow: var(--raised);
+}
+html body.ui2.era-art #menu-button::before { width: 14px; height: 14px; border-radius: 4px; background: conic-gradient(from 200deg, #ff4f1f, #ffb36b, #6d69ff, #3a36ff, #ff4f1f); box-shadow: 0 0 12px #ff4f1f88; }
+html body.ui2.era-art #menu-button::after { content: "RAID"; font: 800 13px var(--os-font); letter-spacing: .12em; color: var(--cream); }
+html body.ui2.era-art #menu-button:hover { background: #ffffff1c; }
+html body.ui2.era-art :is(.tb-run, .tb-stats) { height: 34px; background: transparent; box-shadow: none; color: var(--cream); padding: 0 8px; }
+html body.ui2.era-art :is(.tb-round small, .tb-load small, .tb-money small, .tb-mode small) { color: var(--cream-2); font: 600 11px var(--os-font); letter-spacing: .06em; }
+html body.ui2.era-art :is(.tb-round b, .tb-load b, .tb-mode b) { color: var(--cream); font-family: var(--os-font); }
+html body.ui2.era-art .tb-round span { color: var(--cream-2); }
+html body.ui2.era-art .tb-ladder i { border-radius: 99px; width: 12px; height: 6px; background: #ffffff1f; box-shadow: none; }
+html body.ui2.era-art .tb-ladder i.win { background: #4ade80; box-shadow: 0 0 8px #4ade8099; }
+html body.ui2.era-art .tb-ladder i.lose { background: #ff5a5a; }
+html body.ui2.era-art .tb-ladder i.now { background: var(--os-accent); box-shadow: 0 0 10px #ff4f1fcc; }
+html body.ui2.era-art .tb-lives { color: #ff5a7a; text-shadow: 0 0 10px #ff5a7a88; }
+html body.ui2.era-art .tb-lives span { color: #ffffff33; text-shadow: none; }
+html body.ui2.era-art .tb-money {
+  border-radius: 12px; padding: 2px 12px; background: #000a; box-shadow: inset 0 0 0 1px #ffffff1f;
+  font: 700 17px "Cascadia Code", "Consolas", monospace; color: var(--cream);
+}
+html body.ui2.era-art .tb-money b { color: #ff7a4f; text-shadow: 0 0 12px #ff4f1f88; }
+html body.ui2.era-art .load-bar { height: 8px; padding: 0; border-radius: 99px; background: #ffffff14; box-shadow: none; overflow: hidden; }
+html body.ui2.era-art .load-bar i { border-radius: 99px; background: linear-gradient(90deg, #3a36ff, #ff4f1f) !important; box-shadow: 0 0 12px #ff4f1f99; }
+html body.ui2.era-art .tb-load.over .load-bar i { background: linear-gradient(90deg, #ffb020, #ff4040) !important; }
+html body.ui2.era-art .load-bar em { background: repeating-linear-gradient(90deg, #ff4040 0 6px, transparent 6px 9px); }
+html body.ui2.era-art .tb-speed { color: #4ade80; }
+html body.ui2.era-art .tb-load.over :is(b, .tb-speed) { color: #ff6b6b; }
+html body.ui2.era-art .tb-primary {
+  height: 34px; border-radius: 12px; padding: 0 20px; color: #140a06; font: 800 14px var(--os-font); letter-spacing: .04em;
+  background: linear-gradient(135deg, #ff6a3d, #ff4f1f 55%, #e03a0e); box-shadow: 0 0 0 1px #ffb59e55, 0 8px 30px #ff4f1f66, inset 0 1px 0 #ffffff66;
+}
+html body.ui2.era-art .tb-primary:hover { background: linear-gradient(135deg, #ff7d55, #ff5a2c 55%, #ee4515); box-shadow: 0 0 0 1px #ffd2c2, 0 10px 44px #ff4f1fa0, inset 0 1px 0 #ffffff88; }
+html body.ui2.era-art .tb-primary.is-ready { animation: artBreathe 1.8s ease-in-out infinite; }
+@keyframes artBreathe { 50% { box-shadow: 0 0 0 1px #ffd2c2, 0 10px 60px #ff4f1fcc, inset 0 1px 0 #ffffff88; } }
+
+/* ---------- windows ---------- */
+html body.ui2.era-art :is(.left-panel, .right-panel) { background: var(--os-face); box-shadow: var(--window); padding: 6px; }
+html body.ui2.era-art :is(.left-panel, .right-panel) { margin: 8px; border-radius: var(--os-rw) !important; }
+html body.ui2.era-art :is(.panel-head, .side-sec h3, .cs-bar, .modal-head) { background: transparent; }
+html body.ui2.era-art .panel-head { padding: 8px 10px 10px; margin: 0 0 6px; border-bottom: 1px solid var(--glass-line); }
+html body.ui2.era-art .panel-head b { font: 800 15px var(--os-font); letter-spacing: .02em; color: var(--cream); }
+html body.ui2.era-art .panel-head small { color: var(--cream-2); font-size: 12px; }
+html body.ui2.era-art .panel-head small .unlock { color: #ffb36b; }
+html body.ui2.era-art .library-list, html body.ui2.era-art .inspector, html body.ui2.era-art :is(.shop-foot, .stash-panel) { background: transparent; }
+
+/* crawled sites: small glass browsers */
+html body.ui2.era-art .crawl-site { background: #ffffff08; box-shadow: 0 0 0 1px var(--glass-line); padding: 6px; }
+html body.ui2.era-art .cs-bar { height: 26px; padding: 0 6px; }
+html body.ui2.era-art .cs-name { color: var(--cream); font: 700 12px var(--os-font); }
+html body.ui2.era-art .cs-url { border-radius: 99px; background: #0008; box-shadow: inset 0 0 0 1px var(--glass-line); color: var(--cream-2); font: 11px "Cascadia Code", "Consolas", monospace; padding: 1px 10px; }
+html body.ui2.era-art .cs-body { background: transparent; box-shadow: none; padding: 4px 0 0; }
+
+/* shop cards: glass specimens */
+html body.ui2.era-art :is(.shop-card, .crawl-site .shop-card) {
+  border: 1px solid var(--glass-line); border-radius: 14px; background: #ffffff0a; color: var(--cream); padding: 10px 11px;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+html body.ui2.era-art .shop-card:hover { border-color: #ff4f1f99; background: #ffffff12; box-shadow: 0 0 0 1px #ff4f1f55, 0 12px 34px #ff4f1f22; }
+html body.ui2.era-art :is(.shop-card.pending, .shop-card.tut-target) { outline: 1.5px solid var(--os-accent); outline-offset: 2px; }
+html body.ui2.era-art .sc-top { color: var(--cream); }
+html body.ui2.era-art .sc-kind::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; margin-right: 6px; vertical-align: 1px; }
+html body.ui2.era-art .kind-attack { color: #ff6b5a; } html body.ui2.era-art .kind-shield { color: #7aa8ff; }
+html body.ui2.era-art .kind-heal { color: #4ade80; } html body.ui2.era-art .kind-income { color: #fbbf24; }
+html body.ui2.era-art :is(.kind-passive, .kind-reactive) { color: #b69cff; } html body.ui2.era-art .kind-echo { color: #e39cff; }
+html body.ui2.era-art .sc-weight { color: var(--cream-2); }
+html body.ui2.era-art .sc-price { color: var(--cream); font: 700 16px "Cascadia Code", "Consolas", monospace; }
+html body.ui2.era-art .shop-card.poor .sc-price { color: #ff6b6b; }
+html body.ui2.era-art .sc-visual { background: #f7f6f2; border-radius: 10px; box-shadow: 0 0 0 1px #ffffff26, 0 6px 18px #0006; color: #1b1c21; }
+html body.ui2.era-art .sc-name { font: 800 15px var(--os-font); color: var(--cream); }
+html body.ui2.era-art .sc-desc { color: var(--cream-2); }
+html body.ui2.era-art .sc-match { border: 1px solid #ff4f1f66; background: #ff4f1f1a; color: #ffc2ad; border-radius: 99px; padding: 1px 9px; }
+html body.ui2.era-art .sc-match::before { content: "✦ "; color: #ff7a4f; }
+html body.ui2.era-art :is(.sc-buy, .plan-card .sc-buy) { border-radius: 99px; background: #ffffff14; color: var(--cream); box-shadow: var(--raised); padding: 5px 14px; }
+html body.ui2.era-art .sc-buy:hover { background: var(--os-accent); color: #140a06; box-shadow: 0 0 20px #ff4f1f88; }
+html body.ui2.era-art .shop-card.sold { background: repeating-linear-gradient(45deg, #ffffff06 0 6px, transparent 6px 12px); color: #ffffff55; }
+html body.ui2.era-art .plan-card { border-radius: 14px; background: #0009; border: 1px solid #4ade8055; color: #4ade80; box-shadow: 0 0 24px #4ade8018 inset; }
+html body.ui2.era-art :is(.pc-main b, .pc-cap, .pc-cap small, .cs-note) { color: #4ade80; font-family: "Cascadia Code", "Consolas", monospace; }
+
+/* buttons */
+html body.ui2.era-art :is(.reroll, .side-btn, .sel-actions button, .skin-chip, .modal-footer button, .result-actions button, .menu-grid button, .bb-buttons button, .canvas-float button, .view-back, .coach-next) {
+  border-radius: 12px !important; background: #ffffff12 !important; color: var(--cream) !important; box-shadow: var(--raised) !important;
+  font-family: var(--os-font); transition: background .2s, box-shadow .2s;
+}
+html body.ui2.era-art :is(.reroll, .side-btn, .sel-actions button, .modal-footer button, .result-actions button, .menu-grid button, .bb-buttons button, .canvas-float button, .view-back):hover { background: #ffffff20 !important; }
+html body.ui2.era-art :is(.modal-footer button.primary, .result-actions button.primary, .coach-next) {
+  outline: 0; background: linear-gradient(135deg, #ff6a3d, #ff4f1f 55%, #e03a0e) !important; color: #140a06 !important; box-shadow: 0 8px 28px #ff4f1f66, inset 0 1px 0 #ffffff66 !important;
+}
+html body.ui2.era-art .sel-actions .sell { color: #ff8a8a !important; }
+html body.ui2.era-art .bb-buttons button.active { box-shadow: var(--pressed) !important; }
+html body.ui2.era-art .stash-head { color: var(--cream); }
+html body.ui2.era-art .stash-head span { background: #ffffff14; box-shadow: none; border-radius: 99px; }
+html body.ui2.era-art #stash-list { background: #0005; box-shadow: inset 0 0 0 1px var(--glass-line); border-radius: 12px; }
+html body.ui2.era-art .stash-item { border: 1px solid var(--glass-line); background: #ffffff0d; color: var(--cream); border-radius: 10px; }
+
+/* right panel: glass sections */
+html body.ui2.era-art .side-sec { background: #ffffff08; box-shadow: 0 0 0 1px var(--glass-line); padding: 6px 12px 12px; margin: 0 2px 8px; }
+html body.ui2.era-art .side-sec h3 { margin: 0 -6px 8px; padding: 6px 6px 8px; font: 800 14px var(--os-font); color: var(--cream); border-bottom: 1px solid var(--glass-line); }
+html body.ui2.era-art .side-sec h3 small { color: var(--cream-2); }
+html body.ui2.era-art .side-sec h4 { color: var(--cream-2); border-bottom: 1px solid var(--glass-line); box-shadow: none; letter-spacing: .06em; }
+html body.ui2.era-art :is(.sel-kicker, .sel-card h2, .opp-tip, .sel-connect b) { color: var(--cream); }
+html body.ui2.era-art :is(.sel-desc, .sel-stats div, .traits, .link-row, .opp-meta span, .res-money, .res-mvp > div, .rc-vis, .howto > div, .admin-widget) {
+  background: #0006; box-shadow: inset 0 0 0 1px var(--glass-line); border-radius: 12px; color: var(--cream);
+}
+html body.ui2.era-art .sel-stats small, html body.ui2.era-art .trait > small, html body.ui2.era-art .muted { color: var(--cream-2); }
+html body.ui2.era-art :is(.sel-connect, .hint, .reward-card em, .cer-foe-tip) { background: #ff4f1f14; border: 1px solid #ff4f1f55; color: #ffd9cc; border-radius: 12px; }
+html body.ui2.era-art .sel-bonus li, html body.ui2.era-art .link-row small { color: #4ade80; }
+html body.ui2.era-art .link-row b { color: #ff9a73; }
+html body.ui2.era-art .trait { border-bottom: 1px solid var(--glass-line); }
+html body.ui2.era-art .trait.on { background: #4ade8012; box-shadow: inset 3px 0 0 #4ade80; }
+html body.ui2.era-art .trait.on > small { color: #4ade80; }
+html body.ui2.era-art .pips em { border-radius: 99px; background: #ffffff14; box-shadow: none; }
+html body.ui2.era-art .pips em.f { box-shadow: 0 0 8px var(--c); }
+
+/* ---------- the page window (chrome is glass; the site stays a real page) ---------- */
+html body.ui2.era-art .browser-paper { background: #15141fd9 !important; box-shadow: var(--window), 0 40px 100px #000c !important; padding: 6px; }
+html body.ui2.era-art .browser-tabs { background: transparent; height: 30px; }
+html body.ui2.era-art .browser-tab { color: var(--cream); font: 700 12px var(--os-font); background: #ffffff10; border-radius: 10px 10px 0 0; padding: 0 12px; }
+html body.ui2.era-art .address-bar { background: transparent; }
+html body.ui2.era-art .address-field { border-radius: 99px; background: #0008; box-shadow: inset 0 0 0 1px var(--glass-line); color: var(--cream-2); font-family: "Cascadia Code", "Consolas", monospace; }
+html body.ui2.era-art .address-controls { color: var(--cream-2); }
+html body.ui2.era-art .frame-caption .frame-name b { color: var(--cream); text-shadow: 0 2px 20px #000; font-family: var(--os-font); }
+html body.ui2.era-art :is(.frame-caption .frame-name small) { color: var(--cream-2); }
+html body.ui2.era-art .health-meta .hp-num { color: var(--cream) !important; text-shadow: none; font-family: "Cascadia Code", monospace; }
+html body.ui2.era-art .health-track { background: #ffffff14 !important; box-shadow: none; height: 8px !important; border-radius: 99px !important; }
+html body.ui2.era-art .health-track > i { background: linear-gradient(90deg, #22c55e, #4ade80) !important; box-shadow: 0 0 12px #4ade80aa; top: 0; bottom: 0; left: 0; border-radius: 99px !important; }
+html body.ui2.era-art .frame-caption.enemy .health-track > i { background: linear-gradient(90deg, #ff4f1f, #ff5a7a) !important; box-shadow: 0 0 12px #ff4f1faa; }
+html body.ui2.era-art .canvas-float { background: #15141fcc; box-shadow: var(--window); border-radius: 14px; }
+
+/* ---------- battle ---------- */
+html body.ui2.era-art .battle-bar { background: #15141fcc; color: var(--cream); border-radius: 16px; }
+html body.ui2.era-art #battle-clock { color: #ff9a73; background: #0008; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--glass-line); font-family: "Cascadia Code", monospace; }
+html body.ui2.era-art .battle-bar .tug span { color: var(--cream); }
+html body.ui2.era-art .battle-bar .tug-track { border-radius: 99px; background: linear-gradient(90deg, #ff4f1f, #ff5a7a); box-shadow: 0 0 16px #ff4f1f55; }
+html body.ui2.era-art .tug-track i { background: linear-gradient(90deg, #22c55e, #4ade80); box-shadow: 0 0 16px #4ade8088; }
+html body.ui2.era-art .battle-log { background: #000a !important; border-radius: 14px; }
+html body.ui2.era-art .log-col { color: var(--cream-2); font-family: "Cascadia Code", "Consolas", monospace; }
+html body.ui2.era-art .traffic-hub .hub-label { color: var(--cream); text-shadow: 0 2px 16px #000; }
+
+/* ---------- dialogs ---------- */
+html body.ui2.era-art #modal { background: #15141fe0; color: var(--cream); box-shadow: var(--window), 0 40px 120px #000; padding: 6px; }
+html body.ui2.era-art #modal::backdrop { background: #05050a99; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+html body.ui2.era-art #modal[open] { animation: artOpen .38s cubic-bezier(.2,.9,.25,1.15); }
+@keyframes artOpen { from { transform: translateY(16px) scale(.96); opacity: 0; filter: blur(6px); } }
+html body.ui2.era-art .modal-head { padding: 10px 10px 12px 14px; border-bottom: 1px solid var(--glass-line); }
+html body.ui2.era-art :is(.modal-inner h2, .result h2) { font: 800 17px var(--os-font) !important; color: var(--cream) !important; }
+html body.ui2.era-art .modal-head button { border-radius: 50%; width: 26px; height: 26px; background: #ffffff14; color: var(--cream); box-shadow: none; }
+html body.ui2.era-art :is(.modal-inner, .modal-inner p, .result) { color: var(--cream); }
+html body.ui2.era-art .res-money .sum b { color: var(--cream); font-family: "Cascadia Code", monospace; }
+html body.ui2.era-art .res-bar { border-radius: 99px; background: linear-gradient(90deg, #ff4f1f, #ff5a7a); box-shadow: none; }
+html body.ui2.era-art .res-bar i { background: linear-gradient(90deg, #22c55e, #4ade80); }
+html body.ui2.era-art .res-share b { color: #4ade80; } html body.ui2.era-art .res-share .foe b { color: #ff6b5a; }
+html body.ui2.era-art .reward-card { background: #ffffff0a; box-shadow: 0 0 0 1px var(--glass-line); color: var(--cream); border-radius: 16px; }
+html body.ui2.era-art .reward-card:hover { box-shadow: 0 0 0 1px #ff4f1f99, 0 16px 40px #ff4f1f33; }
+html body.ui2.era-art .howto > div > b, html body.ui2.era-art .res-mvp em { background: var(--os-accent); color: #140a06; border-radius: 99px; }
+html body.ui2.era-art :is(.text-input, .select-input) { background: #0008; color: var(--cream); box-shadow: inset 0 0 0 1px var(--glass-line); border-radius: 10px; }
+
+/* ---------- the assistant: a glowing orb instead of a 90s face ---------- */
+html body.ui2.era-art .coach { background: #15141fe6; color: var(--cream); border: 0; border-radius: 18px; box-shadow: var(--window), 0 0 0 1px #ff4f1f44; padding: 12px 14px 12px 62px; }
+html body.ui2.era-art .coach::before {
+  width: 34px; height: 34px; border-radius: 50%; box-shadow: 0 0 22px #ff4f1fcc, 0 0 50px #3a36ff66;
+  background: radial-gradient(circle at 35% 30%, #fff 0 8%, #ffb36b 20%, #ff4f1f 45%, #3a36ff 100%);
+  animation: artOrb 2.4s ease-in-out infinite;
+}
+@keyframes artOrb { 50% { transform: translateY(-50%) scale(1.08); box-shadow: 0 0 30px #ff4f1f, 0 0 70px #3a36ff88; } }
+html body.ui2.era-art .coach::after { background: #15141fe6; border: 0; }
+html body.ui2.era-art .coach b { color: #ff9a73; }
+html body.ui2.era-art .coach-step { background: #ffffff14; color: var(--cream); border-radius: 99px; }
+html body.ui2.era-art .coach-skip { color: var(--cream-2) !important; }
+html body.ui2.era-art .tut-drop { border: 1.5px dashed #ff4f1fcc; background: #ff4f1f10; border-radius: 16px; }
+html body.ui2.era-art .tut-drop span { background: var(--os-accent); color: #140a06; border-radius: 99px; }
+html body.ui2.era-art .tut-target { outline: 1.5px solid var(--os-accent) !important; outline-offset: 3px; }
+
+/* ---------- notifications ---------- */
+html body.ui2.era-art .toast { background: #15141fe6; color: var(--cream); border: 0; border-radius: 14px; box-shadow: var(--window); bottom: 64px; }
+html body.ui2.era-art .cer-banner { background: #15141fe6 !important; color: var(--cream) !important; border-radius: 16px !important; box-shadow: var(--window), 0 0 0 1px #ff4f1f44 !important; }
+html body.ui2.era-art .slow-banner { background: #ff4f1f22; color: var(--cream); border-top: 1px solid #ff4f1f88 !important; }
+
+/* ---------- admin dock ---------- */
+html body.ui2.era-art .admin-dock { background: #0b0a12cc; color: var(--cream); box-shadow: 0 -1px 0 var(--glass-line); }
+html body.ui2.era-art :is(.ad-head b, .ad-head small, .aw-top b) { color: var(--cream); }
+html body.ui2.era-art .ad-head { border-bottom: 1px solid var(--glass-line); }
+html body.ui2.era-art .aw-top em { color: var(--cream-2); border-color: var(--glass-line); border-radius: 99px; }
+html body.ui2.era-art .aw-metric { color: #4ade80; }
+html body.ui2.era-art .admin-empty { border-color: var(--glass-line); color: var(--cream-2); border-radius: 12px; }
+
+/* ---------- ceremonies ---------- */
+html body.ui2.era-art .cer-overlay { background: var(--os-wall); color: var(--cream); }
+html body.ui2.era-art .cer-chrome { background: transparent; color: var(--cream); border-bottom: 1px solid var(--glass-line); padding: 8px 12px; }
+html body.ui2.era-art :is(.cer-map-window, .cer-result-window) { background: #15141fd9; color: var(--cream); box-shadow: var(--window), 0 40px 120px #000; }
+html body.ui2.era-art .cer-versus::before { background: radial-gradient(70% 80% at 20% 50%, #22c55e33, transparent), #07070b; }
+html body.ui2.era-art .cer-versus::after { background: radial-gradient(70% 80% at 80% 50%, #ff4f1f38, transparent), #07070b; }
+html body.ui2.era-art .cer-site { background: #15141fd9; color: var(--cream); box-shadow: var(--window); }
+html body.ui2.era-art .cer-side-label { background: linear-gradient(90deg, #22c55e, #4ade80); color: #04160b !important; border-radius: 10px; margin: 6px 0 10px; }
+html body.ui2.era-art .cer-site-foe .cer-side-label { background: linear-gradient(90deg, #ff4f1f, #ff5a7a); color: #1a0703 !important; }
+html body.ui2.era-art :is(.cer-site-name, .cer-deploy-text) { color: var(--cream); }
+html body.ui2.era-art .cer-faction, html body.ui2.era-art .cer-stat-label { color: var(--cream-2); }
+html body.ui2.era-art .cer-stat { background: #0006; color: var(--cream); box-shadow: inset 0 0 0 1px var(--glass-line); border-radius: 10px; }
+html body.ui2.era-art .cer-tags { color: #ff9a73; }
+html body.ui2.era-art .cer-upload-track { background: #ffffff14; box-shadow: none; border-radius: 99px; }
+html body.ui2.era-art .cer-upload-fill { background: linear-gradient(90deg, #3a36ff, #ff4f1f); box-shadow: 0 0 14px #ff4f1f99; border-radius: 99px; }
+html body.ui2.era-art .cer-round-label { background: #15141fcc; color: var(--cream); box-shadow: var(--window); border-radius: 99px; }
+html body.ui2.era-art .cer-fight { background: linear-gradient(135deg, #ff6a3d, #ff4f1f 55%, #e03a0e); color: #140a06; box-shadow: 0 0 60px #ff4f1fcc; border-radius: 18px; }
+html body.ui2.era-art .cer-era-note { color: var(--cream-2); }
+
+/* spotlight on dark glass: warm light instead of a multiply tint */
+html body.ui2.era-art :is(.shop-card, .crawl-site, .side-sec)::after { background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), #ff7a4f2e, transparent 65%); mix-blend-mode: screen; }
+
+/* library tools + native scrollbars (Chrome honours scrollbar-color over ::-webkit-scrollbar) */
+html body.ui2.era-art * { scrollbar-color: #ffffff2e transparent; scrollbar-width: thin; }
+html body.ui2.era-art .library-search { background: #0008; border: 0; border-radius: 99px; box-shadow: inset 0 0 0 1px var(--glass-line); color: var(--cream-2); }
+html body.ui2.era-art .library-search input { background: transparent; color: var(--cream); border: 0; }
+html body.ui2.era-art .library-search input::placeholder { color: #f2ece066; }
+html body.ui2.era-art #family-filter, html body.ui2.era-art .lib-tools select { background: #0008; color: var(--cream); border: 0; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--glass-line); color-scheme: dark; }
+html body.ui2.era-art .family-label, html body.ui2.era-art .library-list > h4, html body.ui2.era-art .lib-group { color: var(--cream-2); }

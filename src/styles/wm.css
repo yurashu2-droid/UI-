@@ -1,0 +1,93 @@
+/* ===== RAID OS window manager (src/wm.ts) ===== */
+/* The workspace becomes a desktop: the page fills it, panels float above as windows. */
+html body.ui2.wm-on .workspace { display: block !important; position: relative; }
+html body.ui2.wm-on .center-panel { position: absolute; inset: 0; }
+html body.ui2.wm-on .wm-win {
+  position: absolute !important; display: flex !important; flex-direction: column; overflow: hidden; margin: 0 !important;
+  border-radius: var(--os-rw) !important; background: var(--os-face); box-shadow: var(--window), 0 10px 30px #0006; padding: 3px; box-sizing: border-box;
+}
+html body.ui2.wm-on .wm-win.wm-hidden { display: none !important; }
+html body.ui2.wm-on .wm-win[hidden] { display: none !important; }
+html body.ui2.wm-on.battle-mode .wm-win:not([data-win="page"]) { display: none !important; }
+html body.ui2.wm-on.battle-mode .wm-win[data-win="page"] {
+  display: contents !important;
+}
+html body.ui2.wm-on.battle-mode .wm-win[data-win="page"] > .wm-grip,
+html body.ui2.wm-on.battle-mode .wm-win[data-win="page"] > .wm-bar { display: none; }
+html body.ui2.wm-on .wm-win:not(.wm-front) { filter: saturate(.92); }
+html body.ui2.wm-on .wm-win:not(.wm-front) .wm-bar { background: var(--os-title-off); }
+html body.ui2.wm-on:not(.battle-mode) #page-window { overflow: visible; }
+/* The caption follows the browser outside its bounds; it never adds empty
+   space to the window's move/resize rectangle. */
+html body.ui2.wm-on:not(.battle-mode) #page-window > #player-frame { flex: 1; min-height: 0; position: static; }
+html body.ui2.wm-on:not(.battle-mode) #page-window .frame-caption {
+  position: absolute; bottom: 100%; left: 0; width: 100%; height: 32px;
+  pointer-events: none;
+}
+html body.ui2.wm-on:not(.battle-mode) #page-window .frame-viewport {
+  overflow: auto; background: var(--os-face); border-radius: 0 0 var(--os-rw) var(--os-rw);
+  box-shadow: none; scrollbar-width: thin;
+}
+html body.ui2.wm-on:not(.battle-mode) #page-window .browser-paper {
+  border-radius: 0 !important; box-shadow: none !important; padding: 0;
+}
+html body.ui2.wm-on:not(.battle-mode) #page-window .browser-tabs { display: none; }
+html body.ui2.wm-on .wm-native .browser-tabs { cursor: grab; touch-action: none; }
+html body.ui2.wm-on.wm-moving .wm-native .browser-tabs { cursor: grabbing; }
+
+/* title bar */
+.wm-bar {
+  flex: none; display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 3px 0 6px; margin: 0 0 3px;
+  background: var(--os-title); color: var(--os-title-ink); cursor: grab; user-select: none; touch-action: none;
+  border-radius: var(--os-rw) var(--os-rw) 0 0; font: 700 12.5px var(--os-font);
+}
+.wm-moving .wm-bar { cursor: grabbing; }
+.wm-icon { flex: none; width: 16px; text-align: center; opacity: .9; }
+.wm-title { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: inherit; }
+.wm-min {
+  flex: none; width: 20px; height: 18px; padding: 0; border: 0; border-radius: var(--os-rs); cursor: pointer; line-height: 12px;
+  background: var(--os-btn); color: #000; box-shadow: var(--raised); font: 700 12px Arial, sans-serif;
+}
+.wm-min:active { box-shadow: var(--pressed); }
+
+/* resize grips */
+.wm-grip { position: absolute; z-index: 20; touch-action: none; }
+.wm-e { right: -3px; top: 24px; bottom: 10px; width: 8px; cursor: ew-resize; }
+.wm-w { left: -3px; top: 24px; bottom: 10px; width: 8px; cursor: ew-resize; }
+.wm-s { left: 10px; right: 10px; bottom: -3px; height: 8px; cursor: ns-resize; }
+.wm-se { right: -3px; bottom: -3px; width: 16px; height: 16px; cursor: nwse-resize; }
+.wm-sw { left: -3px; bottom: -3px; width: 16px; height: 16px; cursor: nesw-resize; }
+.wm-se::after { /* the classic diagonal grip */
+  content: ""; position: absolute; right: 5px; bottom: 5px; width: 10px; height: 10px; opacity: .55;
+  background: linear-gradient(135deg, transparent 0 45%, currentColor 45% 52%, transparent 52% 64%, currentColor 64% 71%, transparent 71% 83%, currentColor 83% 90%, transparent 90%);
+}
+.wm-moving, .wm-resizing { user-select: none; }
+.wm-moving iframe, .wm-resizing iframe { pointer-events: none; }
+
+/* panels inside windows: their old headers become plain sub-headers */
+html body.ui2.wm-on .wm-win .panel-head { background: none !important; color: inherit; padding: 4px 6px 6px; min-height: 0; }
+html body.ui2.wm-on .wm-win .panel-head b { color: inherit; }
+html body.ui2.wm-on .wm-win .panel-head small { color: inherit; opacity: .8; }
+html body.ui2.wm-on .wm-win .panel-head small .unlock { color: var(--os-accent); }
+html body.ui2.wm-on .left-panel .panel-head b { display: none; } /* the window title already says it */
+html body.ui2.wm-on #right-panel > .inspector { flex: 1; min-height: 0; overflow: auto; }
+html body.ui2.wm-on .clip-window .stash-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border: 0; }
+html body.ui2.wm-on .clip-window #stash-list { flex: 1; overflow: auto; }
+
+/* taskbar buttons */
+.tb-apps { display: flex; gap: 4px; align-items: center; order: 0; margin-right: 6px; }
+.tb-app {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; max-width: 150px; padding: 0 10px; border: 0; cursor: pointer;
+  border-radius: var(--os-rs); background: var(--os-btn); color: #000; box-shadow: var(--raised); font: 700 12px var(--os-font);
+}
+.tb-app b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 700; }
+.tb-app:not(.is-open) { opacity: .7; }
+.tb-app.is-front { box-shadow: var(--pressed); background: color-mix(in srgb, var(--os-face) 70%, #fff); }
+html body.ui2.era-art .tb-app { background: #ffffff12; color: var(--cream); box-shadow: var(--raised); border-radius: 12px; height: 34px; }
+html body.ui2.era-art .tb-app.is-front { background: #ffffff26; box-shadow: inset 0 -2px 0 var(--os-accent), var(--raised); }
+html body.ui2.era-art .wm-min { background: #ffffff1a; color: var(--cream); box-shadow: none; border-radius: 50%; }
+html body.ui2.era-art .wm-bar { border-bottom: 1px solid var(--glass-line); }
+@media (max-width: 1100px) { .tb-app b { display: none; } }
+
+/* the rift shrinks to just the keeper while the shop is being rebuilt */
+html body.ui2 .left-panel.hx-on:not(.hx-basket-on) .hx-rift { height: 176px; }

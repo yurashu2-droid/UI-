@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#202126">
+<title>UI RAID — Web Composer</title>
+
+</head>
+<body class="ui2">
+<header class="topbar">
+ <div class="tb-brand"><span class="brand-glyph"><i></i><i></i><i></i><i></i></span><b>UI RAID</b></div>
+ <div class="tb-run" id="tb-run"></div>
+ <div class="tb-stats" id="tb-stats"></div>
+ <div class="tb-actions"><button id="menu-button" class="tb-ghost">☰ メニュー</button><button id="battle-button" class="tb-primary">▶ 公開して対戦</button></div>
+</header>
+<div class="workspace" id="workspace">
+ <aside class="left-panel">
+  <div class="panel-head"><div><b id="shop-title">UIショップ</b><small id="shop-sub"></small></div></div>
+  <div id="library-toolbar" class="lib-tools" hidden><label class="library-search"><span>⌕</span><input id="library-query" type="search" placeholder="UIを探す" aria-label="UI検索"></label><select id="family-filter" aria-label="サイト系統"><option value="all">すべてのサイト</option><option value="youtube">YouTube</option><option value="amazon">Amazon</option><option value="google">Google</option><option value="retro">古い個人サイト</option><option value="gov">行政サイト</option></select></div>
+  <div id="library-list" class="library-list"></div>
+  <div class="shop-foot" id="shop-foot"><button id="reroll-button" class="reroll">↻ 品ぞろえを更新 <b>$1</b></button></div>
+  <section class="stash-panel"><div class="stash-head">手持ち <small>（ページに置いていないUI）</small><span id="stash-count">0</span></div><div id="stash-list"></div></section>
+ </aside>
+ <main class="center-panel">
+  <div id="battle-controls" class="battle-bar" hidden><b id="battle-clock">0.0s</b><div class="tug" aria-label="閲覧者の取り合い"><span>あなた <b id="tug-you">0</b></span><div class="tug-track"><i id="tug-bar" style="width:50%"></i></div><span><b id="tug-foe">0</b> 相手</span></div><div class="bb-buttons"><button id="pause-button">一時停止</button><button data-speed="0.5">0.5×</button><button data-speed="1" class="active">1×</button><button data-speed="2">2×</button><button data-speed="4">4×</button><button id="abort-button">やめる</button></div></div>
+  <div id="canvas-scroll" class="canvas-scroll"><div id="scene" class="scene"><section id="player-frame" class="site-frame"></section><section id="traffic-hub" class="traffic-hub" hidden></section><section id="enemy-frame" class="site-frame" hidden></section></div></div>
+  <div class="canvas-float" id="canvas-float"><button id="undo-button" title="元に戻す (Ctrl+Z)">↶</button><button id="redo-button" title="やり直す (Ctrl+Shift+Z)">↷</button><i></i><button id="zoom-out" aria-label="縮小">−</button><button id="zoom-value" title="画面に合わせる">FIT</button><button id="zoom-in" aria-label="拡大">＋</button></div>
+  <button id="back-to-page" class="view-back" hidden>← 自分のサイトに戻る</button>
+  <div id="coach" class="coach" hidden></div>
+  <div id="battle-log" class="battle-log" hidden><div class="log-col" data-log="player"></div><div class="log-col" data-log="enemy"></div></div>
+ </main>
+ <aside class="right-panel" id="right-panel"><div id="inspector" class="inspector"></div></aside>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<canvas id="traffic-layer" class="traffic-layer" aria-hidden="true"></canvas><div id="effect-layer" class="effect-layer" aria-hidden="true"></div>
+<dialog id="modal"><div id="modal-content"></div></dialog>
+<input id="import-file" type="file" accept="application/json,.json" hidden>
+<script type="module" src="/src/main.ts"></script>
+</body></html>

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.verification/
+*.log
+_backup/
+.claude/
+.env
+.env.*
+!.env.example
