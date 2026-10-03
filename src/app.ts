@@ -29,6 +29,7 @@ import { prepareRaidChallenge } from "./raid-challenge.js";
 import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
 import { previewCatalogueAction } from "./catalog/preview.js";
 import { VIDEO_SPEED_HELP, INSTANT_SEARCH_HELP, instantSearchSupport, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
+import { navigationGuidance, renderNavigationGuidance } from "./navigation-guidance.js";
 import { createDeferredMount } from "./feature-loader.js";
 import { createRaidEnemy } from "./raid/blueprint.js";
 import { registerRaidBlueprint } from "./raid/registry.js";
@@ -325,8 +326,8 @@ const NEEDS: Record<string, { t: (item: Item) => boolean; x: string }> = {
     x: "Google以外の文字攻撃UIの隣で威力 +25%",
   },
   am_quantity: {
-    t: (q) => ["am_buy", "am_product"].includes(q.type),
-    x: "購入ボタンの横にくっつけると威力 +20%",
+    t: (q) => ["am_buy", "am_product", "am_oneclick"].includes(q.type),
+    x: "購入ボタン・商品情報・ワンクリック購入の横にくっつけると威力 +20%",
   },
   am_rating: {
     t: (q) => P[q.type].kind === "attack" && has(q, "commerce"),
@@ -370,12 +371,12 @@ const NEEDS: Record<string, { t: (item: Item) => boolean; x: string }> = {
     x: "広告・カウンター・クーポンなど収益UIの隣で、お金が弾になる",
   },
   am_deal: {
-    t: (q) => ["am_buy", "am_product"].includes(q.type),
-    x: "購入ボタン・商品情報の隣で収益",
+    t: (q) => ["am_buy", "am_product", "am_oneclick"].includes(q.type),
+    x: "購入ボタン・商品情報・ワンクリック購入の隣で収益",
   },
   am_coupon: {
-    t: (q) => ["am_buy", "am_product"].includes(q.type),
-    x: "購入ボタン・商品情報の隣で収益",
+    t: (q) => ["am_buy", "am_product", "am_oneclick"].includes(q.type),
+    x: "購入ボタン・商品情報・ワンクリック購入の隣で収益",
   },
   go_page: {
     t: (q) => P[q.type].kind === "attack" && has(q, "text"),
@@ -1171,6 +1172,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
  }
  ${ok ? "" : `<p class="sel-warn">⚠ 今は働いていません</p>`}<div class="sel-connect"><b>つなぎ方</b>${esc(connectText(p.type))}</div>
  ${instantSupport ? `<div class="sel-connect"><b>接続している文字攻撃</b>${!instantSupport.placed ? "未配置：ページに置くと、自分の攻撃と近くの文字攻撃を支援します。" : instantSupport.targets.length ? `<ul class="sel-bonus">${instantSupport.targets.map(target => `<li>${esc(target.label || P[target.type].name)}</li>`).join("")}</ul>` : "ほかの文字攻撃には未接続。自分の内蔵サジェストは有効です。"}</div>` : ""}
+ ${d.kind === "attack" && d.tags.includes("navigation") ? `<details class="sel-more"><summary>このUIの余白加算</summary>${renderNavigationGuidance(navigationGuidance(info, p))}</details>` : ""}
  <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>
  ${p.appearanceId ? '<p class="muted">取得元の外観を使用中。合成後は標準表示になりますが、元の外観と由来はコレクションに残ります。</p>' : ""}
  <details class="sel-more"><summary>見た目（時代）・表示テキストを変える</summary>${skinPicker(p)}<label class="field-label">表示テキスト<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="元のテキストを使用"></label></details>
@@ -1220,7 +1222,9 @@ function synergyPanel(info: EngineInfo) {
     .slice(0, 4)
     .map((h) => `<div class="hint">${esc(h)}</div>`)
     .join("");
-  return `<section class="side-sec synergy"><h3>シナジー<small>効いている効果</small></h3><div class="traits">${traits}</div><h4>連結・内包</h4>${links || '<p class="muted">まだありません。UI同士をくっつけてみよう。</p>'}${tips ? `<h4>強くするヒント</h4>${tips}` : ""}</section>`;
+  const navigation = info.board.some(p => P[p.type].kind === "attack" && P[p.type].tags.includes("navigation"))
+    ? renderNavigationGuidance(navigationGuidance(info)) : "";
+  return `<section class="side-sec synergy"><h3>シナジー<small>効いている効果</small></h3><div class="traits">${traits}</div><h4>連結・内包</h4>${links || '<p class="muted">まだありません。UI同士をくっつけてみよう。</p>'}${navigation}${tips ? `<h4>強くするヒント</h4>${tips}` : ""}</section>`;
 }
 function opponentCard() {
   const o = appOpponent(),
@@ -1230,7 +1234,8 @@ function opponentCard() {
 function renderSide() {
   const host = $("#inspector"),
     sel = editor.selected(),
-    info = E.analyze(run.owned, labPressureCapacity() ? "server-pressure-v1" : null);
+    // Battle construction keeps analyze()'s full result; BattleSide exposes its base type.
+    info = (battle?.player.info as EngineInfo | undefined) ?? E.analyze(run.owned, labPressureCapacity() ? "server-pressure-v1" : null);
   $<HTMLButtonElement>("#undo-button").disabled =
     !editor.history.length || !!battle;
   $<HTMLButtonElement>("#redo-button").disabled =

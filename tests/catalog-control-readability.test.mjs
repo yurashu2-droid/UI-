@@ -91,7 +91,7 @@ test('native resource upgrade preserves escaped editable labels, catalogue count
   const part=C.makeItem(type,type);part.label='<script>bad()</script>';const markup=V.markup(part);
   assert.match(markup,/&lt;script&gt;/);assert.doesNotMatch(markup,/<script>|\bonclick=|\bsrc=/);assert.equal(D.PARTS[type].status,'experimental');
  }
- const{SITE_TEMPLATES}=await import('../src/catalog/index.js');assert.equal(SITE_TEMPLATES.length,22);
+ const{SITE_TEMPLATES}=await import('../src/catalog/index.js');assert.equal(SITE_TEMPLATES.length,23);assert.equal(SITE_TEMPLATES[22].id,"site_gmail");
  const css=readFileSync(new URL('../src/styles/catalog.css',import.meta.url),'utf8');
  assert.match(css,/\.cache-meta\s*\{[^}]*display:\s*flex/s);assert.match(css,/\.cache-target\s*\{[^}]*min-width:\s*0/s);
  assert.match(css,/\.support-feedback\s*\{[^}]*line-height:\s*12px/s);assert.match(css,/\.rate-budget-meter\s*\{[^}]*height:\s*6px/s);

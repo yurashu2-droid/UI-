@@ -8,6 +8,7 @@ import D from '../src/data.js';
 import E from '../src/engine.js';
 import R from '../src/run.js';
 import * as guidance from '../src/app-guidance.js';
+import * as navigation from '../src/navigation-guidance.js';
 const item=(type,id,x,y,w,h)=>C.makeItem(type,id,x,y,w,h);
 const board=()=>[item('go_instant','instant',32,32,420,44),item('ab_heading','heading',464,32,280,56),item('ab_link','link',464,104,192,32),item('ab_link','far',720,600,192,32)];
 
@@ -49,7 +50,7 @@ function renderSelection(p,info) {
   const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
   const context={p,info,P:D.PARTS,D,E,R,battle:null,run:R.newRun('campaign'),storyActive:false,
     labPressureCapacity:()=>null,working:()=>true,KIND:{attack:'攻撃'},GROUP_BONUS:{},
-    esc:escape,connectText:()=>guidance.INSTANT_SEARCH_HELP,skinPicker:()=>'',...guidance};
+    esc:escape,connectText:()=>guidance.INSTANT_SEARCH_HELP,skinPicker:()=>'',...guidance,...navigation};
   vm.runInNewContext(transformSync(functionSource,{loader:'ts',target:'es2022'}).code+'\nglobalThis.output=selectionCard([p],info);',context);
   return context.output;
 }

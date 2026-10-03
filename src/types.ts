@@ -2,7 +2,7 @@ export type Mode = "lab" | "campaign";
 export type Phase = "build" | "battle" | "reward" | "complete" | "gameover";
 export type SideName = "player" | "enemy";
 export type Winner = SideName | "draw";
-export type Theme = "mixed" | "youtube" | "amazon" | "google" | "retro" | "gov" | "twitter" | "x" | "wiki" | "forge" | "nico" | "reddit" | "portal" | "storefront" | "webarchive" | "livechannel" | "documents" | "audio" | "qanda" | "feedreader" | "marketplace" | "rankednews" | "mapsearch" | "personalweb" | "musicshop" | "serviceform" | "projectboard";
+export type Theme = "mixed" | "youtube" | "amazon" | "google" | "retro" | "gov" | "twitter" | "x" | "wiki" | "forge" | "nico" | "reddit" | "portal" | "storefront" | "webarchive" | "livechannel" | "documents" | "audio" | "qanda" | "feedreader" | "marketplace" | "rankednews" | "mapsearch" | "personalweb" | "musicshop" | "serviceform" | "projectboard" | "mailroom";
 export type Faction = Exclude<Theme, "mixed">;
 
 export interface Item {

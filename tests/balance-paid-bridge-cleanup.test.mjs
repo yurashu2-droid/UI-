@@ -16,8 +16,9 @@ test("bridge cleanup replays the paid snapshots and only moves non-target items 
   assert.deepEqual(r.seeds, [103, 113, 115, 126, 208]);
   assert.equal(r.rows.length, 12);
   assert.equal(r.rulesVersion, "combat-v4");
-  assert.equal(R.labEnemies().length, 36);
+  assert.equal(R.labEnemies().length, 37);
   assert.equal(R.labEnemies()[35].id, "site_trello");
+  assert.equal(R.labEnemies()[36].id, "site_gmail");
   for (const path of r.paths)
     assert.equal(
       path.cash,

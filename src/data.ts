@@ -81,6 +81,10 @@ const FACTIONS: Record<
     name: "Trello風", short: "BOARD", color: "#216d99", era: "PROJECT BOARD",
     set: "テンプレート専用：既存UIで構成・追加補正なし",
   },
+  mailroom: {
+    name: "Gmail風", short: "MAIL", color: "#6c7d94", era: "MAIL INBOX",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
   serviceform: {
     name: "GOV.UK風", short: "SERVICE", color: "#1d70b8", era: "PUBLIC SERVICE FORM",
     set: "テンプレート専用：既存UIで構成・追加補正なし",
