@@ -153,20 +153,36 @@ export function safeDeclarations(css: string): SafeStyle {
   }
   return out;
 }
-type Part = { tag?: string; id?: string; classes: string[] };
+type Part = {
+  tag?: string;
+  id?: string;
+  classes: string[];
+  child?: boolean;
+};
 type Rule = { parts: Part[]; style: SafeStyle; score: number; order: number };
 function selector(s: string): Part[] | null {
-  const tokens = s.trim().split(/\s+/);
-  if (tokens.length > CSS_LIMITS.selectorParts) return null;
+  const tokens = s.replace(/>/g, " > ").trim().split(/\s+/);
   const out: Part[] = [];
+  let child = false;
   for (const t of tokens) {
+    if (t === ">") {
+      if (!out.length || child) return null;
+      child = true;
+      continue;
+    }
+    if (out.length >= CSS_LIMITS.selectorParts) return null;
     if (
       !/^(?:[a-z][a-z0-9-]*)?(?:[.#][a-zA-Z][a-zA-Z0-9_-]{0,47})*$/.test(t) ||
       !t
     )
       return null;
     const head = t.match(/^[a-z][a-z0-9-]*/)?.[0];
-    const p: Part = { tag: head, classes: [] };
+    const p: Part = {
+      tag: head,
+      classes: [],
+      ...(child ? { child: true } : {}),
+    };
+    child = false;
     for (const m of t.matchAll(/([.#])([a-zA-Z][a-zA-Z0-9_-]{0,47})/g)) {
       if (m[1] === "#") {
         if (p.id) return null;
@@ -175,7 +191,7 @@ function selector(s: string): Part[] | null {
     }
     out.push(p);
   }
-  return out;
+  return child ? null : out;
 }
 /** Scan only top-level blocks, respecting strings/comments; all at-rules are skipped as a unit. */
 function blocks(
@@ -276,19 +292,50 @@ export function createSafeStyleReader(sheets: string[]) {
     (!p.id || attr(n, "id") === p.id) &&
     p.classes.every((c) => classList(n).includes(c));
   const match = (n: Node, r: Rule) => {
-    let current: Node | null = n;
-    for (let i = r.parts.length - 1; i >= 0; i--) {
-      if (!current) return false;
-      if (i === r.parts.length - 1) {
-        if (!matches(current, r.parts[i])) return false;
-      } else {
-        while (current && !matches(current, r.parts[i]))
-          current = "parentNode" in current ? current.parentNode : null;
+    // Pure descendants never need backtracking: preserve their linear walk.
+    if (!r.parts.some((part) => part.child)) {
+      let current: Node | null = n;
+      for (let i = r.parts.length - 1; i >= 0; i--) {
         if (!current) return false;
+        if (i === r.parts.length - 1) {
+          if (!matches(current, r.parts[i])) return false;
+        } else {
+          while (current && !matches(current, r.parts[i]))
+            current = "parentNode" in current ? current.parentNode : null;
+          if (!current) return false;
+        }
+        current = "parentNode" in current ? current.parentNode : null;
       }
-      current = "parentNode" in current ? current.parentNode : null;
+      return true;
     }
-    return true;
+    // A nearer descendant match may fail a preceding child relationship.
+    // Cache prefix results while trying other ancestors; recursive depth is
+    // at most selectorParts, independent of the source's ancestry depth.
+    const memo = new WeakMap<object, Map<number, boolean>>();
+    const prefix = (current: Node, i: number): boolean => {
+      const cached = memo.get(current)?.get(i);
+      if (cached !== undefined) return cached;
+      let matched = false;
+      if (matches(current, r.parts[i])) {
+        if (i === 0) matched = true;
+        else {
+          let parent = "parentNode" in current ? current.parentNode : null;
+          while (parent) {
+            if (prefix(parent, i - 1)) {
+              matched = true;
+              break;
+            }
+            if (r.parts[i].child) break;
+            parent = "parentNode" in parent ? parent.parentNode : null;
+          }
+        }
+      }
+      const states = memo.get(current) ?? new Map<number, boolean>();
+      states.set(i, matched);
+      memo.set(current, states);
+      return matched;
+    };
+    return prefix(n, r.parts.length - 1);
   };
   const cache = new WeakMap<object, SafeStyle>();
   const styleFor = (n: Node): SafeStyle => {

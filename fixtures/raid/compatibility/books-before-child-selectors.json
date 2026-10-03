@@ -1,0 +1,632 @@
+{
+  "schemaVersion": 1,
+  "extractorVersion": "code-v1",
+  "mapperVersion": "canonical-v1",
+  "viewport": {
+    "width": 960,
+    "height": 680
+  },
+  "source": {
+    "kind": "static-public",
+    "name": "All products | Books to Scrape - Sandbox",
+    "displayUrl": "https://books.toscrape.com/",
+    "capturedAt": "2026-10-03T03:20:00.000Z"
+  },
+  "fidelity": "code-approximation",
+  "analysis": {
+    "sourceHash": "9fdd63da34161ebd13408d7a85105f83ec3c9f351c5d77cd0aa578790e121c1e",
+    "layout": "inferred-flow",
+    "confidence": "low",
+    "styles": "safe-css-subset-v1",
+    "css": {
+      "rules": 424,
+      "limited": false,
+      "stylesheetHashes": [
+        "d497d4a0d52686ccd30f5941b02867075870372cdfe37adbcb0be74fdeed94cf"
+      ]
+    },
+    "candidateCount": 95,
+    "selectedCount": 8,
+    "omitted": [
+      "unsupported-css",
+      "images",
+      "scripts"
+    ]
+  },
+  "warnings": [
+    "コード解析による近似配置です。取得したHTMLのタグ・名前・商品構造から戦闘用に配置しました。",
+    "色・文字・余白・枠線・角丸は限定したCSSから反映。CSSの完全な計算、画像・動画・JavaScriptには対応していません。",
+    "元ページの寸法を測定していません。回収できるのは、この近似再構成で表示したUIです。"
+  ],
+  "background": "#eeeeee",
+  "decor": [
+    {
+      "kind": "rect",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 960,
+        "h": 84
+      },
+      "fill": "#233d4c",
+      "borderColor": "#233d4c",
+      "borderWidth": 0,
+      "radius": 0
+    },
+    {
+      "kind": "text",
+      "rect": {
+        "x": 28,
+        "y": 18,
+        "w": 904,
+        "h": 34
+      },
+      "text": "All products | Books to Scrape - Sandbox",
+      "size": 24,
+      "color": "#ffffff",
+      "font": "sans",
+      "weight": "normal",
+      "align": "left"
+    },
+    {
+      "kind": "text",
+      "rect": {
+        "x": 28,
+        "y": 56,
+        "w": 904,
+        "h": 22
+      },
+      "text": "books.toscrape.com / コード解析による近似配置",
+      "size": 12,
+      "color": "#c2d8e2",
+      "font": "sans",
+      "weight": "normal",
+      "align": "left"
+    }
+  ],
+  "components": [
+    {
+      "componentId": "component-00",
+      "canonicalType": "ab_heading",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 252,
+        "y": 104,
+        "w": 672,
+        "h": 44
+      },
+      "sourceNode": {
+        "tag": "h1",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/div[3]/div[1]/h1[1]",
+        "order": 396,
+        "group": 0,
+        "classes": []
+      },
+      "evidence": "heading",
+      "appearanceId": "appearance_40d2e571c79a1b21e3cea71ca0ee48fc9d4d3194def3e560b9d33fc415917544",
+      "appearance": {
+        "width": 672,
+        "height": 44,
+        "background": "#ffffff",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 672,
+              "h": 44
+            },
+            "fill": "#ffffff",
+            "borderColor": "#b6c5cd",
+            "borderWidth": 1,
+            "radius": 0
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 8,
+              "w": 648,
+              "h": 28
+            },
+            "text": "All products",
+            "size": 20,
+            "color": "#333333",
+            "font": "sans",
+            "weight": "normal",
+            "align": "left"
+          }
+        ]
+      }
+    },
+    {
+      "componentId": "component-01",
+      "canonicalType": "ab_nav",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 28,
+        "y": 156,
+        "w": 192,
+        "h": 40
+      },
+      "sourceNode": {
+        "tag": "a",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/aside[1]/div[3]/ul[1]/li[1]/a[1]",
+        "order": 83,
+        "group": 0,
+        "classes": []
+      },
+      "evidence": "navigation",
+      "appearanceId": "appearance_b1b9ded9742f514c6dde3c717820d091d220ffdd18e0e8a1e260d6011eb88446",
+      "appearance": {
+        "width": 192,
+        "height": 40,
+        "background": "#ffffff",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 192,
+              "h": 40
+            },
+            "fill": "#ffffff",
+            "borderColor": "#b6c5cd",
+            "borderWidth": 1,
+            "radius": 0
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 8,
+              "w": 168,
+              "h": 24
+            },
+            "text": "Books",
+            "size": 14,
+            "color": "#428bca",
+            "font": "sans",
+            "weight": "normal",
+            "align": "left"
+          }
+        ]
+      }
+    },
+    {
+      "componentId": "component-02",
+      "canonicalType": "ab_nav",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 28,
+        "y": 214,
+        "w": 192,
+        "h": 40
+      },
+      "sourceNode": {
+        "tag": "a",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/aside[1]/div[3]/ul[1]/li[1]/ul[3]/li[1]/a[1]",
+        "order": 90,
+        "group": 0,
+        "classes": []
+      },
+      "evidence": "navigation",
+      "appearanceId": "appearance_c2f99d13fb631b5e279e4406de1fb17d036ef0aefb3917c590310c09defd484b",
+      "appearance": {
+        "width": 192,
+        "height": 40,
+        "background": "#ffffff",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 192,
+              "h": 40
+            },
+            "fill": "#ffffff",
+            "borderColor": "#b6c5cd",
+            "borderWidth": 1,
+            "radius": 0
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 8,
+              "w": 168,
+              "h": 24
+            },
+            "text": "Travel",
+            "size": 14,
+            "color": "#428bca",
+            "font": "sans",
+            "weight": "normal",
+            "align": "left"
+          }
+        ]
+      }
+    },
+    {
+      "componentId": "component-03",
+      "canonicalType": "ab_nav",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 28,
+        "y": 272,
+        "w": 192,
+        "h": 40
+      },
+      "sourceNode": {
+        "tag": "a",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/aside[1]/div[3]/ul[1]/li[1]/ul[3]/li[3]/a[1]",
+        "order": 96,
+        "group": 0,
+        "classes": []
+      },
+      "evidence": "navigation",
+      "appearanceId": "appearance_13f2fba47eba3c5624f2dc9edc47bf886a7e496afafac1cd6eb06d43c42130db",
+      "appearance": {
+        "width": 192,
+        "height": 40,
+        "background": "#ffffff",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 192,
+              "h": 40
+            },
+            "fill": "#ffffff",
+            "borderColor": "#b6c5cd",
+            "borderWidth": 1,
+            "radius": 0
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 8,
+              "w": 168,
+              "h": 24
+            },
+            "text": "Mystery",
+            "size": 14,
+            "color": "#428bca",
+            "font": "sans",
+            "weight": "normal",
+            "align": "left"
+          }
+        ]
+      }
+    },
+    {
+      "componentId": "component-04",
+      "canonicalType": "am_product",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 252,
+        "y": 174,
+        "w": 324,
+        "h": 170
+      },
+      "sourceNode": {
+        "tag": "article",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/div[3]/section[9]/div[3]/ol[1]/li[1]/article[1]",
+        "order": 433,
+        "group": 433,
+        "classes": [
+          "product_pod"
+        ]
+      },
+      "evidence": "product",
+      "appearanceId": "appearance_ce381866f7f92a506af8671f37744d11f4bff478e4964a8c1bee5536b0adf43a",
+      "appearance": {
+        "width": 324,
+        "height": 170,
+        "background": "#ffffff",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 324,
+              "h": 170
+            },
+            "fill": "#ffffff",
+            "borderColor": "#b6c5cd",
+            "borderWidth": 1,
+            "radius": 0
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 20,
+              "w": 300,
+              "h": 64
+            },
+            "text": "A Light in the Attic",
+            "size": 14,
+            "color": "#428bca",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 94,
+              "w": 300,
+              "h": 22
+            },
+            "text": "£51.77",
+            "size": 15.714285714285715,
+            "color": "#5cb85c",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 118,
+              "w": 300,
+              "h": 22
+            },
+            "text": "In stock",
+            "size": 14,
+            "color": "#5cb85c",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 146,
+              "w": 300,
+              "h": 16
+            },
+            "text": "画像は省略 / HTMLの商品要素",
+            "size": 10,
+            "color": "#6c7e89",
+            "font": "sans",
+            "weight": "normal",
+            "align": "left"
+          }
+        ]
+      }
+    },
+    {
+      "componentId": "component-05",
+      "canonicalType": "am_buy",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 252,
+        "y": 362,
+        "w": 324,
+        "h": 44
+      },
+      "sourceNode": {
+        "tag": "button",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/div[3]/section[9]/div[3]/ol[1]/li[1]/article[1]/div[7]/form[5]/button[1]",
+        "order": 470,
+        "group": 433,
+        "classes": [
+          "btn",
+          "btn-primary",
+          "btn-block"
+        ]
+      },
+      "evidence": "purchase",
+      "appearanceId": "appearance_2bc659d6b8bd15a3e0638bd69134a491b9f1ff163e99d812898bb05da979e825",
+      "appearance": {
+        "width": 324,
+        "height": 44,
+        "background": "#428bca",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 324,
+              "h": 44
+            },
+            "fill": "#428bca",
+            "borderColor": "#357ebd",
+            "borderWidth": 1,
+            "radius": 4
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 6,
+              "w": 300,
+              "h": 32
+            },
+            "text": "Add to basket",
+            "size": 14,
+            "color": "#ffffff",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          }
+        ]
+      }
+    },
+    {
+      "componentId": "component-06",
+      "canonicalType": "am_product",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 600,
+        "y": 174,
+        "w": 324,
+        "h": 170
+      },
+      "sourceNode": {
+        "tag": "article",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/div[3]/section[9]/div[3]/ol[1]/li[3]/article[1]",
+        "order": 479,
+        "group": 479,
+        "classes": [
+          "product_pod"
+        ]
+      },
+      "evidence": "product",
+      "appearanceId": "appearance_ff65c3fed6a3c28d211ae3429d8d6b40438f49050ba82002b587afede5f97479",
+      "appearance": {
+        "width": 324,
+        "height": 170,
+        "background": "#ffffff",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 324,
+              "h": 170
+            },
+            "fill": "#ffffff",
+            "borderColor": "#b6c5cd",
+            "borderWidth": 1,
+            "radius": 0
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 20,
+              "w": 300,
+              "h": 64
+            },
+            "text": "Tipping the Velvet",
+            "size": 14,
+            "color": "#428bca",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 94,
+              "w": 300,
+              "h": 22
+            },
+            "text": "£53.74",
+            "size": 15.714285714285715,
+            "color": "#5cb85c",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 118,
+              "w": 300,
+              "h": 22
+            },
+            "text": "In stock",
+            "size": 14,
+            "color": "#5cb85c",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 146,
+              "w": 300,
+              "h": 16
+            },
+            "text": "画像は省略 / HTMLの商品要素",
+            "size": 10,
+            "color": "#6c7e89",
+            "font": "sans",
+            "weight": "normal",
+            "align": "left"
+          }
+        ]
+      }
+    },
+    {
+      "componentId": "component-07",
+      "canonicalType": "am_buy",
+      "sourceRect": null,
+      "combatRect": {
+        "x": 600,
+        "y": 362,
+        "w": 324,
+        "h": 44
+      },
+      "sourceNode": {
+        "tag": "button",
+        "path": "document/html[5]/body[3]/div[3]/div[1]/div[3]/div[3]/section[9]/div[3]/ol[1]/li[3]/article[1]/div[7]/form[5]/button[1]",
+        "order": 516,
+        "group": 479,
+        "classes": [
+          "btn",
+          "btn-primary",
+          "btn-block"
+        ]
+      },
+      "evidence": "purchase",
+      "appearanceId": "appearance_2bc659d6b8bd15a3e0638bd69134a491b9f1ff163e99d812898bb05da979e825",
+      "appearance": {
+        "width": 324,
+        "height": 44,
+        "background": "#428bca",
+        "primitives": [
+          {
+            "kind": "rect",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 324,
+              "h": 44
+            },
+            "fill": "#428bca",
+            "borderColor": "#357ebd",
+            "borderWidth": 1,
+            "radius": 4
+          },
+          {
+            "kind": "text",
+            "rect": {
+              "x": 12,
+              "y": 6,
+              "w": 300,
+              "h": 32
+            },
+            "text": "Add to basket",
+            "size": 14,
+            "color": "#ffffff",
+            "font": "sans",
+            "weight": "normal",
+            "align": "center"
+          }
+        ]
+      }
+    }
+  ],
+  "captureId": "capture_094a736bbe69ed43d3f86fce66ca79264af13f519a5ca6193fd5b3ae8c595d2d"
+}
