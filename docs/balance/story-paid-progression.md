@@ -28,6 +28,48 @@ The bounded navigation policy still exhausts its lives at stage six, as do ten c
 
 The runner now checks each actual battle's version against the version it reports. The existing five paid-progression tests and all 42 story/session/QA tests pass. Those counts describe focused existing coverage, not the whole repository suite or visual acceptance.
 
+## Seed 101: recover the first stage-six loss with owned UI
+
+The only failed baseline mixed path is seed 101. Its first loss is the twelfth attempt, `permission-proof`: it enters with $105, three lives, load 38/capacity 49, twenty owned parts and no admins. The original board loses at 20.65 seconds, leaving the enemy with 12.6 HP. Settlement is retained: the player has $121 and two lives. This is a reproducible heuristic failure, not a softlock.
+
+From that real post-loss save, perform these **two ordered editor moves** without resizing, selling, rerolling or buying:
+
+1. Move the existing newsletter `p9` from `(592,16)` to `(592,472)`
+2. Move the existing Instant Search `p24` from `(32,288)` to the now-free `(592,16)`
+
+Both moves use `R.move` and `updateStoryBuild`; trying the second move first is rejected because the newsletter still occupies the destination. Every owned item, size, cash value, capacity purchase and admin is preserved. Instant Search now gives the adjacent heading `p1` and blue link `p4` its actual +45% text-power bonus. This does **not** boost every entry in the navigation row.
+
+The next attempt wins `permission-proof` in 19.75 seconds with 29/380 HP. Keep this board through the rest of the story. Claim the first offered reward each time and leave those new parts in inventory: breadcrumb, form, form, search. With no further purchases, rerolls or board edits, the route wins `hidden-boundary` (328 HP), `hidden-relay` (304 HP), and WHITEOUT (182 HP), obtains all eight records, restores the archive, places the ending link and performs the first restored-page visit. That is the same fifteen canonical victories across eight stages, plus the one retained loss, not a shortened plot.
+
+The ending has $199, reconciled as `11 - 76 purchases - 19 rerolls + 283 actual battle earnings`; capacity stays 49 and admins remain empty. Normal stage transitions restore lives to three. No enemy, item definition, combat rule, story content or production code was changed for this witness. The default mixed policy remains 29/30 endings; the opt-in recovery is a separate bounded continuation, not an upgraded baseline rate.
+
+### Controls and available paid alternatives
+
+Each comparison starts independently from the same **settled first loss**. Their results are not combined into a fictitious single route.
+
+| Change before retry                                                                                                     | New spending | Outcome                                                 |
+| ----------------------------------------------------------------------------------------------------------------------- | -----------: | ------------------------------------------------------- |
+| None                                                                                                                    |           $0 | Loss at 20.65s; enemy retains 12.6 HP                   |
+| Move only seek bar `p20` to `(544,424)`, directly under the video                                                       |           $0 | Simultaneous draw at 20.65s; still consumes a life      |
+| The newsletter + Instant Search moves above                                                                             |           $0 | Win at 19.75s, 29 HP; verified full-ending continuation |
+| Buy the currently offered Search Result (`go_result`) and place it at `(32,472)`, size 280×96                           |           $6 | Win at 20.4s, 29 HP; load 41/49                         |
+| Buy the currently offered Prime (`am_prime`); move wish `p11` to `(320,472)` and place Prime at `(320,96)`, size 192×40 |           $5 | Win at 19.75s, 29 HP; load 40/49                        |
+
+The paid alternatives use the actual post-loss shop, not the different shop available before the loss. Only the free, two-move continuation was taken through the ending; the paid alternatives establish this retry only. A combined video/Instant Search probe also won but was unnecessary, so it is not part of the maintained recovery policy.
+
+**Player lesson:** when a text-support part such as Instant Search is already owned, check which attacks its current position actually supports before spending or retrying unchanged. This coordinate recipe applies to the recorded seed-101 board; it is not a general recommendation to put the part in that corner on arbitrary pages. Linking the video is useful, but here it merely changes a loss to a life-consuming draw.
+
+### Reproduce the recovery
+
+```sh
+node --import tsx scripts/story-progression-benchmark.ts --seeds=1 --policy=mixed --recover
+node --import tsx --test tests/story-paid-progression.test.mjs tests/story-paid-recovery.test.mjs tests/qa-story-paid-recovery.test.mjs
+```
+
+The opt-in option is `{recovery:"seed-101-instant-navigation"}`. It rejects other seeds, policies or combined options. Its output includes the genuine before-loss, after-loss and before/after-retry saves, the two moves, every battle and ledger entry, and the terminal session. Saves are generated by the original paid path, never assembled from injected inventory. Every accepted transaction still validates and JSON-round-trips.
+
+The five added regressions (four route tests and one independent QA test) cover the original paid prefix, the full ending, untouched post-repair board with held loot, current-shop paid alternatives, bounded option scope, the coordinate-only delta, real loss replay and non-winning controls. Independent QA also rebuilt the baseline from a fresh session and confirmed exact snapshot/ledger agreement. Generated evidence is local under `/tmp/ui-raid-story-recovery/` and `/tmp/ui-raid-story-recovery-qa/`; maintained reproduction does not require those files. At this recovery checkpoint, all 700 repository tests, all 47 story/session/QA tests, and the typechecked production build pass. This is engine/session evidence, not browser visual QA or a proof for other failed policies.
+
 ## Earlier bottleneck study and bounded correction
 
 The following candidate comparison and independent holdout are retained historical evidence, not fresh v4 runs of every rejected opponent. The six-part authored board remains current and is the board used in the recheck above.

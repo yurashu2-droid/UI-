@@ -8,6 +8,12 @@ import type { Item, Run, Rect } from "./types.js";
 /* Pixel document editing. Geometry changes are atomic; DOM groups are derived. */
 
 const clone = <T>(o: T): T => structuredClone(o);
+function restoreRun(run: Run, snapshot: Run): void {
+  // Keep the app's live object, but do not retain optional fields absent before.
+  for (const key of Object.keys(run))
+    if (!Object.hasOwn(snapshot, key)) Reflect.deleteProperty(run, key);
+  Object.assign(run, snapshot);
+}
 type ItemPatch = Partial<Pick<Item, "w" | "h" | "label" | "shape">> & {
   x?: number;
   y?: number;
@@ -296,7 +302,7 @@ export class Editor {
       result === false ||
       (typeof result === "object" && result.ok === false)
     ) {
-      Object.assign(this.run, before);
+      restoreRun(this.run, before);
       this.o.onToast(
         (typeof result === "object" ? result.error : undefined) ||
           "ここには配置できません。重なり・ページの端を確認してください。",
@@ -314,14 +320,14 @@ export class Editor {
   undo() {
     if (!this.history.length || !this.o.enabled()) return;
     this.future.push(this.snapshot());
-    Object.assign(this.run, this.history.pop());
+    restoreRun(this.run, this.history.pop()!);
     this.selection.clear();
     this.o.onChange();
   }
   redo() {
     if (!this.future.length || !this.o.enabled()) return;
     this.history.push(this.snapshot());
-    Object.assign(this.run, this.future.pop());
+    restoreRun(this.run, this.future.pop()!);
     this.selection.clear();
     this.o.onChange();
   }

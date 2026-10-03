@@ -17,6 +17,15 @@ export interface StoryPathOptions {
   navigationLimit?: number;
   retireTutorialFusionBeforeFinal?: boolean;
   excludedTypes?: string[];
+  /** One fixed recovery witness, not a general optimizer or a baseline change. */
+  recovery?: "seed-101-instant-navigation";
+}
+interface StoryRecoveryWitness {
+  beforeLoss: S.StorySession;
+  afterLoss: S.StorySession;
+  beforeRetry?: S.StorySession;
+  afterRetry?: S.StorySession;
+  moves: { id: string; type: string; x: number; y: number }[];
 }
 const clone = <T>(value: T): T => structuredClone(value);
 const accepted = (result: S.StorySessionResult): S.StorySession => {
@@ -32,6 +41,18 @@ const accepted = (result: S.StorySessionResult): S.StorySession => {
   return session;
 };
 const navigation = (type: string) => ["ab_link", "ab_nav"].includes(type);
+
+function applyRecoveryMoves(
+  session: S.StorySession,
+  witness: StoryRecoveryWitness,
+) {
+  const run = clone(session.run);
+  for (const move of witness.moves) {
+    assert.equal(run.owned.find((p) => p.id === move.id)?.type, move.type);
+    assert.equal(R.move(run, move.id, move.x, move.y), true);
+  }
+  return accepted(S.updateStoryBuild(session, run));
+}
 
 function partScore(
   run: Run,
@@ -157,6 +178,11 @@ export function simulateStoryPath(
   policy: StoryPolicy,
   options: StoryPathOptions = {},
 ) {
+  if (options.recovery)
+    assert.ok(
+      seed === 101 && policy === "mixed" && Object.keys(options).length === 1,
+      "the recovery witness is limited to unmodified seed 101 mixed",
+    );
   let session = S.createStorySession();
   session.run.seed = seed;
   session = accepted(
@@ -194,6 +220,7 @@ export function simulateStoryPath(
   for (const type of ["ab_heading", "ab_link", "ab_nav"])
     assert.equal(buy(type), true);
   let blocked: string | null = null;
+  let recovery: StoryRecoveryWitness | null = null;
   for (
     let attempt = 0;
     attempt < 40 && session.run.phase !== "gameover";
@@ -223,7 +250,7 @@ export function simulateStoryPath(
     const encounter = currentStoryEncounter(session.story);
     if (!encounter) break;
     const cashBefore = session.run.cash;
-    if (attempt > 0) {
+    if (attempt > 0 && !recovery) {
       let rolls = 0;
       for (let choices = 0; choices < 6; choices++) {
         const offer = session.run.shop
@@ -255,13 +282,24 @@ export function simulateStoryPath(
         });
       }
     }
-    let run = clone(session.run);
-    arrange(run, options);
-    session = accepted(S.updateStoryBuild(session, run));
+    if (!recovery) {
+      const run = clone(session.run);
+      arrange(run, options);
+      session = accepted(S.updateStoryBuild(session, run));
+    } else if (!recovery.beforeRetry) {
+      // Keep the settled first loss. Spend nothing and preserve the rest of the
+      // board: Instant Search now buffs the adjacent link and heading.
+      session = applyRecoveryMoves(session, recovery);
+      recovery.beforeRetry = clone(session);
+    }
     const plan = session.run.shop.find(
       (q) => !q.sold && q.type.startsWith("plan:"),
     );
-    if (plan && C.analyze(session.run.owned).load > R.capacity(session.run))
+    if (
+      !recovery &&
+      plan &&
+      C.analyze(session.run.owned).load > R.capacity(session.run)
+    )
       buy(plan.type);
     if (
       options.retireTutorialFusionBeforeFinal &&
@@ -274,6 +312,7 @@ export function simulateStoryPath(
     }
     const snapshot = clone(session.run),
       matchId = `paid-${seed}-${policy}-${attempt}`;
+    const beforeBattle = options.recovery ? clone(session) : null;
     const prepared = S.prepareStoryBattle(session, matchId);
     if (!prepared.ok) {
       blocked = prepared.error;
@@ -291,15 +330,35 @@ export function simulateStoryPath(
     const settled = S.settleStoryBattle(session, matchId, prepared.battle);
     session = accepted(settled);
     assert.ok("summary" in settled && settled.summary);
+    if (
+      beforeBattle &&
+      !recovery &&
+      encounter.id === "permission-proof" &&
+      settled.summary.winner === "enemy"
+    ) {
+      recovery = {
+        beforeLoss: beforeBattle,
+        afterLoss: clone(session),
+        moves: [
+          { id: "p9", type: "am_newsletter", x: 592, y: 472 },
+          { id: "p24", type: "go_instant", x: 592, y: 16 },
+        ],
+      };
+    } else if (recovery?.beforeRetry && !recovery.afterRetry) {
+      recovery.afterRetry = clone(session);
+    }
     earnings += settled.summary.total;
     let reward: string | null = null;
     if (session.reward) {
       reward =
-        [...session.reward.choices].sort(
-          (a, b) =>
-            partScore(session.run, b, policy, options) -
-              partScore(session.run, a, policy, options) || a.localeCompare(b),
-        )[0] ?? null;
+        (recovery?.beforeRetry
+          ? session.reward.choices[0]
+          : [...session.reward.choices].sort(
+              (a, b) =>
+                partScore(session.run, b, policy, options) -
+                  partScore(session.run, a, policy, options) ||
+                a.localeCompare(b),
+            )[0]) ?? null;
       session = accepted(S.claimStoryReward(session, reward));
     }
     rounds.push({
@@ -373,6 +432,7 @@ export function simulateStoryPath(
     finalInventory: session.run.owned.map((p) => p.type),
     transactions,
     rounds,
+    ...(options.recovery ? { recovery, finalSession: clone(session) } : {}),
   };
 }
 if (
@@ -388,8 +448,11 @@ if (
   const policies: StoryPolicy[] = policy
     ? [policy]
     : ["navigation", "commerce", "mixed"];
+  const options: StoryPathOptions = process.argv.includes("--recover")
+    ? { recovery: "seed-101-instant-navigation" }
+    : {};
   const rows = Array.from({ length: count }, (_, i) => 101 + i).flatMap(
-    (seed) => policies.map((p) => simulateStoryPath(seed, p)),
+    (seed) => policies.map((p) => simulateStoryPath(seed, p, options)),
   );
   console.log(
     JSON.stringify(
