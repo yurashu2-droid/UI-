@@ -1,0 +1,50 @@
+/* Original fixed design-tool chrome. Native fieldset, table and PDF remain intact. */
+.site-theme-designcanvas .site-header { padding: 0 22px; gap: 24px; background: #fcfcfd; color: #39404c; border-bottom: 1px solid #dddfe5; }
+.canvas-word { display: flex; align-items: center; gap: 9px; font: 700 21px/1 Arial, sans-serif; letter-spacing: -.7px; }
+.canvas-word > i { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; background: #6554a6; color: #fff; font: 25px/1 Arial, sans-serif; }
+.canvas-word small { display: block; margin-top: 5px; color: #898299; font: 8px/1.2 Arial, sans-serif; letter-spacing: 0; }
+.canvas-file-name { color: #646472; font: 12px Arial, sans-serif; }
+.canvas-header-local { margin-left: auto; color: #93919b; font: 9px Arial, sans-serif; }
+.site-theme-designcanvas .page-body { background-color: #edeef2; background-image: radial-gradient(#c9ccd6 .7px, transparent .7px); background-size: 12px 12px; color: #444954; }
+.site-theme-designcanvas .page-body::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to right, #fafbfc 0, #fafbfc 192px, #dce0e6 192px, #dce0e6 193px, transparent 193px, transparent 719px, #dce0e6 719px, #dce0e6 720px, #fafbfc 720px, #fafbfc 100%); }
+.site-theme-designcanvas .page-decor { z-index: 1; }
+.site-theme-designcanvas .site-footer { background: #f6f7fa; color: #858791; border-top: 1px solid #dce0e6; }
+.canvas-panel { position: relative; box-sizing: border-box; height: 100%; padding: 0 10px; font-family: Arial, sans-serif; }
+.canvas-panel-tabs { display: flex; align-items: center; gap: 18px; height: 34px; border-bottom: 1px solid #e1e4e9; color: #8a8b96; font: 10px Arial, sans-serif; }
+.canvas-panel-tabs > b { align-self: stretch; padding-top: 10px; color: #4e4566; border-bottom: 2px solid #7664ad; }
+.canvas-panel h2 { display: flex; justify-content: space-between; margin: 22px 0 12px; font: 700 11px/16px Arial, sans-serif; }
+.canvas-panel h2 small { align-self: center; color: #90909b; font: 8px Arial, sans-serif; }
+.canvas-page-row { display: flex; align-items: center; gap: 7px; padding: 8px 6px; border-radius: 4px; background: #eeebf5; color: #675a88; font: 10px/15px Arial, sans-serif; }
+.canvas-page-row i { font: 14px Arial, sans-serif; }
+.canvas-layer-tree, .canvas-layer-tree ol { margin: 0; padding-left: 0; list-style: none; font: 10px/30px Arial, sans-serif; }
+.canvas-layer-tree ol { padding-left: 12px; }
+.canvas-layer-tree span { display: inline-block; width: 15px; color: #83808f; }
+.canvas-panel-note { margin: 18px 0 0; color: #858591; font: 9px/16px Arial, sans-serif; }
+.canvas-panel-divider { margin-top: 24px; border-top: 1px solid #e1e4e9; }
+.canvas-costs { margin: 0; font: 10px/24px Arial, sans-serif; }
+.canvas-costs > div { display: flex; justify-content: space-between; }
+.canvas-costs dt { color: #888592; }
+.canvas-costs dd { margin: 0; color: #5c536e; font-variant-numeric: tabular-nums; }
+.canvas-panel-foot { position: absolute; bottom: 16px; left: 10px; color: #b0aab9; font: 8px Arial, sans-serif; letter-spacing: .2px; }
+.canvas-workspace { display: flex; align-items: center; justify-content: space-between; height: 100%; color: #888a99; font: 8px Arial, sans-serif; }
+.canvas-workspace > span { letter-spacing: 1.3px; }
+.canvas-workspace > small { font: 8px Arial, sans-serif; }
+.canvas-frame-caption { display: flex; align-items: center; justify-content: space-between; height: 100%; color: #717083; font-family: Arial, sans-serif; }
+.canvas-frame-caption > b { font: 10px Arial, sans-serif; }
+.canvas-frame-caption > span { color: #9995a4; font: 8px Arial, sans-serif; }
+.canvas-property-section { margin-top: 14px; padding-bottom: 12px; border-bottom: 1px solid #e1e4e9; }
+.canvas-property-section h3 { display: flex; align-items: center; gap: 7px; margin: 0 0 7px; font: 700 10px/15px Arial, sans-serif; }
+.canvas-property-section h3 i { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 4px; background: #e9e4f2; color: #75628f; font: 700 9px Arial, sans-serif; }
+.canvas-property-section p { margin: 0; color: #727380; font: 10px/16px Arial, sans-serif; }
+.canvas-property-section > small { display: block; margin-top: 6px; color: #9993a3; font: 8px/13px Arial, sans-serif; }
+.canvas-caution { border-bottom: 0; }
+.canvas-caution h3 { color: #7f7161; }
+.canvas-lesson { box-sizing: border-box; height: 100%; padding: 12px; border: 1px solid #ddd9e6; border-radius: 5px; background: #f7f5fb; color: #6d6083; }
+.canvas-lesson h2 { margin: 0; font: 700 12px/18px Arial, sans-serif; }
+.canvas-lesson p { margin: 8px 0 0; color: #898093; font: 10px/15px Arial, sans-serif; }
+.canvas-tools { display: flex; align-items: center; justify-content: center; gap: 16px; box-sizing: border-box; height: 100%; padding: 0 12px; border: 1px solid #555361; border-radius: 7px; background: #373541; color: #dfdce7; box-shadow: 0 3px 7px #27213b15; }
+.canvas-tools > span { font: 15px Arial, sans-serif; }
+.canvas-tools > small { color: #a7a1b6; font: 8px Arial, sans-serif; }
+.canvas-local-note, .canvas-status { margin: 0; color: #93909e; font: 8px/14px Arial, sans-serif; }
+.canvas-local-note { padding-left: 10px; }
+.canvas-status { padding-left: 10px; }

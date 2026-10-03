@@ -73,11 +73,55 @@ const px = (s: string, max: number) =>
   /^(?:0|\d+(?:\.\d+)?px)$/.test(s) && parseFloat(s) <= max
     ? parseFloat(s)
     : undefined;
+/** Keep the legacy raw-segment budget; delimit only outside inert CSS data. */
+function boundedDeclarations(input: string): string[] {
+  const css = input.split(";").slice(0, CSS_LIMITS.declarations).join(";");
+  const declarations: string[] = [],
+    closing: string[] = [];
+  let current = "",
+    quote = "";
+  for (let i = 0; i < css.length; i++) {
+    const c = css[i];
+    if (c === "\\") {
+      if (i + 1 === css.length) return declarations;
+      // Preserve escapes for the existing value filter; never decode them.
+      current += c + css[++i];
+      continue;
+    }
+    if (quote) {
+      current += c;
+      if (c === quote) quote = "";
+      else if (/[\n\r\f]/.test(c)) return declarations;
+      continue;
+    }
+    if (c === '"' || c === "'") quote = c;
+    else if (c === "/" && css[i + 1] === "*") {
+      const end = css.indexOf("*/", i + 2);
+      if (end < 0) return declarations;
+      // Comments separate tokens, not pieces of identifiers or numbers.
+      current += " ";
+      i = end + 1;
+      continue;
+    } else if (c === "(" || c === "[" || c === "{")
+      closing.push(c === "(" ? ")" : c === "[" ? "]" : "}");
+    else if (c === ")" || c === "]" || c === "}") {
+      if (closing.pop() !== c) return declarations;
+    } else if (c === ";" && !closing.length) {
+      declarations.push(current);
+      current = "";
+      continue;
+    }
+    current += c;
+  }
+  // A truncated/malformed value must not expose its contents as declarations.
+  if (!quote && !closing.length) declarations.push(current);
+  return declarations;
+}
 /** Values are interpreted, never inserted as CSS. Unsupported functions/resources are discarded. */
 export function safeDeclarations(css: string): SafeStyle {
   const out: SafeStyle = {};
   if (css.length > 4096) return out;
-  for (const d of css.split(";").slice(0, CSS_LIMITS.declarations)) {
+  for (const d of boundedDeclarations(css)) {
     const j = d.indexOf(":");
     if (j < 0) continue;
     const key = d.slice(0, j).trim().toLowerCase(),

@@ -11,6 +11,7 @@ import C from "../src/document.js";
 import R from "../src/run.js";
 import V from "../src/components.js";
 import E from "../src/engine.js";
+import { incomeRouteGuidance } from "../src/income-route-guidance.js";
 import { createOnlineClient, OnlineError } from "../src/online/client.js";
 import * as layout from "../src/online/layout.js";
 import * as replay from "../src/online/replay.js";
@@ -408,6 +409,7 @@ async function fixture(t, rules, duel = false) {
     R,
     V,
     E,
+    incomeRouteGuidance,
     createOnlineClient: (url) => createOnlineClient(url, { fetch: transport }),
     OnlineError,
     ...layout,

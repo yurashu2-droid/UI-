@@ -3,14 +3,10 @@ import C from "../document.js";
 import R from "../run.js";
 import V from "../components.js";
 import E from "../engine.js";
+import { incomeRouteGuidance } from "../income-route-guidance.js";
 import { isSupportedCombatVersion } from "../combat-rules.js";
 import { createOnlineClient, OnlineError } from "./client.js";
-import {
-  placeItem,
-  placementPayload,
-  routeChoices,
-  onlineFusionChoices,
-} from "./layout.js";
+import { placeItem, placementPayload, onlineFusionChoices } from "./layout.js";
 import type { Item, BattleEvent } from "../types.js";
 import {
   applyOnlineReplayFeedback,
@@ -52,6 +48,7 @@ export function mountOnlinePanel(
     message = "サーバーに接続しています…",
     error = false;
   let guestExpired = false;
+  let routeFocus: { runId: string; sourceId: string } | null = null;
   let pendingHistory: PendingHistory | null = null;
   let selected: string | null = null,
     draft: Item[] | null = null,
@@ -230,6 +227,17 @@ export function mountOnlinePanel(
   }
   function render() {
     if (disposed) return;
+    if (routeFocus) {
+      const active = document.activeElement;
+      if (
+        view?.online.id !== routeFocus.runId ||
+        selected !== routeFocus.sourceId ||
+        (active &&
+          active !== document.body &&
+          active !== root.querySelector("[data-arena-route]"))
+      )
+        routeFocus = null;
+    }
     const s = guestExpired ? undefined : view?.run,
       build = s?.phase === "build" && !view?.online.requiresNewRun,
       match = view?.match;
@@ -328,6 +336,51 @@ export function mountOnlinePanel(
       replayControls.after(log);
     }
     resizePages();
+    if (routeFocus && !locked() && !drag) {
+      const control =
+        root.querySelector<HTMLSelectElement>("[data-arena-route]");
+      if (
+        control &&
+        !control.disabled &&
+        control.dataset.sourceId === routeFocus.sourceId &&
+        document.activeElement === document.body
+      )
+        control.focus({ preventScroll: true });
+      routeFocus = null;
+    }
+  }
+  function routeControls(p: Item) {
+    const owned = view!.run.owned;
+    const route = incomeRouteGuidance(p, E.analyze(draft ?? owned), {
+      owned,
+      editable: editable() && !drag,
+    });
+    if (!route) return "";
+    const name = (target: { id: string; name: string }) => {
+      const part = owned.find((item) => item.id === target.id);
+      return esc(
+        target.name +
+          (part
+            ? C.placed(part)
+              ? `（X ${part.x} / Y ${part.y}）`
+              : "（未配置）"
+            : ""),
+      );
+    };
+    const saved = route.saved;
+    const unavailable =
+      saved && !saved.available
+        ? `<option value="${esc(saved.id)}" selected disabled>${name(saved)}（現在は利用不可）</option>`
+        : "";
+    const status = !route.placed
+      ? "この収益UIは未配置です。ページに配置してから接続先を変更できます。"
+      : saved && !saved.available
+        ? "指定先が現在の接続候補にないため、自動へフォールバックします。候補に戻ると保存した指定が優先されます。"
+        : "近い受け皿だけを選べます。自動では距離やページ上の位置などの規則で1つを選びます。";
+    return `<div class="arena-route-guidance"><label>収益の接続先<select data-arena-route data-source-id="${esc(route.sourceId)}" ${route.editable ? "" : "disabled"}><option value="" ${saved ? "" : "selected"}>自動（近い受け皿）</option>${unavailable}${route.candidates.map((target) => `<option value="${esc(target.id)}" ${saved?.id === target.id ? "selected" : ""}>${name(target)}</option>`).join("")}</select></label>
+      <p style="overflow-wrap:anywhere">保存した指定：${saved ? name(saved) + (saved.available ? "" : "（現在は利用不可・指定は保持）") : "自動（近い受け皿を優先）"}</p>
+      <p style="overflow-wrap:anywhere">実際の接続先：${route.effective ? name(route.effective) : "未接続"}</p>
+      <p>${status}</p><p>接続だけでは収益を増やしません。収益の発生条件や受け皿の発動条件は変わりません。同じ収益は二重配分せず、受け皿が満杯でも余りは別の受け皿へ流れません。</p></div>`;
   }
   function selection() {
     const p = (draft ?? view!.run.owned).find((p) => p.id === selected);
@@ -337,17 +390,7 @@ export function mountOnlinePanel(
       pairs = onlineFusionChoices(view!.run.owned).filter(
         (q) => q.a.id === p.id || q.b.id === p.id,
       );
-    return `<h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p><form data-arena-layout><div class="arena-fields">${(["x", "y", "w", "h"] as const).map((k) => `<label>${k.toUpperCase()}<input name="${k}" type="number" value="${p[k] ?? 0}" step="1"></label>`).join("")}</div><button ${locked() ? "disabled" : ""}>位置・サイズを保存</button></form><label>収益の接続先<select data-arena-route><option value="">自動</option>${routeChoices(
-      view!.run.owned,
-      p.id,
-    )
-      .map(
-        (q) =>
-          `<option value="${q.id}" ${p.routeTo === q.id ? "selected" : ""}>${esc(D.PARTS[q.type].name)}</option>`,
-      )
-      .join(
-        "",
-      )}</select></label><button data-arena="stash" ${locked() ? "disabled" : ""}>未配置に戻す</button><button data-arena="sell" ${locked() ? "disabled" : ""}>売却 $${R.sellValue(view!.run, p.type)}</button>${pairs.map((q) => `<button data-arena="fuse" data-a="${q.a.id}" data-b="${q.b.id}" ${locked() ? "disabled" : ""}>合成 → ${esc(D.PARTS[q.recipe.into].name)}</button>`).join("")}`;
+    return `<h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p><form data-arena-layout><div class="arena-fields">${(["x", "y", "w", "h"] as const).map((k) => `<label>${k.toUpperCase()}<input name="${k}" type="number" value="${p[k] ?? 0}" step="1"></label>`).join("")}</div><button ${locked() ? "disabled" : ""}>位置・サイズを保存</button></form>${routeControls(p)}<button data-arena="stash" ${locked() ? "disabled" : ""}>未配置に戻す</button><button data-arena="sell" ${locked() ? "disabled" : ""}>売却 $${R.sellValue(view!.run, p.type)}</button>${pairs.map((q) => `<button data-arena="fuse" data-a="${q.a.id}" data-b="${q.b.id}" ${locked() ? "disabled" : ""}>合成 → ${esc(D.PARTS[q.recipe.into].name)}</button>`).join("")}`;
   }
   function resizePages() {
     for (const box of root.querySelectorAll<HTMLElement>(
@@ -508,11 +551,41 @@ export function mountOnlinePanel(
         replaySpeed = Number(el.value);
         return;
       }
-      if (el.hasAttribute("data-arena-route") && editable() && selected) {
-        const board = structuredClone(view!.run.owned),
-          p = board.find((p) => p.id === selected)!;
+      if (el.hasAttribute("data-arena-route")) {
+        if (
+          disposed ||
+          !editable() ||
+          drag ||
+          !selected ||
+          el.disabled ||
+          el !== root.querySelector("[data-arena-route]") ||
+          el.dataset.sourceId !== selected
+        )
+          return;
+        const option = el.selectedOptions[0];
+        if (!option || option.disabled) return;
+        const owned = view!.run.owned;
+        const source = owned.find((part) => part.id === selected);
+        if (!source) return;
+        const route = incomeRouteGuidance(source, E.analyze(owned), {
+          owned,
+          editable: true,
+        });
+        if (
+          !route?.editable ||
+          (el.value &&
+            !route.candidates.some((part) => part.id === el.value)) ||
+          (source.routeTo ?? "") === el.value
+        )
+          return;
+        const board = structuredClone(owned),
+          p = board.find((part) => part.id === source.id)!;
         if (el.value) p.routeTo = el.value;
         else delete p.routeTo;
+        routeFocus =
+          document.activeElement === el
+            ? { runId: view!.online.id, sourceId: source.id }
+            : null;
         saveBoard(board);
       }
     },
@@ -724,6 +797,7 @@ export function mountOnlinePanel(
     dispose() {
       if (disposed) return;
       disposed = true;
+      routeFocus = null;
       pendingHistory = null;
       undo = [];
       redo = [];
