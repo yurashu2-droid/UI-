@@ -67,6 +67,11 @@ test('QA a selected stash item never advertises an instantaneous natural attack'
 test('QA version-upgrade notice does not promise old snapshots remain in current matchmaking',()=>{
  const source=fs.readFileSync(new URL('../src/online/panel.ts',import.meta.url),'utf8'),start=source.indexOf('${s.phase === "complete"'),end=source.indexOf('\n       <h2>対戦履歴',start);
  assert.ok(start>=0&&end>start);const expression=source.slice(start,end).trim().slice(2,-1).replace(/view!/g,'view');
- const rendered=[];for(const requiresNewRun of [false,true]){const ctx=vm.createContext({s:{phase:'complete',wins:3,history:[]},view:{online:{requiresNewRun,pendingMatchId:null}},busy:false});vm.runInContext('output=('+expression+');',ctx);rendered.push(ctx.output);}
+ const rendered=[];for(const requiresNewRun of [false,true]){
+  const state={s:{phase:'complete',wins:3,history:[]},view:{online:{requiresNewRun,pendingMatchId:null}},busy:false};
+  const ctx=vm.createContext({...state,locked:()=>false});vm.runInContext('output=('+expression+');',ctx);rendered.push(ctx.output);
+  const blocked=vm.createContext({...state,locked:()=>true});vm.runInContext('output=('+expression+');',blocked);
+  assert.match(blocked.output,/data-arena="new-run"\s+disabled/,'pending history locks replacement runs even after the network request stops');
+ }
  assert.match(rendered[0],/保存ビルドは.*対戦候補に残ります/);assert.doesNotMatch(rendered[1],/対戦候補に残ります/);assert.match(rendered[1],/以前のルールの記録/);assert.match(rendered[1],/新しいランを始め/);
 });

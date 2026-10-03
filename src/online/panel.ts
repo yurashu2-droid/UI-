@@ -30,6 +30,15 @@ function connectionMessage(error: unknown) {
     : "オンラインサービスに接続できませんでした。";
 }
 type Command = Parameters<ReturnType<typeof createOnlineClient>["command"]>[0];
+type HistoryEffect =
+  | { kind: "record"; board: Item[] }
+  | { kind: "move"; back: boolean; board: Item[] }
+  | { kind: "clear" | "preserve" };
+type PendingHistory = {
+  runId: string;
+  revision: number;
+  effect: HistoryEffect;
+};
 /** Independent online screen: local campaign state is never read or written. */
 export function mountOnlinePanel(
   host: HTMLElement,
@@ -43,6 +52,7 @@ export function mountOnlinePanel(
     message = "サーバーに接続しています…",
     error = false;
   let guestExpired = false;
+  let pendingHistory: PendingHistory | null = null;
   let selected: string | null = null,
     draft: Item[] | null = null,
     undo: Item[][] = [],
@@ -69,10 +79,11 @@ export function mountOnlinePanel(
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-label", "非同期オンライン対戦");
   host.replaceChildren(root);
+  const locked = () => busy || pendingHistory !== null;
   const editable = () =>
     !!view &&
     view.run.phase === "build" &&
-    !busy &&
+    !locked() &&
     !view.online.requiresNewRun;
   function stopReplay() {
     replayEpoch++;
@@ -80,8 +91,45 @@ export function mountOnlinePanel(
     raf = 0;
     replay = null;
   }
-  function setView(next: OnlineView) {
+  function reconcileHistory(
+    next: OnlineView,
+    completed: PendingHistory | null = null,
+  ) {
+    // A receipt contains the latest server view, which can already include a
+    // different tab's work. Only the one known revision has our history effect.
+    if (
+      completed &&
+      view?.online.id === completed.runId &&
+      view.revision === completed.revision &&
+      next.online.id === completed.runId &&
+      next.revision === completed.revision + 1
+    ) {
+      const effect = completed.effect;
+      if (effect.kind === "record") {
+        undo = [...undo, effect.board].slice(-20);
+        redo = [];
+      } else if (effect.kind === "move") {
+        const from = effect.back ? undo : redo,
+          to = effect.back ? redo : undo;
+        from.pop();
+        to.push(effect.board);
+      } else if (effect.kind === "clear") {
+        undo = [];
+        redo = [];
+      }
+    } else if (
+      completed ||
+      (view &&
+        (next.online.id !== view.online.id || next.revision !== view.revision))
+    ) {
+      undo = [];
+      redo = [];
+    }
+  }
+  function setView(next: OnlineView, completed: PendingHistory | null = null) {
     if (disposed) return;
+    reconcileHistory(next, completed);
+    pendingHistory = null;
     guestExpired = false;
     view = next;
     draft = null;
@@ -89,8 +137,44 @@ export function mountOnlinePanel(
     error = false;
     render();
   }
-  async function action(command: Command, oldBoard?: Item[]) {
-    if (busy || disposed) return;
+  function rejectHistory(e: unknown) {
+    // Keep the same in-memory effect for the client's unresolved command.
+    // This follows client.ts: 408/429 do not disprove an earlier commit.
+    if (
+      e instanceof OnlineError &&
+      e.status >= 400 &&
+      e.status < 500 &&
+      e.status !== 408 &&
+      e.status !== 429
+    ) {
+      pendingHistory = null;
+      if (e.code === "STALE_REVISION") {
+        // The old baseline is already known stale even if its refresh fails.
+        undo = [];
+        redo = [];
+      }
+    }
+  }
+  async function refreshAfterConflict(e: unknown) {
+    if (!(e instanceof OnlineError) || e.code !== "STALE_REVISION") return;
+    try {
+      const next = await client.refresh();
+      if (disposed) return;
+      reconcileHistory(next);
+      view = next;
+    } catch {}
+  }
+  async function action(
+    command: Command,
+    effect: HistoryEffect = {
+      kind:
+        command.kind === "publish" || command.kind === "match"
+          ? "preserve"
+          : "clear",
+    },
+  ) {
+    if (!view || locked() || disposed) return;
+    pendingHistory = { runId: view.online.id, revision: view.revision, effect };
     busy = true;
     error = false;
     message = "保存中…";
@@ -98,27 +182,19 @@ export function mountOnlinePanel(
     try {
       const next = await client.command(command);
       if (disposed) return;
-      if (oldBoard) {
-        undo.push(oldBoard);
-        undo = undo.slice(-20);
-        redo = [];
-      } else if (command.kind !== "publish" && command.kind !== "match") {
-        undo = [];
-        redo = [];
-      }
-      view = next;
-      draft = null;
-      message = next.outcome?.message || "保存しました。";
+      setView(next, pendingHistory);
+      message =
+        effect.kind === "move"
+          ? "配置を保存しました。"
+          : next.outcome?.message || "保存しました。";
     } catch (e) {
       if (disposed) return;
+      rejectHistory(e);
       error = true;
       if (e instanceof OnlineError && e.code === "SESSION_EXPIRED")
         guestExpired = true;
       message = connectionMessage(e);
-      if (e instanceof OnlineError && e.code === "STALE_REVISION")
-        try {
-          view = await client.refresh();
-        } catch {}
+      await refreshAfterConflict(e);
     } finally {
       if (!disposed) {
         busy = false;
@@ -132,12 +208,16 @@ export function mountOnlinePanel(
     busy = true;
     render();
     try {
-      setView(await (client.current ? client.retry() : client.connect()));
+      const next = await (client.current ? client.retry() : client.connect());
+      setView(next, pendingHistory);
     } catch (e) {
+      if (disposed) return;
+      rejectHistory(e);
       error = true;
       if (e instanceof OnlineError && e.code === "SESSION_EXPIRED")
         guestExpired = true;
       message = connectionMessage(e);
+      await refreshAfterConflict(e);
     } finally {
       if (!disposed) {
         busy = false;
@@ -171,10 +251,10 @@ export function mountOnlinePanel(
                    plan = stock.type.startsWith("plan:")
                      ? R.PLANS[stock.type.slice(5)]
                      : null;
-                 return `<button class="arena-stock" data-arena="buy" data-type="${esc(stock.type)}" ${busy || stock.sold || s.cash < (p?.price ?? plan?.price ?? 0) ? "disabled" : ""}><b>${esc(p?.name ?? plan?.name ?? stock.type)}</b><span>$${p?.price ?? plan?.price ?? 0} ${stock.sold ? "購入済み" : ""}</span><small>${esc(p?.desc ?? `容量 +${plan?.cap ?? 0}`)}</small></button>`;
+                 return `<button class="arena-stock" data-arena="buy" data-type="${esc(stock.type)}" ${locked() || stock.sold || s.cash < (p?.price ?? plan?.price ?? 0) ? "disabled" : ""}><b>${esc(p?.name ?? plan?.name ?? stock.type)}</b><span>$${p?.price ?? plan?.price ?? 0} ${stock.sold ? "購入済み" : ""}</span><small>${esc(p?.desc ?? `容量 +${plan?.cap ?? 0}`)}</small></button>`;
                })
                .join("") +
-             `<button data-arena="reroll" ${busy || s.cash < R.REROLL ? "disabled" : ""}>ショップ更新 $${R.REROLL}</button>`
+             `<button data-arena="reroll" ${locked() || s.cash < R.REROLL ? "disabled" : ""}>ショップ更新 $${R.REROLL}</button>`
            : `<p>結果はサーバーで確定済みです。表示速度や再読込で勝敗は変わりません。</p>`
        }
        <h2>未配置のUI</h2><div class="arena-stash">${
@@ -182,21 +262,21 @@ export function mountOnlinePanel(
            .filter((p) => !C.placed(p))
            .map(
              (p) =>
-               `<button data-arena="place" data-id="${p.id}" ${!build || busy ? "disabled" : ""}>＋ ${esc(D.PARTS[p.type]?.name ?? p.type)}</button>`,
+               `<button data-arena="place" data-id="${p.id}" ${!build || locked() ? "disabled" : ""}>＋ ${esc(D.PARTS[p.type]?.name ?? p.type)}</button>`,
            )
            .join("") || "<p>なし</p>"
        }</div>
-       ${view!.online.inbox.length ? `<button data-arena="inbox" ${!build || busy ? "disabled" : ""}>受取箱 ${view!.online.inbox.length}個を移動</button>` : ""}
+       ${view!.online.inbox.length ? `<button data-arena="inbox" ${!build || locked() ? "disabled" : ""}>受取箱 ${view!.online.inbox.length}個を移動</button>` : ""}
        <h2>管理設備</h2><p>${s.admin.map((a) => esc(D.ADMIN[a]?.name ?? a)).join(" / ") || "まだありません"}</p><small>報酬で解放 · 次の枠 ${R.adminSlots(s)}</small>
        <details><summary>オンラインの仮ルール</summary><p>8ラウンド・残機3・初期資金10。基本収入6＋勝利4＋戦闘収益の半分（最大10）。引き分けは残機を1消費。レートは勝利+16／敗北−16、引き分け±0。</p><p>このブラウザのゲストとして保存。24時間操作がないと接続が期限切れになります。オフラインのセーブとは独立しています。</p></details></aside>
        <main class="arena-main">${page(!build && match ? match.player.items : (draft ?? s.owned), "self", !build && match ? "対戦時のあなたのページ" : "あなたのページ")}<p class="arena-hint">${build ? "UIをドラッグして配置。選択したUIのサイズ・接続先を右側で調整できます。" : "自動戦闘の入力は固定されています。"}</p>
        ${match && !build ? `<div class="arena-match-label">対戦相手：ほかのプレイヤーが登録した保存ビルド · ROUND ${match.opponent.round + 1} · ${match.opponent.wins}勝 · 記録時レート${match.opponent.rating}</div>${page(match.opponent.items, "opponent", "保存された相手のページ")}<div class="arena-replay"><button data-arena="replay">▶ リプレイ</button><button data-arena="pause">一時停止 / 再開</button><select data-arena-speed aria-label="リプレイ速度"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select><span data-arena-clock>サーバー結果: ${match.winner === "player" ? "勝利" : match.winner === "enemy" ? "敗北" : "引き分け"} · ${match.summary.time.toFixed(1)}秒</span></div>` : ""}
        </main>
        <aside class="arena-inspector">${build ? selection() : ""}
-       ${build ? `<h2>公開して対戦</h2><p>登録されるのは標準UIと配置・性能だけです。URLの画像・取得元・元サイトの文言は送信されません。</p><button class="arena-primary" data-arena="match" ${busy ? "disabled" : ""}>ビルドを公開して対戦</button><button data-arena="publish" ${busy ? "disabled" : ""}>ビルドだけ公開</button><div class="arena-undo"><button data-arena="undo" ${busy || !undo.length ? "disabled" : ""}>元に戻す</button><button data-arena="redo" ${busy || !redo.length ? "disabled" : ""}>やり直す</button></div>` : ""}
-       ${s.phase === "battle" && match ? `<h2>${match.winner === "player" ? "勝利" : match.winner === "enemy" ? "敗北" : "引き分け"}</h2><p>基本 $${match.summary.base} ＋ 勝利 $${match.summary.bonus} ＋ 収益 $${match.summary.income}</p><button class="arena-primary" data-arena="settle" ${busy ? "disabled" : ""}>結果を受け取る $${match.summary.total}</button>` : ""}
-       ${s.phase === "reward" && s.pending ? `<h2>報酬を一つ選ぶ</h2>${s.pending.loot.map((t) => `<button class="arena-reward" data-arena="claim" data-type="${esc(t)}" ${busy ? "disabled" : ""}>${esc(t.startsWith("admin:") ? (D.ADMIN[t.slice(6)]?.name ?? t) : (D.PARTS[t]?.name ?? t))}</button>`).join("")}<button data-arena="skip" ${busy ? "disabled" : ""}>選ばずに次へ</button>` : ""}
-       ${s.phase === "complete" || s.phase === "gameover" || (view!.online.requiresNewRun && !view!.online.pendingMatchId) ? `<h2>${view!.online.requiresNewRun ? "ルールが更新されました" : s.phase === "complete" ? "ラン完了" : "残機がなくなりました"}</h2><p>${s.wins}勝 / ${s.history.length}戦。${view!.online.requiresNewRun ? "以前のルールの記録は引き続き閲覧できます。現在の対戦候補に参加するには、新しいランを始めてください。" : "保存ビルドは他のプレイヤーの対戦候補に残ります。"}</p><button class="arena-primary" data-arena="new-run" ${busy ? "disabled" : ""}>新しいオンラインラン</button>` : ""}
+       ${build ? `<h2>公開して対戦</h2><p>登録されるのは標準UIと配置・性能だけです。URLの画像・取得元・元サイトの文言は送信されません。</p><button class="arena-primary" data-arena="match" ${locked() ? "disabled" : ""}>ビルドを公開して対戦</button><button data-arena="publish" ${locked() ? "disabled" : ""}>ビルドだけ公開</button><div class="arena-undo"><button data-arena="undo" ${locked() || !undo.length ? "disabled" : ""}>元に戻す</button><button data-arena="redo" ${locked() || !redo.length ? "disabled" : ""}>やり直す</button></div>` : ""}
+       ${s.phase === "battle" && match ? `<h2>${match.winner === "player" ? "勝利" : match.winner === "enemy" ? "敗北" : "引き分け"}</h2><p>基本 $${match.summary.base} ＋ 勝利 $${match.summary.bonus} ＋ 収益 $${match.summary.income}</p><button class="arena-primary" data-arena="settle" ${locked() ? "disabled" : ""}>結果を受け取る $${match.summary.total}</button>` : ""}
+       ${s.phase === "reward" && s.pending ? `<h2>報酬を一つ選ぶ</h2>${s.pending.loot.map((t) => `<button class="arena-reward" data-arena="claim" data-type="${esc(t)}" ${locked() ? "disabled" : ""}>${esc(t.startsWith("admin:") ? (D.ADMIN[t.slice(6)]?.name ?? t) : (D.PARTS[t]?.name ?? t))}</button>`).join("")}<button data-arena="skip" ${locked() ? "disabled" : ""}>選ばずに次へ</button>` : ""}
+       ${s.phase === "complete" || s.phase === "gameover" || (view!.online.requiresNewRun && !view!.online.pendingMatchId) ? `<h2>${view!.online.requiresNewRun ? "ルールが更新されました" : s.phase === "complete" ? "ラン完了" : "残機がなくなりました"}</h2><p>${s.wins}勝 / ${s.history.length}戦。${view!.online.requiresNewRun ? "以前のルールの記録は引き続き閲覧できます。現在の対戦候補に参加するには、新しいランを始めてください。" : "保存ビルドは他のプレイヤーの対戦候補に残ります。"}</p><button class="arena-primary" data-arena="new-run" ${locked() ? "disabled" : ""}>新しいオンラインラン</button>` : ""}
        <h2>対戦履歴</h2><ol class="arena-history">${s.history.map((h) => `<li>R${h.round} ${h.winner === "player" ? "勝利" : h.winner === "draw" ? "引分" : "敗北"} <span>+$${h.total}</span></li>`).join("") || "<li>まだ対戦していません</li>"}</ol></aside>
       </div>`
       }`;
@@ -257,7 +337,7 @@ export function mountOnlinePanel(
       pairs = onlineFusionChoices(view!.run.owned).filter(
         (q) => q.a.id === p.id || q.b.id === p.id,
       );
-    return `<h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p><form data-arena-layout><div class="arena-fields">${(["x", "y", "w", "h"] as const).map((k) => `<label>${k.toUpperCase()}<input name="${k}" type="number" value="${p[k] ?? 0}" step="1"></label>`).join("")}</div><button ${busy ? "disabled" : ""}>位置・サイズを保存</button></form><label>収益の接続先<select data-arena-route><option value="">自動</option>${routeChoices(
+    return `<h2>${esc(d.name)}</h2><p>${esc(d.desc)}</p><form data-arena-layout><div class="arena-fields">${(["x", "y", "w", "h"] as const).map((k) => `<label>${k.toUpperCase()}<input name="${k}" type="number" value="${p[k] ?? 0}" step="1"></label>`).join("")}</div><button ${locked() ? "disabled" : ""}>位置・サイズを保存</button></form><label>収益の接続先<select data-arena-route><option value="">自動</option>${routeChoices(
       view!.run.owned,
       p.id,
     )
@@ -267,7 +347,7 @@ export function mountOnlinePanel(
       )
       .join(
         "",
-      )}</select></label><button data-arena="stash" ${busy ? "disabled" : ""}>未配置に戻す</button><button data-arena="sell" ${busy ? "disabled" : ""}>売却 $${R.sellValue(view!.run, p.type)}</button>${pairs.map((q) => `<button data-arena="fuse" data-a="${q.a.id}" data-b="${q.b.id}" ${busy ? "disabled" : ""}>合成 → ${esc(D.PARTS[q.recipe.into].name)}</button>`).join("")}`;
+      )}</select></label><button data-arena="stash" ${locked() ? "disabled" : ""}>未配置に戻す</button><button data-arena="sell" ${locked() ? "disabled" : ""}>売却 $${R.sellValue(view!.run, p.type)}</button>${pairs.map((q) => `<button data-arena="fuse" data-a="${q.a.id}" data-b="${q.b.id}" ${locked() ? "disabled" : ""}>合成 → ${esc(D.PARTS[q.recipe.into].name)}</button>`).join("")}`;
   }
   function resizePages() {
     for (const box of root.querySelectorAll<HTMLElement>(
@@ -285,37 +365,17 @@ export function mountOnlinePanel(
     if (!view) return;
     void action(
       { kind: "placement", items: placementPayload(board) },
-      structuredClone(view.run.owned),
+      { kind: "record", board: structuredClone(view.run.owned) },
     );
   }
   async function historyMove(back: boolean) {
-    if (!view || busy) return;
-    const from = back ? undo : redo,
-      to = back ? redo : undo,
-      target = from.at(-1);
+    if (!view || locked() || disposed) return;
+    const target = (back ? undo : redo).at(-1);
     if (!target) return;
-    busy = true;
-    try {
-      const old = structuredClone(view.run.owned);
-      const next = await client.command({
-        kind: "placement",
-        items: placementPayload(target),
-      });
-      if (disposed) return;
-      from.pop();
-      to.push(old);
-      view = next;
-      message = "配置を保存しました。";
-      error = false;
-    } catch (e) {
-      message = e instanceof Error ? e.message : "更新できませんでした。";
-      error = true;
-    } finally {
-      if (!disposed) {
-        busy = false;
-        render();
-      }
-    }
+    await action(
+      { kind: "placement", items: placementPayload(target) },
+      { kind: "move", back, board: structuredClone(view.run.owned) },
+    );
   }
   root.addEventListener(
     "click",
@@ -361,7 +421,7 @@ export function mountOnlinePanel(
         paused = !paused;
         return;
       }
-      if (!view || busy) return;
+      if (!view || locked()) return;
       if (kind === "undo" || kind === "redo") {
         void historyMove(kind === "undo");
         return;
@@ -664,6 +724,9 @@ export function mountOnlinePanel(
     dispose() {
       if (disposed) return;
       disposed = true;
+      pendingHistory = null;
+      undo = [];
+      redo = [];
       stopReplay();
       events.abort();
       observer.disconnect();
