@@ -20,7 +20,7 @@ export function calendarDecor(kind: string): string {
     }
     case "calendar-list": return '<aside class="calendar-list"><h2>カレンダー <small>固定表示</small></h2><p><i class="calendar-swatch-blue" aria-hidden="true"></i>ページづくり</p><p><i class="calendar-swatch-green" aria-hidden="true"></i>読みものと寄り道</p></aside>';
     case "calendar-bell-title": return '<h2 class="calendar-bell-title">通知ベル <small>ゲーム内UI</small></h2>';
-    case "calendar-bell-note": return '<p class="calendar-bell-note">このベルは4秒ごとに<br>ページへシールド5。<br>動画は近くになく、追加分はなし。<br>通知の切替はページ内の見本で、<br>端末へ通知を送る機能はありません。</p>';
+    case "calendar-bell-note": return '<p class="calendar-bell-note">初期配置の見本：<br>ベルは基礎間隔4秒・シールド5。<br>近くに動画で+2。速度補正あり。<br>未配置では発動しません。<br>切替は表示のみ・端末への通知なし。</p>';
     case "calendar-day-mon": return day("月曜日", "5", true);
     case "calendar-day-tue": return day("火曜日", "6");
     case "calendar-day-wed": return day("水曜日", "7");

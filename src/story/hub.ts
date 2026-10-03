@@ -9,7 +9,7 @@ import {
   currentStoryEncounter,
   currentStoryStage,
 } from "./state.js";
-import type { StoryCommand, StoryHubCallbacks } from "./types.js";
+import type { StoryCommand, StoryHubCallbacks, StoryState } from "./types.js";
 
 type ObjectId =
   | "junk"
@@ -28,6 +28,7 @@ export function mountStoryHub(
   const doc = host.ownerDocument;
   let ownPreview: { viewport: HTMLElement; paper: HTMLElement } | null = null;
   let previewResize: ResizeObserver | null = null;
+  let namingDraft: { owner: StoryState; input: HTMLInputElement } | null = null;
   let postgameWorkshop = false;
   let selected: ObjectId = "junk",
     busy = false,
@@ -96,6 +97,7 @@ export function mountStoryHub(
     return panel;
   };
   function renderNaming(root: HTMLElement) {
+    const owner = callbacks.getState();
     const pane = screen("拾ったブラウザ端末 / about:blank");
     pane.append(make("div", "story-blank-mark", "□"));
     paragraph(pane, STORY_WORLD.blank, "story-blank-message");
@@ -111,6 +113,10 @@ export function mountStoryHub(
     input.required = true;
     input.autocomplete = "off";
     input.placeholder = "あなたのページの名前";
+    // A rejected command repaints the form. Preserve its live draft only for
+    // this exact naming owner, including edits made while the command waited.
+    input.value = namingDraft?.owner === owner ? namingDraft.input.value : "";
+    namingDraft = { owner, input };
     label.append(input);
     const submit = make("button", "story-primary", "このページを始める");
     submit.type = "submit";
@@ -118,6 +124,10 @@ export function mountStoryHub(
     form.append(label, submit);
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (
+        disposed || busy || namingDraft?.input !== input ||
+        callbacks.getState() !== owner || owner.phase !== "naming"
+      ) return;
       await transact({ type: "name-page", name: input.value });
     });
     pane.append(form);
@@ -594,6 +604,7 @@ export function mountStoryHub(
     const state = callbacks.getState(),
       stage = currentStoryStage(state),
       root = make("section", "story-hub");
+    if (state.phase !== "naming") namingDraft = null;
     const header = make("header", "story-header"),
       brand = make("div");
     brand.append(
@@ -742,6 +753,7 @@ export function mountStoryHub(
     dispose() {
       previewResize?.disconnect();
       disposed = true;
+      namingDraft = null;
       host.replaceChildren();
     },
   };

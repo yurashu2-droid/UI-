@@ -21,12 +21,22 @@ import { loadFeatureStylesheet } from "../feature-styles.js";
 export const loadStyles = () => loadFeatureStylesheet(stylesheetUrl);
 
 const esc = V.esc;
+// An expired Max-Age cookie is normally removed before the next request.
+function isGuestSessionLost(error: unknown) {
+  return (
+    error instanceof OnlineError &&
+    error.status === 401 &&
+    (error.code === "SESSION_REQUIRED" || error.code === "SESSION_EXPIRED")
+  );
+}
 function connectionMessage(error: unknown) {
   const recovery =
     " この画面を開いたまま、ローカル開発では対戦サービスのターミナルを確認してください。起動していない場合は、このプロジェクトで別のターミナルから npm run arena を実行します。その後「結果を確認・再接続」を押してください。";
   // Preserve domain rejection details, but not arbitrary upstream 5xx bodies.
   // Parseable JSON does not establish the response's source or commit outcome.
   if (error instanceof OnlineError) {
+    if (isGuestSessionLost(error) && error.code === "SESSION_REQUIRED")
+      return "ゲスト接続を確認できません。前のランを復元した状態ではありません。新しく始める場合は「新しいゲストで開始」を選んでください。";
     if (error.status >= 500)
       return "対戦サービスの応答を確認できませんでした。" + recovery;
     return error.message;
@@ -103,6 +113,7 @@ export function mountOnlinePanel(
   const locked = () => busy || pendingHistory !== null;
   const editable = () =>
     !!view &&
+    !guestExpired &&
     view.run.phase === "build" &&
     !locked() &&
     !view.online.requiresNewRun;
@@ -177,6 +188,12 @@ export function mountOnlinePanel(
     error = false;
     render();
   }
+  function retireGuestIfLost(e: unknown) {
+    if (!isGuestSessionLost(e)) return false;
+    guestExpired = true;
+    cancelDrag();
+    return true;
+  }
   function rejectHistory(e: unknown) {
     // Keep the same in-memory effect for the client's unresolved command.
     // This follows client.ts: 408/429 do not disprove an earlier commit.
@@ -202,7 +219,10 @@ export function mountOnlinePanel(
       if (disposed) return;
       reconcileHistory(next);
       view = next;
-    } catch {}
+    } catch (refreshError) {
+      if (!disposed && retireGuestIfLost(refreshError))
+        message = connectionMessage(refreshError);
+    }
   }
   async function action(
     command: Command,
@@ -213,7 +233,7 @@ export function mountOnlinePanel(
           : "clear",
     },
   ) {
-    if (!view || locked() || disposed) return;
+    if (!view || guestExpired || locked() || disposed) return;
     pendingHistory = { runId: view.online.id, revision: view.revision, effect };
     busy = true;
     error = false;
@@ -231,8 +251,7 @@ export function mountOnlinePanel(
       if (disposed) return;
       rejectHistory(e);
       error = true;
-      if (e instanceof OnlineError && e.code === "SESSION_EXPIRED")
-        guestExpired = true;
+      retireGuestIfLost(e);
       message = connectionMessage(e);
       await refreshAfterConflict(e);
     } finally {
@@ -254,8 +273,7 @@ export function mountOnlinePanel(
       if (disposed) return;
       rejectHistory(e);
       error = true;
-      if (e instanceof OnlineError && e.code === "SESSION_EXPIRED")
-        guestExpired = true;
+      retireGuestIfLost(e);
       message = connectionMessage(e);
       await refreshAfterConflict(e);
     } finally {
@@ -694,12 +712,20 @@ export function mountOnlinePanel(
     "pointermove",
     (e) => {
       if (!drag) return;
+      if (disposed || guestExpired) {
+        cancelDrag();
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       const board = root.querySelector<HTMLElement>(
-          '[data-arena-board="self"]',
-        )!,
-        scale = board.getBoundingClientRect().width / 960;
+        '[data-arena-board="self"]',
+      );
+      if (!board) {
+        cancelDrag();
+        return;
+      }
+      const scale = board.getBoundingClientRect().width / 960;
       draft = placeItem(
         drag.board,
         drag.id,
@@ -717,6 +743,10 @@ export function mountOnlinePanel(
     "pointerup",
     (e) => {
       if (!drag) return;
+      if (disposed || guestExpired) {
+        cancelDrag();
+        return;
+      }
       e.stopPropagation();
       const old = drag;
       drag = null;
@@ -737,8 +767,10 @@ export function mountOnlinePanel(
   );
   function cancelDrag() {
     if (drag) {
+      const pointer = drag.pointer;
       drag = null;
       draft = null;
+      if (root.hasPointerCapture(pointer)) root.releasePointerCapture(pointer);
       render();
     }
   }
@@ -905,8 +937,7 @@ export function mountOnlinePanel(
     .catch((e) => {
       if (!disposed) {
         error = true;
-        if (e instanceof OnlineError && e.code === "SESSION_EXPIRED")
-          guestExpired = true;
+        retireGuestIfLost(e);
         message = connectionMessage(e);
         render();
       }
