@@ -2182,30 +2182,129 @@ function buildBook() {
   openModal(`<div class="modal-inner bd">${modalHead("BUILD BOOK", "構成例図鑑")}
     <p class="muted">配置と相性を調べるための完成構成例です。入手費用・必要な処理能力・弱点を確認して使ってください。実験室では読み込んで中身を触れます。「対戦相手にする」がある構成は相手にも選べます。</p>
     <div class="bd-grid">${cards}</div>
-    <h3 class="bd-h">相性表 <small>行が自分・列が相手。両者 閲覧者${Lab.MATCH_HP}・各自の管理画面つき。実際のエンジンで計算</small></h3>
-    <div id="bd-matrix" class="bd-matrix"><p class="muted">計算中…</p></div>
+    <h3 class="bd-h">相性表 <small>行が自分・列が相手。両者 閲覧者${Lab.DEFAULT_CONDITIONS.hp}・CPU${Lab.DEFAULT_CONDITIONS.capacity}・管理画面${Lab.DEFAULT_CONDITIONS.adminSlots}枠（各自の設備）。共通条件で実際のエンジンを使用</small></h3>
+    <div id="bd-matrix" class="bd-matrix"></div>
     <div class="modal-footer"><button data-close-modal class="primary">閉じる</button></div></div>`);
-  window.setTimeout(() => {
-    const host = document.getElementById("bd-matrix");
-    if (!host) return;
-    const { list, cells, wins } = Lab.roundRobin();
-    const order = list.map((_, i) => i).sort((a, b) => wins[b] - wins[a]);
-    const head = `<tr><th></th>${order.map((j) => `<th class="${list[j].build ? "is-build" : ""}" title="${esc(list[j].name)}">${esc(list[j].name.slice(0, 5))}</th>`).join("")}<th>勝</th></tr>`;
-    const rows = order
-      .map((i) => {
-        const tds = order
-          .map((j) => {
-            const c = cells[i][j];
-            if (!c) return `<td class="bd-self">—</td>`;
-            const k = c.winner === "player" ? "w" : c.winner === "draw" ? "d" : "l";
-            return `<td class="bd-${k}" title="${esc(list[i].name)} vs ${esc(list[j].name)}：${c.time.toFixed(1)}秒 / 残り ${Math.round(c.hpA * 100)}% 対 ${Math.round(c.hpB * 100)}%">${k === "w" ? "勝" : k === "d" ? "分" : "負"}<small>${c.time.toFixed(0)}s</small></td>`;
+  const host = $("#bd-matrix"), loadingHead = host.parentElement!;
+  let disposed = false, generation = 0;
+  let active: AbortController | undefined;
+  const ownsOpenDialog = (): boolean => !disposed && modalFeatureDispose === feature.dispose &&
+    host.isConnected && $<HTMLDialogElement>("#modal").open;
+  const feature = deferredModalFeature(host, async () => {
+    try {
+      const helper = await import("./buildlab-async.js");
+      // Native close can precede its queued close event while these nodes remain connected.
+      if (!ownsOpenDialog()) feature.dispose();
+      return helper;
+    } catch (error) {
+      if (!ownsOpenDialog()) feature.dispose();
+      throw error;
+    }
+  }, ({ roundRobinAsync }) => {
+    if (!ownsOpenDialog()) return { dispose() {} };
+    const status = document.createElement("p"), progress = document.createElement("progress"),
+      action = document.createElement("button"), result = document.createElement("div");
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    status.setAttribute("aria-atomic", "true");
+    progress.setAttribute("aria-label", "相性表の計算進捗");
+    action.type = "button";
+    host.replaceChildren(status, progress, action, result);
+    const calculate = () => {
+      if (!ownsOpenDialog()) return;
+      active?.abort();
+      const controller = new AbortController(), token = ++generation;
+      active = controller;
+      const current = () => ownsOpenDialog() && generation === token && active === controller && !controller.signal.aborted;
+      let announced = -1, completedMatches = 0, totalMatches = 0;
+      progress.hidden = false;
+      progress.max = 1;
+      progress.value = 0;
+      action.textContent = "計算を中止";
+      const stopped = (message: string) => {
+        status.textContent = message;
+        progress.hidden = true;
+        // Keep the live control itself, preserving only focus it actually still owns.
+        action.textContent = "計算を再試行";
+        action.onclick = () => {
+          if (ownsOpenDialog() && action.isConnected && generation === token && active === controller && controller.signal.aborted)
+            calculate();
+        };
+      };
+      action.onclick = () => {
+        if (!current() || !action.isConnected) return;
+        controller.abort();
+        stopped(`計算を中止しました（${completedMatches} / ${totalMatches}試合）。`);
+      };
+      void roundRobinAsync(undefined, {
+        signal: controller.signal,
+        onProgress: ({ completed, total }) => {
+          if (!current()) { controller.abort(); return; }
+          completedMatches = completed;
+          totalMatches = total;
+          progress.max = Math.max(1, total);
+          progress.value = completed;
+          const percent = total ? Math.floor(completed / total * 10) * 10 : 100;
+          if (percent !== announced) {
+            announced = percent;
+            status.textContent = `計算中… ${percent}%（${completed} / ${total}試合）`;
+          }
+        },
+        schedule: resume => {
+          // The helper uses soft batches; one real match is indivisible, not an 8ms guarantee.
+          const timer = window.setTimeout(() => {
+            if (current()) resume();
+            else controller.abort();
+          }, 0);
+          return () => window.clearTimeout(timer);
+        },
+      }).then(({ list, cells, wins }) => {
+        if (!current()) { controller.abort(); return; }
+        const order = list.map((_, i) => i).sort((a, b) => wins[b] - wins[a]);
+        const head = `<tr><th></th>${order.map((j) => `<th class="${list[j].build ? "is-build" : ""}" title="${esc(list[j].name)}">${esc(list[j].name.slice(0, 5))}</th>`).join("")}<th>勝</th></tr>`;
+        const rows = order
+          .map((i) => {
+            const tds = order
+              .map((j) => {
+                const c = cells[i][j];
+                if (!c) return `<td class="bd-self">—</td>`;
+                const k = c.winner === "player" ? "w" : c.winner === "draw" ? "d" : "l";
+                return `<td class="bd-${k}" title="${esc(list[i].name)} vs ${esc(list[j].name)}：${c.time.toFixed(1)}秒 / 残り ${Math.round(c.hpA * 100)}% 対 ${Math.round(c.hpB * 100)}%">${k === "w" ? "勝" : k === "d" ? "分" : "負"}<small>${c.time.toFixed(0)}s</small></td>`;
+              })
+              .join("");
+            return `<tr><th class="${list[i].build ? "is-build" : ""}">${esc(list[i].name)}</th>${tds}<td class="bd-wins">${wins[i]}</td></tr>`;
           })
           .join("");
-        return `<tr><th class="${list[i].build ? "is-build" : ""}">${esc(list[i].name)}</th>${tds}<td class="bd-wins">${wins[i]}</td></tr>`;
-      })
-      .join("");
-    host.innerHTML = `<table>${head}${rows}</table>`;
-  }, 30);
+        result.innerHTML = `<table>${head}${rows}</table>`;
+        status.textContent = `計算完了：${completedMatches} / ${totalMatches}試合（100%）`;
+        const follow = document.activeElement === action;
+        progress.remove();
+        action.remove();
+        if (follow && current() && document.activeElement === document.body) {
+          const close = loadingHead.querySelector<HTMLButtonElement>("[data-close-modal]");
+          if (close?.isConnected && !close.disabled) close.focus({ preventScroll: true });
+        }
+      }).catch((error: unknown) => {
+        if (!current()) return;
+        controller.abort();
+        stopped("相性表を計算できませんでした。" + (error instanceof Error ? " " + error.message : ""));
+      });
+    };
+    calculate();
+    return { dispose() { generation++; active?.abort(); } };
+  }, { loadingHead, closeSelector: "[data-close-modal]" });
+  const start = feature.start, dispose = feature.dispose;
+  feature.start = () => {
+    if (!ownsOpenDialog()) { feature.dispose(); return Promise.resolve(); }
+    return start();
+  };
+  feature.dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    dispose();
+  };
+  modalFeatureDispose = feature.dispose;
+  void feature.start();
 }
 function settings() {
   openModal(

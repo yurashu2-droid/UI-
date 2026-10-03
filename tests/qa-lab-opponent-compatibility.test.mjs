@@ -9,6 +9,9 @@ import vm from "node:vm";
 import { transformSync } from "esbuild";
 import { parseFragment } from "parse5";
 import { BUILDS } from "../src/builds.js";
+import { createDeferredMount } from "../src/feature-loader.js";
+import { roundRobinAsync } from "../src/buildlab-async.js";
+import { ElementAdapter } from "./support/raid-dom-adapter.mjs";
 
 // Frozen continuation baseline, captured before adding b_search_documents.
 // Lab saves persist only the numeric stage, so order is part of save compatibility.
@@ -22,12 +25,12 @@ const existingIds = [
   "site_github_releases", "site_hacker_news", "site_google_maps", "site_geocities", "site_bandcamp", "site_govuk",
 ];
 
-test("QA: all 39 established laboratory opponent indices preserve saved meaning with only the reviewed chat workspace appended", () => {
-  const reviewedIds=[...existingIds,"site_trello","site_gmail","site_calendar","site_figma"];
+test("QA: all 40 established laboratory opponent indices preserve saved meaning with only the reviewed notebook appended", () => {
+  const reviewedIds=[...existingIds,"site_trello","site_gmail","site_calendar","site_figma","site_slack"];
   const currentIds=R.labEnemies().map(enemy=>enemy.id);
   assert.deepEqual(currentIds.slice(0,reviewedIds.length),reviewedIds);
-  assert.deepEqual(currentIds.slice(reviewedIds.length),["site_slack"]);
-  for (const [index,id] of [...reviewedIds,"site_slack"].entries()) {
+  assert.deepEqual(currentIds.slice(reviewedIds.length),["site_notion"]);
+  for (const [index,id] of [...reviewedIds,"site_notion"].entries()) {
     const run=R.newRun("lab");run.stage=index;
     const restored=JSON.parse(JSON.stringify(run));
     assert.equal(R.validateRun(restored),true);
@@ -55,11 +58,31 @@ function appFunction(name, nextName) {
   return transformSync(source.slice(from,to),{loader:"ts",target:"es2022"}).code;
 }
 
-test("QA: generated compact build cards expose player loading without invalid enemy actions", () => {
-  let markup="";
-  vm.runInNewContext(appFunction("buildBook","settings")+"\nbuildBook();",{
-    BUILDS,Lab,D,esc:V.esc,modalHead:()=>"",openModal(html){markup=html;},window:{setTimeout(){}},
-  });
+test("QA: generated compact build cards expose player loading without invalid enemy actions", async () => {
+  let markup="", calculations=0;
+  const document={};
+  class HostElement extends ElementAdapter {
+    get isConnected(){return this===document.body||!!this.parentElement?.isConnected;}
+  }
+  document.createElement=tag=>new HostElement(document,tag);
+  document.body=document.createElement("body");document.activeElement=document.body;
+  const modal={open:true},allElements=node=>[node,...node.children.flatMap(allElements)];
+  const source=readFileSync(new URL("../src/app.ts",import.meta.url),"utf8");
+  const deferredSource=source.match(/^function deferredModalFeature[^]*?^}/m)?.[0];
+  assert.ok(deferredSource,"actual deferred feature declaration");
+  const context={BUILDS,Lab,D,document,createDeferredMount,AbortController,
+    esc:V.esc,modalHead:()=>"",modalFeatureDispose:undefined,
+    openModal(html){markup=html;document.body.innerHTML=html;},
+    $(selector){if(selector==="#modal")return modal;const found=allElements(document.body).find(node=>node.getAttribute("id")===selector.slice(1));assert.ok(found,selector);return found;},
+    loadMatrixModule:async()=>({roundRobinAsync(...args){calculations++;return roundRobinAsync(...args);}}),
+    window:{setTimeout,clearTimeout},
+  };
+  const book=appFunction("buildBook","settings").replace('import("./buildlab-async.js")','loadMatrixModule()');
+  vm.runInNewContext(transformSync(deferredSource,{loader:"ts",target:"es2022"}).code+book+"\nbuildBook(); modalFeatureDispose();",context);
+  // This test owns card generation. Execute the real deferred seam, then close
+  // before delivery; full real matrix/table lifecycle is covered by its host test.
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(calculations,0,"closed card-only probe must not calculate the matrix");
   const all=node=>[node,...(node.childNodes??[]).flatMap(all)];
   const nodes=all(parseFragment(markup));
   const attr=(node,key)=>node.attrs?.find(a=>a.name===key)?.value;

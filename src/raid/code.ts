@@ -73,6 +73,105 @@ function rawText(n: Node, depth = 0): string {
     .map((c) => rawText(c, depth + 1))
     .join(" ");
 }
+/** Local-only structural labels; never an ARIA/accessibility-name resolver. */
+function localCheckboxLabels(
+  nodes: Node[],
+  hidden: (node: Node) => boolean | undefined,
+): Map<Node, string> {
+  const html = (n: Node) =>
+    "namespaceURI" in n && n.namespaceURI === "http://www.w3.org/1999/xhtml";
+  const parent = (n: Node) => ("parentNode" in n ? n.parentNode : null);
+  const ids = new Map<string, Node | null>();
+  const active = new WeakSet<Node>();
+  const labels = new Map<Node, { control?: Node; invalid: boolean }>();
+  // nodes is already bounded and in tree order. Index every document-tree ID,
+  // including hidden/foreign nodes, so an excluded duplicate cannot become a
+  // false unique match. Template contents belong to a separate, omitted tree.
+  for (const n of nodes) {
+    const id = attr(n, "id"),
+      p = parent(n),
+      name = tag(n);
+    if (id) ids.set(id, ids.has(id) ? null : n);
+    if (
+      (!p || active.has(p)) &&
+      (!name || html(n)) &&
+      !hidden(n) &&
+      attr(n, "inert") === undefined &&
+      name !== "datalist" &&
+      (!omit.has(name) || name === "input")
+    )
+      active.add(n);
+    if (html(n) && name === "label") labels.set(n, { invalid: false });
+  }
+  // A label cannot contain other labels or unrelated labelable controls.
+  // Each ancestry walk is bounded by the existing depth-64 source guard;
+  // there are no per-label whole-document searches or selector evaluation.
+  for (const n of nodes) {
+    if (!html(n)) continue;
+    const name = tag(n),
+      own = labels.get(n),
+      labelable =
+        name === "input"
+          ? attr(n, "type")?.toLowerCase() !== "hidden"
+          : [
+              "button",
+              "meter",
+              "output",
+              "progress",
+              "select",
+              "textarea",
+            ].includes(name);
+    if (!own && !labelable) continue;
+    for (let p = parent(n); p; p = parent(p)) {
+      const ancestor = labels.get(p);
+      if (!ancestor) continue;
+      if (own) {
+        own.invalid = true;
+        ancestor.invalid = true;
+      } else if (ancestor.control) ancestor.invalid = true;
+      else ancestor.control = n;
+    }
+  }
+  const text = (n: Node): string => {
+    if (!active.has(n) || omit.has(tag(n))) return "";
+    if (n.nodeName === "#text" && "value" in n) return n.value;
+    return children(n).map(text).join(" ");
+  };
+  const selected = new Map<
+    Node,
+    { node: Node; text: string; nested: boolean }
+  >();
+  for (const [n, info] of labels) {
+    if (!active.has(n) || info.invalid) continue;
+    const id = attr(n, "for"),
+      target =
+        id === undefined
+          ? info.control
+          : id && !/[\u0000-\u0020\u007f]/.test(id)
+            ? ids.get(id)
+            : undefined;
+    if (
+      !target ||
+      !html(target) ||
+      !active.has(target) ||
+      tag(target) !== "input" ||
+      attr(target, "type")?.toLowerCase() !== "checkbox" ||
+      (info.control && info.control !== target)
+    )
+      continue;
+    const caption = clean(text(n));
+    if (!caption) continue;
+    const nested = info.control === target,
+      previous = selected.get(target);
+    // Preserve existing wrapped-label output even if an extra external label
+    // appears first; otherwise take the first eligible label in source order.
+    if (!previous || (nested && !previous.nested))
+      selected.set(target, { node: n, text: caption, nested });
+  }
+  return new Map(
+    [...selected.values()].map((label) => [label.node, label.text]),
+  );
+}
 export function analyzeStaticCode(
   html: string,
   externalStyles: (string | { css: string; url: string })[] = [],
@@ -166,6 +265,7 @@ function analyzeCode(
         ? []
         : [c, ...descendants(c)],
     );
+  const localLabels = local ? localCheckboxLabels(nodes, hidden) : undefined;
   const candidates: Candidate[] = [];
   let count = 0,
     order = 0,
@@ -258,11 +358,15 @@ function analyzeCode(
       label = label || "検索";
     } else if (
       name === "label" &&
-      descendants(n).some(
-        (c) => tag(c) === "input" && attr(c, "type") === "checkbox",
-      )
-    )
+      (localLabels
+        ? localLabels.has(n)
+        : descendants(n).some(
+            (c) => tag(c) === "input" && attr(c, "type") === "checkbox",
+          ))
+    ) {
       kind = "checkbox";
+      if (localLabels) label = localLabels.get(n)!;
+    }
     if (kind && label) {
       count++;
       const bucket = kind + ":" + region,
