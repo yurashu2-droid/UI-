@@ -72,7 +72,10 @@ function color(s: string) {
     return "#" + [...s.slice(1)].map((c) => c + c).join("");
   return Object.hasOwn(names, s) ? names[s] : undefined;
 }
-type StyleOptions = { localOpaqueRgb?: boolean };
+type StyleOptions = {
+  localOpaqueRgb?: boolean;
+  localInputTypeSelectors?: boolean;
+};
 /**
  * Local-only literal sRGB subset, not a browser color/compositing engine.
  * Decimal numbers (no exponents), optional percentages, comma or space syntax.
@@ -275,19 +278,95 @@ type Part = {
   id?: string;
   classes: string[];
   child?: boolean;
+  inputType?: "submit" | "button";
 };
 type Rule = { parts: Part[]; style: SafeStyle; score: number; order: number };
-function selector(s: string): Part[] | null {
+/** Detect real attribute syntax without reinterpreting quoted/comment data. */
+function hasAttributeSelector(prelude: string): boolean {
+  let quote = "";
+  for (let i = 0; i < prelude.length; i++) {
+    const c = prelude[i];
+    if (c === "\\") i++;
+    else if (quote) {
+      if (c === quote) quote = "";
+    } else if (c === '"' || c === "'") quote = c;
+    else if (c === "/" && prelude[i + 1] === "*") {
+      const end = prelude.indexOf("*/", i + 2);
+      if (end < 0) return false;
+      i = end + 1;
+    } else if (c === "[") return true;
+  }
+  return false;
+}
+/**
+ * Local attribute-bearing lists only. Keep the legacy raw-comma budget, but
+ * never expose selectors inside quoted values or unsupported functions.
+ * Comments/escapes are outside
+ * this deliberately small subset, even when otherwise-valid siblings exist.
+ */
+function localAttributeSelectors(prelude: string): string[] {
+  const bounded = prelude.split(",").slice(0, 128).join(",");
+  if (/\\|\/\*/.test(bounded)) return [];
+  const out: string[] = [];
+  let start = 0,
+    quote = "",
+    bracket = false,
+    parentheses = 0;
+  for (let i = 0; i < bounded.length; i++) {
+    const c = bounded[i];
+    if (quote) {
+      if (c === quote) quote = "";
+      else if (/[\n\r\f]/.test(c)) return [];
+    } else if (c === '"' || c === "'") quote = c;
+    else if (c === "[") {
+      if (bracket) return [];
+      bracket = true;
+    } else if (c === "]") {
+      if (!bracket) return [];
+      bracket = false;
+    } else if (c === "(" && !bracket) parentheses++;
+    else if (c === ")" && !bracket) {
+      if (!parentheses) return [];
+      parentheses--;
+    } else if (c === "," && !bracket && !parentheses) {
+      out.push(bounded.slice(start, i));
+      start = i + 1;
+    }
+  }
+  if (!quote && !bracket && !parentheses) out.push(bounded.slice(start));
+  return out;
+}
+function selector(s: string, localInputTypeSelectors: boolean): Part[] | null {
+  if (localInputTypeSelectors && s.includes("[")) {
+    // Normalize only exact literal type syntax, not arbitrary CSS tokens.
+    // Values are not trimmed inside quotes; CSS whitespace is ASCII-only.
+    if (/[^\S \t\n\r\f]|\\|\/\*/.test(s)) return null;
+    s = s.replace(
+      /\[[ \t\n\r\f]*type[ \t\n\r\f]*=[ \t\n\r\f]*(?:"(submit|button)"|'(submit|button)'|(submit|button))[ \t\n\r\f]*\]/gi,
+      (_match, double: string, single: string, bare: string) =>
+        `[type=${(double || single || bare).toLowerCase()}]`,
+    );
+  }
   const tokens = s.replace(/>/g, " > ").trim().split(/\s+/);
   const out: Part[] = [];
   let child = false;
-  for (const t of tokens) {
+  for (let t of tokens) {
     if (t === ">") {
       if (!out.length || child) return null;
       child = true;
       continue;
     }
     if (out.length >= CSS_LIMITS.selectorParts) return null;
+    let inputType: Part["inputType"];
+    if (localInputTypeSelectors && t.includes("[")) {
+      const typed =
+        /^input((?:[.#][a-zA-Z][a-zA-Z0-9_-]{0,47})*)\[type=(submit|button)\]((?:[.#][a-zA-Z][a-zA-Z0-9_-]{0,47})*)$/i.exec(
+          t,
+        );
+      if (!typed) return null;
+      inputType = typed[2].toLowerCase() as Part["inputType"];
+      t = "input" + typed[1] + typed[3];
+    }
     if (
       !/^(?:[a-z][a-z0-9-]*)?(?:[.#][a-zA-Z][a-zA-Z0-9_-]{0,47})*$/.test(t) ||
       !t
@@ -298,6 +377,7 @@ function selector(s: string): Part[] | null {
       tag: head,
       classes: [],
       ...(child ? { child: true } : {}),
+      ...(inputType ? { inputType } : {}),
     };
     child = false;
     for (const m of t.matchAll(/([.#])([a-zA-Z][a-zA-Z0-9_-]{0,47})/g)) {
@@ -313,7 +393,7 @@ function selector(s: string): Part[] | null {
 /** Scan only top-level blocks, respecting strings/comments; all at-rules are skipped as a unit. */
 function blocks(
   css: string,
-  emit: (prelude: string, body: string) => void,
+  emit: (prelude: string, body: string, rawPrelude: string) => void,
 ): boolean {
   let i = 0,
     count = 0;
@@ -336,9 +416,8 @@ function blocks(
   }
   while (i < css.length) {
     if (++count > CSS_LIMITS.blocks) return true;
-    const prelude = until("{;")
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .trim();
+    const rawPrelude = until("{;");
+    const prelude = rawPrelude.replace(/\/\*[\s\S]*?\*\//g, "").trim();
     if (css[i] === ";") {
       i++;
       continue;
@@ -359,7 +438,7 @@ function blocks(
     if (depth) break;
     const body = css.slice(start, i - 1);
     // Only real nested blocks are unsupported; braces in inert data are not nesting.
-    if (!prelude.startsWith("@") && !nested) emit(prelude, body);
+    if (!prelude.startsWith("@") && !nested) emit(prelude, body, rawPrelude);
   }
   return false;
 }
@@ -378,22 +457,33 @@ export function createSafeStyleReader(
       break;
     }
     limited =
-      blocks(css, (prelude, body) => {
+      blocks(css, (prelude, body, rawPrelude) => {
         const style = safeDeclarations(body, options);
         if (!Object.keys(style).length) return;
-        for (const s of prelude.split(",").slice(0, 128)) {
+        const localAttributes =
+          !!options.localInputTypeSelectors && hasAttributeSelector(rawPrelude);
+        const selectors = localAttributes
+          ? localAttributeSelectors(rawPrelude)
+          : prelude.split(",").slice(0, 128);
+        for (const s of selectors) {
           if (rules.length >= CSS_LIMITS.rules) {
             limited = true;
             break;
           }
-          const parts = selector(s);
+          // Legacy splitting may expose a quoted bracket fragment. It must
+          // never opt that fragment into the new local attribute grammar.
+          const parts = selector(s, localAttributes);
           if (!parts) continue;
           const rule = {
             parts,
             style,
             score: parts.reduce(
               (n, p) =>
-                n + (p.id ? 100 : 0) + p.classes.length * 10 + (p.tag ? 1 : 0),
+                n +
+                (p.id ? 100 : 0) +
+                p.classes.length * 10 +
+                (p.inputType ? 10 : 0) +
+                (p.tag ? 1 : 0),
               0,
             ),
             order: rules.length,
@@ -414,6 +504,13 @@ export function createSafeStyleReader(
   const matches = (n: Node, p: Part) =>
     (!p.tag || tag(n) === p.tag) &&
     (!p.id || attr(n, "id") === p.id) &&
+    (!p.inputType ||
+      ("namespaceURI" in n &&
+        n.namespaceURI === "http://www.w3.org/1999/xhtml" &&
+        "attrs" in n &&
+        n.attrs
+          .find((a) => a.name === "type" && !a.namespace)
+          ?.value.replace(/[A-Z]/g, (c) => c.toLowerCase()) === p.inputType)) &&
     p.classes.every((c) => classList(n).includes(c));
   const match = (n: Node, r: Rule) => {
     // Pure descendants never need backtracking: preserve their linear walk.

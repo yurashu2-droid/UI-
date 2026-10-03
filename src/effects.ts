@@ -16,6 +16,7 @@ import { advancePagination } from "./catalog/pagination.js";
 import { setSubscriptionState } from "./catalog/subscription-state.js";
 import { setFollowState } from "./catalog/follow-state.js";
 import { setNativeToggleState } from "./catalog/toggle-state.js";
+import { setNativeChoiceState } from "./catalog/choice-state.js";
 import { applyAudienceFeedback } from "./catalog/audience-feedback.js";
 import { applyHistoryFeedback, historyFeedback } from "./catalog/history-render.js";
 
@@ -294,6 +295,7 @@ class Effects {
     );
     if (!btns.length) return;
     const i = btns.findIndex((b) => b.classList.contains("current"));
+    if (setNativeChoiceState(btns[(i + 1) % btns.length])) return;
     btns.forEach((b) => b.classList.remove("current"));
     btns[(i + 1) % btns.length].classList.add("current");
   }

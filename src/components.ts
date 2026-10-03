@@ -153,7 +153,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "go_ads":
       return `<article class="native-result native-search-ad"><div class="result-address"><b>スポンサー</b><i>ads.example / ui</i><span>⋮</span></div><a href="#" data-ui="link">${text(p, "あなたのサイトを、収益化。")}</a><p>検索するたびに広がる可能性。<br>その言葉が、次のアクセスをつくる。</p></article>`;
     case "go_tabs":
-      return `<nav class="native-tabs" aria-label="検索カテゴリ">${["すべて", "画像", "動画", "ニュース", "ショッピング"].map((s, i) => `<button type="button" class="${i ? "" : "current"}" data-ui="tab">${s}</button>`).join("")}</nav>`;
+      return `<nav class="native-tabs" aria-label="検索カテゴリ">${["すべて", "画像", "動画", "ニュース", "ショッピング"].map((s, i) => `<button type="button" class="${i ? "" : "current"}" data-ui="tab"${i ? "" : ' aria-current="true"'}>${s}</button>`).join("")}</nav>`;
     case "go_voice":
       return `<button type="button" class="native-button voice-button" data-ui="voice" aria-label="音声検索UIの反応をプレビュー" title="ページ内の操作デモです。音声の録音・認識はしません。">${icon("mic")}</button>`;
     case "go_result":
@@ -185,7 +185,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "gov_form":
       return `<fieldset class="native-form"><legend>電子申請</legend><div class="form-subtitle">必要事項を確認し、送信してください。</div><div class="empty-container"><label>申請者氏名<input placeholder="氏名を入力" aria-label="申請者氏名"></label><small>UIを内側に置くと、この案内欄を置き換えます。</small></div><div class="container-slot"></div><span class="accepted-stamp">受理</span></fieldset>`;
     case "gov_font":
-      return `<div class="native-font"><span>文字サイズ</span><div>${["小", "中", "大"].map((v, n) => `<button type="button" data-ui="font" class="${n === 1 ? "current" : ""}">${v}</button>`).join("")}</div></div>`;
+      return `<div class="native-font"><span>文字サイズ</span><div>${["小", "中", "大"].map((v, n) => `<button type="button" data-ui="font" class="${n === 1 ? "current" : ""}"${n === 1 ? ' aria-current="true"' : ""}>${v}</button>`).join("")}</div></div>`;
     case "gov_notice":
       return `<aside class="native-notice"><b>お知らせ</b><span>${text(p, "ただいま各種手続きを受け付けています。")}</span>${icon("chevron")}</aside>`;
     case "gov_breadcrumb":

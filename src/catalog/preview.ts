@@ -3,9 +3,11 @@ import {previewPagination} from "./pagination.js";
 import {setSubscriptionState} from "./subscription-state.js";
 import {setFollowState} from "./follow-state.js";
 import {setNativeToggleState} from "./toggle-state.js";
+import {setNativeChoiceState} from "./choice-state.js";
 /** Cosmetic local demonstration only. This helper has no battle, network or currency access. */
 export function previewCatalogueAction(control: HTMLElement, node: HTMLElement | null): boolean {
   const kind = control.dataset.ui;
+  if ((kind === 'tab' || kind === 'font') && setNativeChoiceState(control)) return true;
   if (kind === 'caption' || kind === 'notify' || kind === 'wish') {
     setNativeToggleState(control, !control.classList.contains('is-on'));
     return true;

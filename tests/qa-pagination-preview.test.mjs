@@ -199,11 +199,14 @@ for (const type of ["go_tabs", "gov_font"]) {
       effects.act(node, type);
       assert.equal(buttons.filter(button => button.classList.contains("current")).length, 1);
       assert.equal(buttons.findIndex(button => button.classList.contains("current")), (initial + turn) % buttons.length);
-      assert.equal(node.querySelectorAll("[data-page],[aria-current]").length, 0);
+      assert.equal(node.querySelectorAll('[data-page],[aria-current="page"]').length, 0);
+      assert.deepEqual(buttons.filter(button => button.getAttribute("aria-current") === "true"),
+        buttons.filter(button => button.classList.contains("current")));
     }
     h.context.preview = true;
     h.click(buttons.at(-1));
     assert.equal(buttons.at(-1).classList.contains("current"), true);
     assert.equal(buttons.filter(button => button.classList.contains("current")).length, 1);
+    assert.equal(buttons.at(-1).getAttribute("aria-current"), "true");
   });
 }

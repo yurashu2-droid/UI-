@@ -286,6 +286,7 @@ function analyzeCode(
     throw Error("source-too-large");
   const reader = createSafeStyleReader(orderedStyles.map((sheet) => sheet.css), {
     localOpaqueRgb: !!local,
+    localInputTypeSelectors: !!local,
   });
   const styleFor = (n: Node, _parent: Style = {}): Style => reader.styleFor(n);
   const hidden = (n: Node) =>
