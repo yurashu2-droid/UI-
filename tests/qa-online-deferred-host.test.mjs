@@ -13,7 +13,7 @@ test("QA: actual online host retries a failed load, mounts once, and removes onl
   const start=text.indexOf("function deferredModalFeature"),end=text.indexOf("async function playRaidChallenge");
   const source=text.slice(start,end).replace('import("./online/panel.js")','loadModule()');
   assert.ok(!source.includes('import("./online/panel.js")'));
-  const el=()=>({children:[],textContent:"",setAttribute(){},replaceChildren(){this.children=[];},append(...nodes){this.children.push(...nodes);}});
+  const el=()=>({children:[],textContent:"",querySelector:()=>null,setAttribute(){},replaceChildren(){this.children=[];},append(...nodes){this.children.push(...nodes);}});
   const host=el(),head=el();
   let markup="",attempts=0,mounts=0,removed=0,disposals=0;
   head.remove=()=>removed++;
@@ -44,7 +44,7 @@ test("QA: actual online host retries a failed load, mounts once, and removes onl
 test("QA: online host withholds mount across stylesheet failure and succeeds only after CSS retry readiness", async () => {
   const text = readFileSync(process.env.UI_RAID_QA_APP_SOURCE || new URL("../src/app.ts",import.meta.url),"utf8");
   const source = text.slice(text.indexOf("function deferredModalFeature"), text.indexOf("async function playRaidChallenge")).replace('import("./online/panel.js")','loadModule()');
-  const el=()=>({children:[],textContent:"",setAttribute(){},replaceChildren(){this.children=[];},append(...nodes){this.children.push(...nodes);}});
+  const el=()=>({children:[],textContent:"",querySelector:()=>null,setAttribute(){},replaceChildren(){this.children=[];},append(...nodes){this.children.push(...nodes);}});
   const host=el(),head=el(),styles=[];let mounts=0,removed=0;
   head.remove=()=>removed++;
   const context={createDeferredMount,document:{createElement:el},modalHead:()=>'<button data-close-modal>Close</button>',

@@ -237,6 +237,8 @@ export function mountOnlinePanel(
   }
   function render() {
     if (disposed) return;
+    const previousClose = root.querySelector<HTMLButtonElement>('[data-arena="close"]');
+    const followClose = !!previousClose && document.activeElement === previousClose;
     if (routeFocus) {
       const active = document.activeElement;
       if (
@@ -360,6 +362,13 @@ export function mountOnlinePanel(
       )
         control.focus({ preventScroll: true });
       routeFocus = null;
+    }
+    // Connection readiness can replace the Close just handed off by the host.
+    if (followClose && !disposed && root.isConnected && host.contains(root) && document.activeElement === document.body) {
+      const dialog = root.closest<HTMLDialogElement>("dialog");
+      const close = root.querySelector<HTMLButtonElement>('[data-arena="close"]');
+      if ((!dialog || dialog.open) && close?.isConnected && !close.disabled)
+        close.focus({ preventScroll: true });
     }
   }
   function routeControls(p: Item) {

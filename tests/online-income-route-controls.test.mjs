@@ -803,9 +803,10 @@ test("delayed route responses do not steal deliberate focus or reopen a disposed
   close.focus();
   pending.release();
   await h.flush();
+  assert.equal(close.isConnected, false, "the response actually replaced the old Close");
   assert.ok(
-    h.doc.focusCalls.at(-1).node === close,
-    "last requested focus stays on the deliberate target",
+    h.doc.focusCalls.at(-1).node === h.node("close") && h.doc.activeElement === h.node("close"),
+    "deliberate Close focus follows its live replacement rather than the route control",
   );
   assert.ok(
     h.doc.activeElement !== h.route(),

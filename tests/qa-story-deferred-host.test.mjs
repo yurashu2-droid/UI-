@@ -23,7 +23,7 @@ function environment() {
   const elements = new Map(), requests = [], mounts = [], queuedClose = [], events = new Map();
   let markup = "", disposals = 0;
   const node = () => ({
-    children: [], textContent: "", removed: false, attributes: {},
+    children: [], textContent: "", removed: false, attributes: {}, querySelector: () => null,
     classList: { add() {}, remove() {} },
     setAttribute(name, value) { this.attributes[name] = value; },
     replaceChildren(...nodes) { this.children = nodes; },

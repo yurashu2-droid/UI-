@@ -78,5 +78,6 @@ test('optional online loading does not place the dark arena under generic modal 
   const source = await readFile(new URL('../src/app.ts', import.meta.url), 'utf8');
   const online = source.slice(source.indexOf('function onlinePanel()'), source.indexOf('async function playRaidChallenge'));
   assert.match(online, /id="online-loading-head"[^`]*<\/div><div id="online-feature-host"/);
-  assert.match(online, /#online-loading-head"\)\.remove\(\)/);
+  assert.match(online, /loadingHead\s*=\s*\$\("#online-loading-head"\)/);
+  assert.match(online, /loadingHead\.remove\(\)/);
 });

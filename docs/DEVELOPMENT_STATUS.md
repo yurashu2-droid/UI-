@@ -4,6 +4,10 @@ Ongoing development is delivered on `feat/raid-balance-async`. See [the current 
 
 ## Current user-facing workflows
 
+- Stashed items retain edited-label plus canonical identity in bounded visible rows and full title/accessible names; existing IDs, placement, saved labels and ownership stay unchanged
+- Focus owned by a replaced loading Close/retry follows only the same live optional dialog control; online connection rerenders preserve a currently focused Close. Native cancellation disposes pending delivery before its queued close event, while result-save prevention remains intact
+- A genuinely paid routing-only comparison separates charge pooling from stronger conversion and explicitly reports overloaded-opponent, unequal-budget and startup-sensitivity limits
+
 - Story workshop code and CSS load on first opening, with Close/retry and late-delivery disposal safety. State, persistence and combat stay synchronous. The isolated change removes 26,243 initial asset bytes but increases initial JS requests 4→6; startup plus first story use is 1,892 bytes larger in that isolated comparison, and browser timing remains unmeasured
 - Optional story/online stylesheets have explicit success readiness, bounded failure cleanup and fresh manual retry; emitted-module DOM-event checks prevent a cached failed preload from mounting an unstyled screen
 - Finished battle results separate measured gross income, accepted/spent/retained/unconverted charge and capped settlement payout. Missing historical telemetry is omitted, and stale ceremonies cannot overwrite newer battles

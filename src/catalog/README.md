@@ -32,6 +32,10 @@ Native version-history feedback shows a filled green marker for recoverable reco
 
 Finished story, legacy and laboratory result dialogs now offer a collapsed ledger from the actual completed battle: gross income, charge accepted/spent/retained and unconverted income. Full-receiver surplus is not mislabeled as an absent connection; charge spending does not reduce earned settlement income, and capped cash payout remains separate. The view is captured before delayed outcome presentation and never inferred from historical summaries. This changes explanation, not earnings, routing, settlement, fusion or balance.
 
+Stash rows now share the same edited-label/canonical caption as placed wrappers and route targets, with a bounded ellipsis span and complete title/accessible name. Real editor click/drag, save/reload, nested stash and individual placement/Undo preserve owned IDs and raw saved labels. This improves identity, not artwork or acquisition.
+
+Deferred story/online dialogs transfer focus only when their removed loading Close/retry actually owned it. The current live Close can also survive the online connection's immediate follow-up repaint; deliberate focus elsewhere is preserved. Native cancellation synchronously disposes pending delivery while retaining the pending-result protection. These are real-host/renderer tests with a DOM focus adapter; actual browser focus, Tab and assistive-technology acceptance remain unverified.
+
 ## Template design distinctions
 
 | Template | Structural identity | Mechanical purpose | Surrendered opportunity |

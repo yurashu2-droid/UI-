@@ -57,6 +57,16 @@ function application(initial = StorySession.createStorySession(), options = {}) 
     }
     addEventListener(name, fn) { this.events[name] = fn; }
     remove() { if (this.parent) this.parent.children = this.parent.children.filter(node => node !== this); this.parent = null; }
+    querySelector(selector) {
+      const attribute = selector.match(/^\[([^=\]]+)(?:="([^"]*)")?\]$/);
+      assert.ok(attribute, `modeled attribute selector: ${selector}`);
+      for (const child of this.children) {
+        if (Object.hasOwn(child.attributes, attribute[1]) &&
+            (attribute[2] === undefined || child.attributes[attribute[1]] === attribute[2])) return child;
+        const nested = child.querySelector(selector); if (nested) return nested;
+      }
+      return null;
+    }
     focus() {}
     showModal() { this.open = true; }
     close() { if (this.open) { this.open = false; queued.push(() => this.events.close?.({target: this})); } }

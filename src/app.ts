@@ -1180,10 +1180,10 @@ function renderStash() {
   $("#stash-count").textContent = String(stash.length);
   $("#stash-list").innerHTML =
     stash
-      .map(
-        (p) =>
-          `<button class="stash-item" data-stash-id="${p.id}" title="ドラッグしてページへ"><i style="background:${D.FACTIONS[P[p.type].faction].color}"></i>${esc(P[p.type].name)}</button>`,
-      )
+      .map((p) => {
+        const caption = esc(targetCaption(p));
+        return `<button class="stash-item" data-stash-id="${p.id}" style="max-width:100%" aria-label="${caption}" title="${caption} / ドラッグしてページへ"><i style="background:${D.FACTIONS[P[p.type].faction].color}"></i><span style="min-width:0;max-width:24ch">${caption}</span></button>`;
+      })
       .join("") || '<span class="empty-list">なし</span>';
 }
 
@@ -1652,7 +1652,7 @@ function openStoryHub() {
   openModal(`<div class="modal-inner" id="story-loading-head">${modalHead("THE LAST BROWSER","ジャンクの作業場")}</div><div class="story-host-controls"><button id="story-open-inbox" class="side-btn"></button></div><div id="story-feature-host"></div>`);
   $("#modal").classList.add("feature-modal");
   const inbox=$("#story-open-inbox");inbox.textContent=`物語の受取箱 (${storySession.inbox.length})`;inbox.onclick=storyInboxPanel;
-  const host=$("#story-feature-host");
+  const host=$("#story-feature-host"), loadingHead=$("#story-loading-head");
   const feature=deferredModalFeature(host,async()=>{
     const panel=await import("./story/panel.js");
     await panel.loadStyles();
@@ -1680,9 +1680,9 @@ function openStoryHub() {
       await raidPanel({url,kind,...(kind==="cached"&&storySession?{cachedBlueprint:StorySession.findStoryCapture(storySession,url)}:{})});
     },
     });
-    $("#story-loading-head").remove();
+    loadingHead.remove();
     return panel;
-  });
+  }, { loadingHead, closeSelector: '[data-story-action="close"]' });
   modalFeatureDispose=feature.dispose;
   void feature.start();
 }
@@ -1731,23 +1731,42 @@ async function finishStoryBattle() {
   $("#story-result-editor").onclick=()=>leaveBattle();
 }
 
-function deferredModalFeature<T>(host: HTMLElement, load: () => Promise<T>, mount: (value: T) => { dispose(): void }) {
+function deferredModalFeature<T>(host: HTMLElement, load: () => Promise<T>, mount: (value: T) => { dispose(): void }, focus?: { loadingHead: HTMLElement; closeSelector: string }) {
+  let retry: HTMLButtonElement | undefined;
+  const ownsOpenDialog = (): boolean => modalFeatureDispose === feature.dispose && host.isConnected && $<HTMLDialogElement>("#modal").open;
   const feature = createDeferredMount({
     load,
-    mount,
+    mount: value => {
+      // Capture ownership at replacement time, never across the async load.
+      const previous = focus?.loadingHead.querySelector<HTMLButtonElement>("[data-close-modal]");
+      const follow = !!previous && document.activeElement === previous;
+      const panel = mount(value);
+      if (follow && focus && ownsOpenDialog() && document.activeElement === document.body) {
+        const close = host.querySelector<HTMLButtonElement>(focus.closeSelector);
+        if (close?.isConnected && !close.disabled) close.focus({ preventScroll: true });
+      }
+      return panel;
+    },
     onLoading: () => {
+      // Only the retry control being removed may hand focus back to Close.
+      const follow = !!retry && document.activeElement === retry;
       host.replaceChildren();
+      retry = undefined;
       const status = document.createElement("p");
       status.setAttribute("role", "status");
       status.textContent = "画面を読み込んでいます…";
       host.append(status);
+      if (follow && focus && ownsOpenDialog() && document.activeElement === document.body) {
+        const close = focus.loadingHead.querySelector<HTMLButtonElement>("[data-close-modal]");
+        if (close?.isConnected && !close.disabled) close.focus({ preventScroll: true });
+      }
     },
     onError: error => {
       host.replaceChildren();
       const notice = document.createElement("p");
       notice.setAttribute("role", "alert");
       notice.textContent = "画面を読み込めませんでした。" + (error instanceof Error ? " " + error.message : "");
-      const retry = document.createElement("button");
+      retry = document.createElement("button");
       retry.type = "button";
       retry.textContent = "画面をもう一度読み込む";
       retry.onclick = () => { void feature.start(); };
@@ -1759,16 +1778,16 @@ function deferredModalFeature<T>(host: HTMLElement, load: () => Promise<T>, moun
 function onlinePanel() {
   openModal(`<div class="modal-inner" id="online-loading-head">${modalHead("ONLINE", "非同期オンライン")}</div><div id="online-feature-host"></div>`);
   $("#modal").classList.add("feature-modal");
-  const host = $("#online-feature-host");
+  const host = $("#online-feature-host"), loadingHead = $("#online-loading-head");
   const feature = deferredModalFeature(host, async () => {
     const panel = await import("./online/panel.js");
     await panel.loadStyles();
     return panel;
   }, ({ mountOnlinePanel }) => {
     const panel = mountOnlinePanel(host, { baseUrl: "/api/arena", onClose: closeModal });
-    $("#online-loading-head").remove();
+    loadingHead.remove();
     return panel;
-  });
+  }, { loadingHead, closeSelector: '[data-arena="close"]' });
   modalFeatureDispose = feature.dispose;
   void feature.start();
 }
@@ -3148,6 +3167,7 @@ document.addEventListener("keydown", (e) => {
 });
 $<HTMLDialogElement>("#modal").addEventListener("cancel", (event) => {
   if (pendingStorySettlement) { event.preventDefault(); return; }
+  modalFeatureDispose?.(); modalFeatureDispose = undefined;
   if (battle?.result) setTimeout(leaveBattle, 0);
 });
 new ResizeObserver(scheduleFit).observe($("#canvas-scroll"));
