@@ -80,6 +80,23 @@ The panel reads existing verified metadata only. `candidateCount` counts recogni
 
 The repository includes an [original inert HTML/CSS example](../../examples/local-raid/README.md) with an exact selected stylesheet link, six recognized/selected components and ten accepted selector rules. Its focused test reads the real bytes, verifies hashes and canonical geometry, and checks the HTML-only alternative. No fixture URL, network allowlist entry, source-execution path or campaign/online acquisition route is added.
 
+## Local opaque RGB colors
+
+Only the local-file analysis path opts into a finite literal sRGB subset before existing safe-style validation. This improves the colors of supported text, flat backgrounds and solid borders; it does not measure browser layout or broaden URL acquisition. Embedded styles, the one explicitly selected/matched stylesheet and inline declarations use the same reader. Existing selector/cascade/inheritance rules and all declaration/byte/block/rule/parse/Worker deadlines remain unchanged.
+
+Supported forms follow the relevant [CSS Color 4 RGB grammar](https://www.w3.org/TR/css-color-4/#rgb-functions):
+
+- `rgb()` and `rgba()` are case-insensitive aliases, with exactly three signed decimal channel literals; each may use `%`. Exponent notation is deliberately unsupported.
+- Comma syntax requires all three channels to use numbers or all percentages; optional alpha is separated by a comma. Space syntax permits mixed channel units; optional alpha follows `/`.
+- Numeric channels clamp to 0–255, percentages to 0–100%, and normalize to nearest 8-bit `#rrggbb` values. Alpha must be absent or fully opaque after clamping: a numeric value at least 1 or percentage at least 100%.
+- Only existing `color`, color-only `background`/`background-color`, one `border-color`, and the existing three-token solid-border shorthand accept the normalized value. No new properties or background-layer grammar are added.
+
+For example `rgb(18,52,86)` and `rgba(18 52 86 / 1)` become `#123456`. Nonopaque alpha, missing/extra channels, mixed comma-channel units, mixed separators, `none`, relative colors, nested functions, `var()`/`calc()`, other color spaces and resource syntax remain outside this supported subset. Unknown functions do not reach rendering, source code is never executed, and this extension makes no network request.
+
+The public/default reader remains on its previous behavior, including public captures containing RGB declarations. Existing non-RGB local captures remain identical. Newly analyzed local source with newly supported RGB can produce different style primitives, analysis counts, blueprint hashes and capture IDs; this intentional change does not rewrite an existing snapshot. Old stored RGB approximations retain their bytes and hashes even after a new RGB-aware acquisition. Local provenance, archive schemas, canonical control geometry, progression isolation and reward rules are unchanged.
+
+`tests/raid-local-rgb-colors.test.mjs` covers declaration grammar and rejection, embedded/selected/inline styles, inherited text/fills/borders, bounded rule processing, unchanged public/non-RGB whole-result hashes, Worker result verification, matching equivalent hex appearance, and old/new collection round trips. These are source/Worker/serialization checks, not browser pixels, full CSS support or a visual-fidelity percentage.
+
 ## Verified runtime blocker
 
 In this runtime, a user/network namespace can be created and public HTTPS fetches succeed. Chromium launched on `about:blank` inside the network namespace, without disabling its sandbox, aborts with process-singleton `socket() failed: Operation not permitted` (exit 134). No page data was rendered in that probe. `bwrap` also fails while attempting a NETLINK_ROUTE socket. Direct `dns.lookup` fails with EAI_AGAIN, whereas the runtime-brokered fetch works, so application-level DNS pinning has **not** been demonstrated.

@@ -284,7 +284,9 @@ function analyzeCode(
     ) > CSS_LIMITS.bytes
   )
     throw Error("source-too-large");
-  const reader = createSafeStyleReader(orderedStyles.map((sheet) => sheet.css));
+  const reader = createSafeStyleReader(orderedStyles.map((sheet) => sheet.css), {
+    localOpaqueRgb: !!local,
+  });
   const styleFor = (n: Node, _parent: Style = {}): Style => reader.styleFor(n);
   const hidden = (n: Node) =>
     attr(n, "hidden") !== undefined ||

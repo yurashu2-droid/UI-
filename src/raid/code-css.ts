@@ -72,6 +72,72 @@ function color(s: string) {
     return "#" + [...s.slice(1)].map((c) => c + c).join("");
   return Object.hasOwn(names, s) ? names[s] : undefined;
 }
+type StyleOptions = { localOpaqueRgb?: boolean };
+/**
+ * Local-only literal sRGB subset, not a browser color/compositing engine.
+ * Decimal numbers (no exponents), optional percentages, comma or space syntax.
+ * CSS Color 4 clamps channels/alpha; only fully opaque results fit our hex data.
+ */
+function opaqueRgb(value: string): string | undefined {
+  const match = /^rgba?\(([+\-.\d%,/ \t\n\r\f]+)\)$/i.exec(value);
+  if (!match) return undefined;
+  const body = match[1];
+  let channels: string[], alpha: string | undefined;
+  if (body.includes(",")) {
+    const parts = body.split(",").map((part) => part.trim());
+    if (parts.length !== 3 && parts.length !== 4) return undefined;
+    channels = parts.slice(0, 3);
+    alpha = parts[3];
+    // The legacy comma syntax cannot mix number and percentage channels.
+    if (
+      !channels.every(
+        (part) => part.endsWith("%") === channels[0].endsWith("%"),
+      )
+    )
+      return undefined;
+  } else {
+    const parts = body.split("/");
+    if (parts.length > 2) return undefined;
+    channels = parts[0].trim().split(/[ \t\n\r\f]+/);
+    alpha = parts[1]?.trim();
+    if (channels.length !== 3) return undefined;
+  }
+  const number = (token: string) =>
+    /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)%?$/.test(token) &&
+    Number.isFinite(parseFloat(token));
+  if (!channels.every(number) || (alpha !== undefined && !number(alpha)))
+    return undefined;
+  if (
+    alpha !== undefined &&
+    parseFloat(alpha) < (alpha.endsWith("%") ? 100 : 1)
+  )
+    return undefined;
+  return (
+    "#" +
+    channels
+      .map((part) => {
+        const max = part.endsWith("%") ? 100 : 255;
+        return Math.round(
+          (Math.max(0, Math.min(max, parseFloat(part))) / max) * 255,
+        )
+          .toString(16)
+          .padStart(2, "0");
+      })
+      .join("")
+  );
+}
+function localRgbValue(key: string, value: string): string {
+  if (["color", "background", "background-color", "border-color"].includes(key))
+    return opaqueRgb(value) ?? value;
+  // Replace only a whole, whitespace-separated border color token. Remaining
+  // functions/resources still fail the existing filter and three-token grammar.
+  if (key === "border")
+    return value.replace(
+      /(^|[ \t\n\r\f])(rgba?\([^()]*\))(?=$|[ \t\n\r\f])/gi,
+      (_match, space: string, rgb: string) => space + (opaqueRgb(rgb) ?? rgb),
+    );
+  return value;
+}
 const px = (s: string, max: number) =>
   /^(?:0|\d+(?:\.\d+)?px)$/.test(s) && parseFloat(s) <= max
     ? parseFloat(s)
@@ -121,17 +187,21 @@ function boundedDeclarations(input: string): string[] {
   return declarations;
 }
 /** Values are interpreted, never inserted as CSS. Unsupported functions/resources are discarded. */
-export function safeDeclarations(css: string): SafeStyle {
+export function safeDeclarations(
+  css: string,
+  options: StyleOptions = {},
+): SafeStyle {
   const out: SafeStyle = {};
   if (css.length > 4096) return out;
   for (const d of boundedDeclarations(css)) {
     const j = d.indexOf(":");
     if (j < 0) continue;
-    const key = d.slice(0, j).trim().toLowerCase(),
-      value = d
-        .slice(j + 1)
-        .trim()
-        .replace(/\s*!important\s*$/i, "");
+    const key = d.slice(0, j).trim().toLowerCase();
+    let value = d
+      .slice(j + 1)
+      .trim()
+      .replace(/\s*!important\s*$/i, "");
+    if (options.localOpaqueRgb) value = localRgbValue(key, value);
     if (/[()@\\]/.test(value) || /url|expression|javascript/i.test(value))
       continue;
     if (key === "color") {
@@ -293,7 +363,10 @@ function blocks(
   }
   return false;
 }
-export function createSafeStyleReader(sheets: string[]) {
+export function createSafeStyleReader(
+  sheets: string[],
+  options: StyleOptions = {},
+) {
   const rules: Rule[] = [],
     index = new Map<string, Rule[]>();
   let total = 0,
@@ -306,7 +379,7 @@ export function createSafeStyleReader(sheets: string[]) {
     }
     limited =
       blocks(css, (prelude, body) => {
-        const style = safeDeclarations(body);
+        const style = safeDeclarations(body, options);
         if (!Object.keys(style).length) return;
         for (const s of prelude.split(",").slice(0, 128)) {
           if (rules.length >= CSS_LIMITS.rules) {
@@ -410,7 +483,7 @@ export function createSafeStyleReader(sheets: string[]) {
       .filter((r) => match(n, r))
       .sort((a, b) => a.score - b.score || a.order - b.order);
     for (const r of candidates) Object.assign(out, r.style);
-    Object.assign(out, safeDeclarations(attr(n, "style") ?? ""));
+    Object.assign(out, safeDeclarations(attr(n, "style") ?? "", options));
     cache.set(n, out);
     return out;
   };

@@ -121,3 +121,123 @@ node --import tsx --test tests/balance-paid-counter-witness.test.mjs
 The fixed-seed script writes one JSON report to stdout. It contains the actual pre-round 7 `Run`, all 23 relevant transactions, the six real settlements, both budgets, both exact opponents, every paired result, and the losing controls. Forty intermediate/final replay states are validated and JSON-round-tripped using `R.validateRun`; the exact final inventory is compared with the unchanged pursuit harness. The full Run remains identical after all reference duels. The report records the SHA-256 fingerprint of the existing gameplay-catalog definition, which excludes cosmetic template metadata, rather than hashing the whole data source file.
 
 The focused regression test locks the actual retained items and geometry, real loss and cash ledger, no-admin nominal outputs, and asymmetric-admin losses. It makes no game-definition, shop, fusion-recipe, preset, enemy-pool, combat-version, or frozen-snapshot changes. Passing this focused test is not a claim that the full project suite, build, or browser checks were run.
+
+## Stronger paid witness: seed 217 with earned administrators
+
+The seed-122 evidence above remains unchanged, including its losses against full-administrator opponents. A separate, independently replayed witness now establishes the narrower missing result: **a genuinely paid ordinary board can defeat both recorded completed fused boards while both opponents retain `server` and `backup`**. It uses the same ten-part compact target, unchanged acquisition policy and existing opponent fixture. This adds an existence proof; it does not make the acquisition policy reliable or establish an optimal build.
+
+This second acquisition is also the **legacy eight-round expedition**. It does not establish success in the canonical fifteen-battle story. Seed 217 first completes the target **before round 6**, after four real wins and one loss, with two lives remaining. The saved state contains all eleven acquired pieces: the ten-part target and the purchased heading. There are no held, sold, deleted, refunded, fused or experimental pieces, and no post-completion geometry edits.
+
+### Actual paid state and budget
+
+| Resource or state | Before round 6 |
+| --- | ---: |
+| Ten-part ordinary target input value / load | $37 / 13 |
+| Whole retained inventory | 11 parts, $42 input value |
+| Part purchases | $42 |
+| Light server **capacity plan** `plan:srv_s` | $3; capacity 12 → 17 |
+| Six paid rerolls | $6 |
+| Total cash spending | **$51** |
+| Prior cash rewards, rounds 1–5 | $46 |
+| Cash conservation | **$10 + $46 − $51 = $5** |
+| Full retained load / paid capacity | **16 / 17**, no overload |
+| Actually earned administrators | `server` after round 2; `backup` after round 5 |
+| Base HP / engine-rounded actual starting and maximum HP | **380 / 475** |
+| Progress | 4 wins, 1 loss, 2 lives |
+
+All UI inventory is bought; no UI item loot contributes to the $42 inventory value. The capacity plan is separate from the earned `server` administrator: the plan raises capacity, while `server` raises starting/max HP by 25%. Administrator preferences in target metadata are never used as grants.
+
+The complete paid-and-selected-reward ledger is below. Cash is measured immediately after each action; the next round starts with the prior real settlement added. The reproducer also reports the actual offer list for every transaction and both declined loot claims.
+
+| Round | Action | Cash cost | Cash after action |
+| --- | --- | ---: | ---: |
+| 1 | Buy `ab_link` | $3 | $7 |
+| 1 | Buy `ab_hr` | $3 | $4 |
+| 2 | Buy `ab_link` | $3 | $7 |
+| 2 | Buy `gov_font` | $5 | $2 |
+| 2 | Claim offered `admin:server` after settlement | $0 | $12 |
+| 3 | Buy `ab_link` | $3 | $9 |
+| 3 | Buy `go_suggest` | $6 | $3 |
+| 4 | Reroll | $1 | $12 |
+| 4 | Buy `ab_link` | $3 | $9 |
+| 4 | Reroll | $1 | $8 |
+| 4 | Buy `ab_heading` | $5 | $3 |
+| 5 | Reroll | $1 | $12 |
+| 5 | Reroll | $1 | $11 |
+| 5 | Buy `gov_form` | $5 | $6 |
+| 5 | Buy `plan:srv_s` | $3 | $3 |
+| 5 | Claim offered `admin:backup` after settlement | $0 | $13 |
+| 6 | Buy `ab_link` | $3 | $10 |
+| 6 | Reroll | $1 | $9 |
+| 6 | Reroll | $1 | $8 |
+| 6 | Buy `ab_link` | $3 | $5 |
+
+The round-2 reward actually offers `gov_page`, `gov_form`, and `admin:server`; the round-5 reward offers `ab_nav`, `ab_counter`, and `admin:backup`. The public reward API claims the administrators. Round-3 and round-4 loot is declined through that same API, with no cash or inventory benefit.
+
+| Prior round | Result | Time | Cash reward | Prebattle load / capacity | Actual player HP at start |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 1 | Loss | 19.10 s | $6 | 2 / 12 | 180 |
+| 2 | Win | 10.25 s | $10 | 4 / 12 | 220 |
+| 3 | Win | 7.50 s | $10 | 7 / 12 | 325 |
+| 4 | Win | 6.15 s | $10 | 11 / 12 | 375 |
+| 5 | Win | 9.65 s | $10 | 14 / 17 | 425 |
+
+Only these five settlements fund the witness. The replay stops before round 6 combat, so no round-6 reward or later money, item, or capacity purchase is counted.
+
+### All eleven retained pieces
+
+Every piece retains its actual acquisition ID, ordinary `source` shape and empty label. In particular, p8 is not removed to substitute the smaller ten-part target for the paid board.
+
+| ID | Part | x | y | width | height |
+| --- | --- | ---: | ---: | ---: | ---: |
+| p1 | `ab_link` | 32 | 112 | 96 | 24 |
+| p2 | `ab_hr` | 32 | 208 | 864 | 8 |
+| p3 | `ab_link` | 128 | 112 | 96 | 24 |
+| p4 | `gov_font` | 32 | 72 | 576 | 32 |
+| p5 | `ab_link` | 224 | 112 | 96 | 24 |
+| p6 | `go_suggest` | 32 | 144 | 576 | 56 |
+| p7 | `ab_link` | 320 | 112 | 96 | 24 |
+| p8 | `ab_heading` | 608 | 80 | 224 | 42 |
+| p9 | `gov_form` | 16 | 16 | 920 | 240 |
+| p10 | `ab_link` | 416 | 112 | 96 | 24 |
+| p11 | `ab_link` | 512 | 112 | 96 | 24 |
+
+### Full-administrator comparisons and an explicit losing control
+
+Both sides retain `server` + `backup`, start at actual/max HP **475**, and remain within capacity. The paid board keeps its acquired capacity 17; the opponents keep the same fixture geometry, recorded administrators and comparison capacities described above. Their $74/$73 recursive input values and capacities remain unverified paid acquisition conditions. These are counterfactual reference duels, not actual expedition encounters or equal-spend contests.
+
+| Recorded opponent | Opponent load / capacity | Paid-board HP remaining in either seat | Time |
+| --- | ---: | ---: | ---: |
+| Cart `s3-candidate-1100144` | 28 / 35 | 33 | 10.80 s |
+| Six-onestop `s0-candidate-432` | 19 / 26 | 21.2 | 11.95 s |
+
+At the acquired base HP 380, phases −0.5/0/+0.5 reproduce **six paired-seat cases, twelve physical wins**, with minimum remaining HP about **21.2**. Phase zero keeps natural startup. Negative phase delays every opponent periodic clock by 0.5 s; positive phase delays every paid-board periodic clock. These are correlated side-wide timing controls, not independent per-part jitter or exhaustive robustness. Each duel uses canonical combat-v4, a 0.05 s fixed step, and no experimental rules.
+
+**The result is not robust across the tested HP range.** Separate counterfactual base HP 342 and 418 controls use the engine-rounded actual HP 428 and 523 respectively. At **base 418 / actual HP 523**, delaying the paid side by **+0.5 s** lets **Cart win in both seats**, retaining approximately **16 HP at 12.15 s**. Natural startup at that HP still wins. Across the combined three-HP/three-phase/two-opponent grid, the outcome is **34/36 physical wins**, including the twelve actual-475-HP wins; it is not an all-win HP sensitivity result. Longer survival can expose additional timed cycles, so more HP is not a monotone guarantee for this matchup.
+
+Only the opponent's comparison base HP is normalized to match the paid side's engine-rounded actual HP after `server`. The higher/lower player HP values are explicitly labeled counterfactual battle options. No acquired Run field, capacity, administrator or inventory geometry is changed for any duel.
+
+### What the acquisition study does and does not justify
+
+A separate independently replayed study used the fixed seed block **201–230**, excluding calibration seed 122. Its unchanged-policy baseline completed the exact target on **2/30** paths. Only **1/30** completed within paid capacity: seed 217. The other completion, seed 211 before round 8, retained fourteen pieces at load/capacity **21/12**. These are deterministic results for a bounded heuristic, not player population rates, an optimal-policy estimate, or proof that a better route cannot exist.
+
+An exploratory cheaper-reroll-reserve variant completed the target on **3/30** paths. Only **1/30** was within capacity at first completion; **3/30** became within capacity at some observed completed snapshot. Its overloaded battles increased from **22/194** in the baseline to **55/227**. It is a separate external acquisition-policy experiment, not a change shipped to the game or this reproducer, and the extra completions are not three equivalent full-administrator counter witnesses.
+
+The baseline's chief obstacles were obtaining six separate links, early survival, and capacity decisions. Twenty-seven paths still lacked at least one target link at their last prebattle snapshot; all encountered offers of target parts that were still missing at the end had been purchased. In sixteen of the baseline's twenty-two overloaded battles, an affordable plan had appeared earlier that round and was rerolled away before the policy's final capacity check. These observations concern the markets actually encountered; they do not establish that an alternative affordable path would preserve later purchases and victories.
+
+Do not recommend following the whole heuristic after completion. Even seed 217 later buys an unnecessary guestbook before round 8, taking retained load **16 → 19** while capacity stays **17**. It also continues paying for rerolls. The valid witness is the saved **pre-round-6** board. Practical guidance should check the full retained inventory, genuinely earned administrators, missing pieces, cash reserve and capacity before calling a board ready; the six-link shopping recipe is not promised to appear consistently. This evidence supports investigating acquisition/readiness guidance, not a combat buff or a new preset.
+
+### Reproduce the stronger witness
+
+From the repository root with existing dependencies:
+
+```sh
+node --import tsx scripts/paid-admin-counter-witness.ts
+node --import tsx --test tests/balance-paid-admin-counter-witness.test.mjs tests/balance-paid-counter-witness.test.mjs
+```
+
+[paid-admin-counter-witness.ts](../../scripts/paid-admin-counter-witness.ts) writes one portable JSON report to stdout. It imports only project modules and the existing [opponent fixture](../../fixtures/balance/paid-counter-opponents.json); no research dump or private path is a runtime dependency. It calls the unchanged `simulateCompositionPath` for seed 217 and independently replays the path only through the pre-round-6 snapshot. The report contains the **entire actual Run**, all twenty paid/selected-reward transactions with actual offers, all four reward claims including declines, every public editor move, all five real settlement summaries, the exact opponents with existing provenance, and every paired comparison.
+
+Purchases, prices, offers, rerolls, claims, moves, legal placements, canonical battle outcomes and settlements are asserted against public APIs and recorded pursuit snapshots. Persistent states are validated and JSON-round-tripped after each purchase, reroll, move, settlement and claim. The final full inventory is matched to the unchanged pursuit harness. The complete Run is asserted unchanged after all reference duels. The report includes the gameplay-catalog SHA-256 fingerprint, excluding cosmetic template metadata.
+
+The new [focused regression](../../tests/balance-paid-admin-counter-witness.test.mjs) locks the complete inventory and ledger, actual administrator offers and claims, five real prior outcomes, matched starting/max HP, unchanged fixture opponents, the twelve actual-HP wins and the higher-HP Cart loss. The command above also reruns the older seed-122 regression. This reproducer verifies one witness and its controls; it does not rerun the separate thirty-seed study, introduce its exploratory policy, or certify the whole project suite, build, browser, canonical story, a closed counter cycle, or broad balance.
