@@ -1,3 +1,4 @@
+import {withOriginalReleaseTeaching} from './helpers/original-release-teaching.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -12,8 +13,8 @@ const hash = value => createHash('sha256').update(JSON.stringify(value)).digest(
 
 test('chat workspace appends to existing opponent and template indices without changing any combat definition', () => {
   const enemies = R.labEnemies();
-  assert.equal(hash(enemies.slice(0, 39)), '755dae8bbacabe6544bc4308df396ea233a6b0abd4b3e1c232b170c9eb891e88');
-  assert.equal(hash(SITE_TEMPLATES.slice(0, 25)), '4cffc1fbfda4a601f6359aa28fc214decb783d77066309b993e4f553c41b9819');
+  assert.equal(hash(withOriginalReleaseTeaching(enemies.slice(0, 39),29)), '755dae8bbacabe6544bc4308df396ea233a6b0abd4b3e1c232b170c9eb891e88');
+  assert.equal(hash(withOriginalReleaseTeaching(SITE_TEMPLATES.slice(0, 25),15)), '4cffc1fbfda4a601f6359aa28fc214decb783d77066309b993e4f553c41b9819');
   assert.equal(hash(D.PARTS), 'a949b4d8aa8f8b8b55f60fb827bb8e5c21f62219fccbc6da05fdd570189f5fb6');
   assert.equal(enemies[39]?.id, 'site_slack');
   assert.equal(SITE_TEMPLATES[25]?.id, 'site_slack');

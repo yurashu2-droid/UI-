@@ -1,3 +1,4 @@
+import {releasesProtectionDecor} from '../src/catalog/releases-protection-render.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import D from '../src/data.js';
@@ -31,7 +32,7 @@ test('funded cover is blocked or delayed at its real clock without claiming ever
 });
 test('release chrome contains fictional notes and assets but no real download or verification action',()=>{
  const t=template();assert.ok(t);assert.equal(typeof render.releasesDecor,'function');assert.match(V.header('forge',t.pageName),/非公式/);
- for(const[kind]of t.decor){const html=knowledgeDecor(kind)||render.releasesDecor(kind);assert.ok(html,kind);assert.doesNotMatch(html,/<button|<input|<form|<script|<iframe|<img|\bsrc=|\bhref=|\bonclick=/i);}
+ for(const[kind]of t.decor){const html=knowledgeDecor(kind)||render.releasesDecor(kind)||releasesProtectionDecor(kind);assert.ok(html,kind);assert.doesNotMatch(html,/<button|<input|<form|<script|<iframe|<img|\bsrc=|\bhref=|\bonclick=/i);}
  assert.match(render.releasesDecor('release-disclaimer'),/実ファイル/);assert.match(render.releasesDecor('release-disclaimer'),/追加セット補正はありません/);
  for(const p of boardOf(t))assert.equal(V.markup(p,{theme:'forge'}),V.markup(p,{theme:'mixed'}));
 });

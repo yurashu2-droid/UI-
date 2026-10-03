@@ -22,11 +22,24 @@ export const loadStyles = () => loadFeatureStylesheet(stylesheetUrl);
 
 const esc = V.esc;
 function connectionMessage(error: unknown) {
+  const recovery =
+    " この画面を開いたまま、ローカル開発では対戦サービスのターミナルを確認してください。起動していない場合は、このプロジェクトで別のターミナルから npm run arena を実行します。その後「結果を確認・再接続」を押してください。";
+  // Preserve domain rejection details, but not arbitrary upstream 5xx bodies.
+  // Parseable JSON does not establish the response's source or commit outcome.
+  if (error instanceof OnlineError) {
+    if (error.status >= 500)
+      return "対戦サービスの応答を確認できませんでした。" + recovery;
+    return error.message;
+  }
   if (error instanceof Error && error.name === "TimeoutError")
-    return "接続がタイムアウトしました。「結果を確認・再接続」で同じ操作を復旧できます。";
-  return error instanceof Error
-    ? error.message
-    : "オンラインサービスに接続できませんでした。";
+    return "接続がタイムアウトしました。" + recovery;
+  if (
+    error instanceof Error &&
+    error.name !== "SyntaxError" &&
+    error.name !== "TypeError"
+  )
+    return error.message;
+  return "対戦サービスの応答を確認できませんでした。" + recovery;
 }
 function outcomeMessage(next: OnlineView, fallback: string) {
   // A recovered receipt can accompany a newer view. Describe its search as
@@ -260,7 +273,7 @@ export function mountOnlinePanel(
       noOpponent = confirmedBuild && view?.outcome?.code === "NO_OPPONENT",
       published = confirmedBuild && !!view?.online.publishedSnapshotId;
     root.innerHTML = `<header class="arena-header"><div><span class="arena-kicker">ASYNC NETWORK</span><h1>保存されたページと対戦</h1><p>他のプレイヤーの公開ビルドと戦います。相手の接続を待つ必要はありません</p></div><button data-arena="close" aria-label="オンラインを閉じる">閉じる ×</button></header>
-      <div class="arena-status ${error || needsRecovery ? "is-error" : ""}" role="status">${esc(message)} ${needsRecovery ? '<span data-arena-pending-command>前の操作の結果はまだ確認できていません。「結果を確認・再接続」で確認してください。</span>' : ""} ${error || needsRecovery ? '<button data-arena="retry">結果を確認・再接続</button>' : ""} ${guestExpired ? '<button data-arena="new-guest">新しいゲストで開始</button>' : ""}</div>
+      <div class="arena-status ${error || needsRecovery ? "is-error" : ""}" role="status">${esc(message)} ${needsRecovery ? '<span data-arena-pending-command>前の操作の結果はまだ確認できていません。サーバーでは確定済みの可能性があります。「結果を確認・再接続」で確認してください。</span>' : ""} ${error || needsRecovery ? '<button data-arena="retry">結果を確認・再接続</button>' : ""} ${guestExpired ? '<button data-arena="new-guest">新しいゲストで開始</button>' : ""}</div>
       ${
         !s
           ? '<div class="arena-loading">オンラインサービスを起動して接続してください。接続先: ' +

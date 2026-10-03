@@ -1,3 +1,4 @@
+import {withOriginalReleaseTeaching} from './helpers/original-release-teaching.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -12,8 +13,8 @@ const hash = value => createHash('sha256').update(JSON.stringify(value)).digest(
 
 test('LEAFNOTE appends after every prior opponent/template without changing combat definitions', () => {
   const enemies = R.labEnemies();
-  assert.equal(hash(enemies.slice(0, 40)), '3e2c6cbcb449ccb3b23e27ff78e70d91177bd7ec9329baf0f8c2435046256feb');
-  assert.equal(hash(SITE_TEMPLATES.slice(0, 26)), 'f47f912668c28f1ac4684e46a5e5ca16ccb4c8c0422d05e0c3416d08c2a54223');
+  assert.equal(hash(withOriginalReleaseTeaching(enemies.slice(0, 40),29)), '3e2c6cbcb449ccb3b23e27ff78e70d91177bd7ec9329baf0f8c2435046256feb');
+  assert.equal(hash(withOriginalReleaseTeaching(SITE_TEMPLATES.slice(0, 26),15)), 'f47f912668c28f1ac4684e46a5e5ca16ccb4c8c0422d05e0c3416d08c2a54223');
   assert.equal(hash(D.PARTS), 'a949b4d8aa8f8b8b55f60fb827bb8e5c21f62219fccbc6da05fdd570189f5fb6');
   assert.equal(enemies[40]?.id, 'site_notion');
   assert.equal(SITE_TEMPLATES[26]?.id, 'site_notion');

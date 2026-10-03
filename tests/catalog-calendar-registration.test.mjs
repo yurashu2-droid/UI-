@@ -1,3 +1,4 @@
+import {withOriginalReleaseTeaching} from './helpers/original-release-teaching.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -12,8 +13,8 @@ const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex
 
 test('calendar appends after all 37 complete opponents and 23 complete templates without changing combat definitions',()=>{
   const enemies=R.labEnemies();
-  assert.equal(hash(enemies.slice(0,37)),'4bcb2df295893cbe4c4b392c1f440f9de93af5eaf608a6cbe017d4a39fd62060');
-  assert.equal(hash(SITE_TEMPLATES.slice(0,23)),'e829855fe2bd6ce7735d9950ab085588c1fa2bebc8fdaa02aab52da6662a4333');
+  assert.equal(hash(withOriginalReleaseTeaching(enemies.slice(0,37),29)),'4bcb2df295893cbe4c4b392c1f440f9de93af5eaf608a6cbe017d4a39fd62060');
+  assert.equal(hash(withOriginalReleaseTeaching(SITE_TEMPLATES.slice(0,23),15)),'e829855fe2bd6ce7735d9950ab085588c1fa2bebc8fdaa02aab52da6662a4333');
   assert.equal(hash(D.PARTS),'a949b4d8aa8f8b8b55f60fb827bb8e5c21f62219fccbc6da05fdd570189f5fb6');
   assert.equal(enemies[37]?.id,'site_calendar');assert.equal(SITE_TEMPLATES[23]?.id,'site_calendar');
   assert.equal(SITE_TEMPLATES.filter(t=>t.id==='site_calendar').length,1);

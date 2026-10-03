@@ -1,3 +1,4 @@
+import {withOriginalReleaseTeaching,withOriginalReleasePresetDescription} from './helpers/original-release-teaching.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -47,8 +48,8 @@ test('data facade preserves API order, constants, existing templates and gamepla
     }, `${key} remains a plain facade data property`);
   }
   assert.equal(hash(D.ENEMIES), 'b68fcb8299863fa241caabdc7952a282648a12ce6c1f350a7f0241497df88774');
-  assert.equal(hash(D.PRESETS), '12ad4f6eaea48b155f8397719d777765ddd5b004088a3b35bda866f80674cf60');
-  assert.equal(hash(SITE_TEMPLATES.slice(0, 28)), 'f785ead593679902127ccc2b2bcbe777161746ededfc781f34923c5a9c541b89');
+  assert.equal(hash(withOriginalReleasePresetDescription(D.PRESETS)), '12ad4f6eaea48b155f8397719d777765ddd5b004088a3b35bda866f80674cf60');
+  assert.equal(hash(withOriginalReleaseTeaching(SITE_TEMPLATES.slice(0, 28),15)), 'f785ead593679902127ccc2b2bcbe777161746ededfc781f34923c5a9c541b89');
   assert.equal(await fingerprintJson(arenaCatalogDefinition()), '5ae7f15b99800961281723849d5c74b681c7cff3b6f4d92879f9be6323db6ece');
 });
 

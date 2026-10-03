@@ -1,3 +1,4 @@
+import {withOriginalReleaseTeaching} from './helpers/original-release-teaching.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -12,8 +13,8 @@ const hash = value => createHash('sha256').update(JSON.stringify(value)).digest(
 
 test('PINFIELD appends after every prior opponent/template without changing combat definitions', () => {
   const enemies = R.labEnemies();
-  assert.equal(hash(enemies.slice(0, 41)), '3d2af64ccb0bafb289066f5583d3a54f7d9f02b720b4c28aa17cc065eff99a62');
-  assert.equal(hash(SITE_TEMPLATES.slice(0, 27)), '4670a5632dbabeb675daf174025bf8f80454605c31fd45ff0bfd6d3133eab865');
+  assert.equal(hash(withOriginalReleaseTeaching(enemies.slice(0, 41),29)), '3d2af64ccb0bafb289066f5583d3a54f7d9f02b720b4c28aa17cc065eff99a62');
+  assert.equal(hash(withOriginalReleaseTeaching(SITE_TEMPLATES.slice(0, 27),15)), '4670a5632dbabeb675daf174025bf8f80454605c31fd45ff0bfd6d3133eab865');
   assert.equal(hash(D.PARTS), 'a949b4d8aa8f8b8b55f60fb827bb8e5c21f62219fccbc6da05fdd570189f5fb6');
   assert.equal(enemies[41]?.id, 'site_pinterest');
   assert.equal(SITE_TEMPLATES[27]?.id, 'site_pinterest');

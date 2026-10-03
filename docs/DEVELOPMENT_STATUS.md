@@ -2,6 +2,16 @@
 
 Ongoing development is delivered on `feat/raid-balance-async`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the incremental history, current scope and verification limits. The main branch and public hosting are unchanged.
 
+## Releases protection lesson and online recovery guidance
+
+The existing Releases template is upgraded in place, with its same index, identity, four native parts/labels/default geometry, $24 ingredient cost and CPU10. Three legal cache positions distinguish ZIP protection, PDF protection and disconnection. Original fixed instructional chrome stays clear of all three slots; it does not create a download, service cache, game rule or new template. The [public comparison record](../src/catalog/releases-protection-review.md) describes exact fixtures, all costs, both-seat controls and limitations.
+
+At fixed 24 seconds, equal HP10,000/CPU12 and no administrators, the plain $15/CPU4 popup fixture produces 192/192 HP damage despite 2/0 blocks. The accelerated $20/CPU7 fixture produces 157/135 with 2/1 replays, but a +0.75-second opposing-clock diagnostic removes the advantage (157/157). The 22HP gap comprises 15 extra raw replay damage plus seven different shield absorption. CPU8 deployment versus storage exposes overload cost, not a normal-start recommendation; all three placements lose a completed duel to a cheaper $17/CPU5 supported-link board. Counts remain 28 templates, 42 laboratory opponents and 82 combat definitions, and all 160 prior simulation rows remain identical.
+
+Unavailable local arena and empty/HTML proxy responses now yield neutral connection text and conditional local startup/reconnect instructions instead of raw JSON parser errors. Untrusted HTTP5xx JSON messages are also suppressed, including a response that uses an arena-looking error code. Authoritative 4xx input/session errors retain their existing useful messages. The status explicitly notes that an uncertain command may already have committed; its identity, revision, idempotent retry and pending intent are unchanged. Real ephemeral Vite/arena HTTP plus production-panel DOM adapters prove recovery in the same panel and one-time purchase application after a lost committed response. These tests do not establish browser acceptance or persistence of intent across a reload.
+
+The frozen build's initial JS is 644,738 bytes across 11 entry/modulepreload files, initial CSS 397,286 bytes and optional local-import Worker 215,053 bytes. No measured browser-time claim follows from these sizes. Browser pixels, native inputs, wrapping, keyboard and assistive-technology acceptance remain unverified. Later paid-counter artifacts and policy research are excluded from this increment.
+
 ## Smaller local-import Worker and clearer control states
 
 The shared `src/part-registry.ts` now owns the unchanged 82-part registry and board constants. `data.ts` remains the same public facade; document geometry and raid blueprint validation import only the shared definitions. The emitted local-import Worker no longer retains the catalog facade or its 23 template modules. Registry values, property ordering/descriptors, shared identity and freezes, combat fingerprint, archive seals and the full 160-result simulation remain unchanged.

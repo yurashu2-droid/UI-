@@ -1,0 +1,21 @@
+/* Fixed original lesson chrome only. Never override native controls or their handlers. */
+.release-protection-cache-note,
+.release-protection-lesson,
+.release-protection-footer {
+  box-sizing: border-box;
+  height: 100%;
+  margin: 0;
+  pointer-events: none;
+  color: #34485b;
+  background: #f3f6f9;
+  font: 11px/14px Arial, sans-serif;
+}
+.release-protection-cache-note { padding: 4px 8px; border-left: 2px solid #8fa5b8; }
+.release-protection-cache-note b { display: block; font-weight: 700; }
+.release-protection-cache-note p { margin: 4px 0 0; }
+/* Six explicit 14px lines plus 12px padding fit the declared 96px lesson. */
+.release-protection-lesson { padding: 6px 12px; }
+.release-protection-lesson p,
+.release-protection-footer p { margin: 0; }
+/* Three explicit 14px lines plus 6px padding fit the declared 48px footer. */
+.release-protection-footer { padding: 3px 12px; }

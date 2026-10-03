@@ -1,3 +1,4 @@
+import {withOriginalReleaseTeaching} from './helpers/original-release-teaching.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -12,8 +13,8 @@ const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex
 
 test('designcanvas appends after all 38 complete opponents and 24 complete templates without changing combat definitions',()=>{
   const enemies=R.labEnemies();
-  assert.equal(hash(enemies.slice(0,38)),'f413bbb3d3978deba741a5106fdf3c1b31c40159ec8a09aca514394fd3611a9f');
-  assert.equal(hash(SITE_TEMPLATES.slice(0,24)),'d6cde001ec98abc3123a5a6de4f4c0a5f65ecbbfc3a9fffff83f6fabfd28ece3');
+  assert.equal(hash(withOriginalReleaseTeaching(enemies.slice(0,38),29)),'f413bbb3d3978deba741a5106fdf3c1b31c40159ec8a09aca514394fd3611a9f');
+  assert.equal(hash(withOriginalReleaseTeaching(SITE_TEMPLATES.slice(0,24),15)),'d6cde001ec98abc3123a5a6de4f4c0a5f65ecbbfc3a9fffff83f6fabfd28ece3');
   assert.equal(hash(D.PARTS),'a949b4d8aa8f8b8b55f60fb827bb8e5c21f62219fccbc6da05fdd570189f5fb6');
   assert.equal(enemies[38]?.id,'site_figma');assert.equal(SITE_TEMPLATES[24]?.id,'site_figma');
   assert.equal(SITE_TEMPLATES.filter(t=>t.id==='site_figma').length,1);

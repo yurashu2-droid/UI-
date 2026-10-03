@@ -1,3 +1,4 @@
+import {releasesProtectionDecor} from '../src/catalog/releases-protection-render.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -22,7 +23,7 @@ test('QA: release save and opponent retain sparse native layout and inert fictio
  const overlap=(a,b)=>a[0]<b[0]+b[2]&&a[0]+a[2]>b[0]&&a[1]<b[1]+b[3]&&a[1]+a[3]>b[1];
  for(const [kind,x,y,w,h]of t.decor){assert.ok(x>=0&&y>=0&&x+w<=960&&y+h<=680,kind);for(const p of r.owned)assert.equal(overlap([x,y,w,h],[p.x,p.y,p.w,p.h]),false,kind);}
  const walk=(n,decor=false)=>{assert.ok(!['script','iframe','object','embed','img','link','audio','video','form'].includes(n.tagName));if(decor)assert.ok(!['button','input','select','textarea','a'].includes(n.tagName));for(const a of n.attrs||[]){if(a.name==='href'&&a.value==='#')continue;assert.ok(!['href','src','srcset','download','action','formaction','poster'].includes(a.name));assert.ok(!a.name.startsWith('on'));}for(const c of n.childNodes||[])walk(c,decor);};
- const decor=t.decor.map(([kind])=>knowledgeDecor(kind)||releasesDecor(kind)).join('');walk(parseFragment(decor),true);assert.match(decor,/実ファイルの取得・送信は行いません/);assert.match(decor,/追加セット補正はありません/);
+ const decor=t.decor.map(([kind])=>knowledgeDecor(kind)||releasesDecor(kind)||releasesProtectionDecor(kind)).join('');walk(parseFragment(decor),true);assert.match(decor,/実ファイルの取得・送信は行いません/);assert.match(decor,/追加セット補正はありません/);
  for(const p of r.owned){assert.equal(V.markup(p,{theme:'forge'}),V.markup(p,{theme:'mixed'}));walk(parseFragment(V.markup(p)));}
  const css=readFileSync(new URL('../src/catalog/releases.css',import.meta.url),'utf8');assert.doesNotMatch(css,/@import|url\s*\(|\.web-node|\.node-|\.native-/i);
 });

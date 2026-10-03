@@ -15,6 +15,7 @@ import { personalWebHeader, personalWebDecor } from "./catalog/personal-web-rend
 import { mapSearchHeader, mapSearchDecor } from "./catalog/map-search-render.js";
 import { rankedNewsHeader, rankedNewsDecor } from "./catalog/ranked-news-render.js";
 import { releasesDecor } from "./catalog/releases-render.js";
+import { releasesProtectionDecor } from "./catalog/releases-protection-render.js";
 import { marketplaceHeader, marketplaceDecor } from "./catalog/marketplace-render.js";
 import { feedreaderHeader, feedreaderDecor } from "./catalog/feedreader-render.js";
 import { qandaHeader, qandaDecor } from "./catalog/qanda-render.js";
@@ -386,7 +387,7 @@ function decorMarkup(kind: string) {
     case "gov-contact":
       return `<div class="d-gov-contact"><b>このページに関するお問い合わせ</b><p>総務部 デジタル推進課　電話：000-000-0000（平日 8:30〜17:15）</p><small>ページ番号 1024-0098　更新日 2026年9月1日</small></div>`;
     default:
-      return socialDecor(kind) || knowledgeDecor(kind) || communityDecor(kind) || discoveryDecor(kind) || timeMediaDecor(kind) || documentsDecor(kind) || audioDecor(kind) || qandaDecor(kind) || feedreaderDecor(kind) || marketplaceDecor(kind) || releasesDecor(kind) || rankedNewsDecor(kind) || mapSearchDecor(kind) || personalWebDecor(kind) || musicShopDecor(kind) || serviceFormDecor(kind) || projectBoardDecor(kind) || mailDecor(kind) || calendarDecor(kind) || designCanvasDecor(kind) || chatWorkspaceDecor(kind) || notebookDecor(kind) || pinfieldDecor(kind);
+      return socialDecor(kind) || knowledgeDecor(kind) || communityDecor(kind) || discoveryDecor(kind) || timeMediaDecor(kind) || documentsDecor(kind) || audioDecor(kind) || qandaDecor(kind) || feedreaderDecor(kind) || marketplaceDecor(kind) || releasesDecor(kind) || releasesProtectionDecor(kind) || rankedNewsDecor(kind) || mapSearchDecor(kind) || personalWebDecor(kind) || musicShopDecor(kind) || serviceFormDecor(kind) || projectBoardDecor(kind) || mailDecor(kind) || calendarDecor(kind) || designCanvasDecor(kind) || chatWorkspaceDecor(kind) || notebookDecor(kind) || pinfieldDecor(kind);
   }
 }
 export interface CreateOptions {
