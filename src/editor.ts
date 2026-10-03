@@ -909,6 +909,35 @@ export class Editor {
       }
     o.append(box);
   }
+  private keyboardEdit(target: EventTarget | null, action: () => void): void {
+    const focused =
+      target instanceof HTMLElement &&
+      target === document.activeElement &&
+      target.matches('.web-node[data-side="player"]') &&
+      this.host.contains(target) &&
+      isPlaced(this.board.find((p) => p.id === target.dataset.id))
+        ? target
+        : null;
+    const id = focused?.dataset.id;
+    action();
+    // The app replaces the entire frame on edits. Follow only this keyboard
+    // target, and never override focus deliberately moved by the callback.
+    if (
+      !focused ||
+      !id ||
+      focused.isConnected ||
+      !this.o.enabled() ||
+      document.querySelector("dialog[open]") ||
+      (document.activeElement !== document.body &&
+        document.activeElement !== null) ||
+      !isPlaced(this.board.find((p) => p.id === id))
+    )
+      return;
+    const replacement = [
+      ...this.host.querySelectorAll<HTMLElement>('.web-node[data-side="player"]'),
+    ].find((node) => node.dataset.id === id);
+    replacement?.focus({ preventScroll: true });
+  }
   key(e: KeyboardEvent): void {
     const target = e.target;
     if (
@@ -944,12 +973,12 @@ export class Editor {
     }
     if (mod && e.key.toLowerCase() === "z") {
       e.preventDefault();
-      e.shiftKey ? this.redo() : this.undo();
+      this.keyboardEdit(target, () => (e.shiftKey ? this.redo() : this.undo()));
       return;
     }
     if (mod && e.key.toLowerCase() === "y") {
       e.preventDefault();
-      this.redo();
+      this.keyboardEdit(target, () => this.redo());
       return;
     }
     if (e.key === "Escape") {
@@ -981,8 +1010,10 @@ export class Editor {
     if (delta && this.selection.size) {
       e.preventDefault();
       const m = e.shiftKey ? 10 : 1;
-      this.commit(() =>
-        C.moveMany(this.board, [...this.selection], delta[0] * m, delta[1] * m),
+      this.keyboardEdit(target, () =>
+        this.commit(() =>
+          C.moveMany(this.board, [...this.selection], delta[0] * m, delta[1] * m),
+        ),
       );
     }
   }

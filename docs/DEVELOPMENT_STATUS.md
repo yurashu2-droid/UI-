@@ -1,13 +1,15 @@
 # UI RAID development branch
 
-This continuation of `feat/raid-balance-async` starts from delivery commit `d95fe0292a72c91c3d14661378aa38e2b1143a2b`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
+Ongoing development is delivered on `feat/raid-balance-async`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the incremental history, current scope and verification limits. The main branch and public hosting are unchanged.
 
-## Latest additions
+## Current user-facing workflows
 
-- Append the original-code PATCHBOARD template while preserving all 35 prior opponent IDs; 22 templates and 28 experimental parts, with inert lanes and no new combat bonus
-- Apply acquired CSS in reviewed source-link order without extra requests or expanded destinations
-- Retain uncertain arena command identity through retryable HTTP 408/429 until explicit recovery in the same open panel
-- Establish a paid-reachable supported-link counter with explicit inventory-value, cumulative-spend and normalized-duel boundaries
+- `npm run dev:local` starts the existing local client and arena together, checks both health paths and cleans up only its own child processes
+- Mode-aware help distinguishes the canonical story, legacy campaign and laboratory; paid transactions and save recovery preserve inventory and editor-history boundaries
+- Placed parts support keyboard selection and retain focus through keyboard move/undo/redo repaints when the same part remains available; edited labels identify wrappers and combat targets, and ordinary/fused native video titles reflect their labels. Inspector guidance limits visible-text changes to supporting standard artwork
+- The laboratory catalogue contains twenty-three fictional, original-code templates and twenty-eight experimental UI definitions. PATCHBOARD and POSTROOM reuse existing mechanics; template order and normal acquisition exclusions remain protected
+- Reviewed source CSS follows actual document order, and uncertain arena operations retain command identity through explicit retryable HTTP 408/429 recovery within the open panel
+- Paid-reachable navigation and supported-link examples document inventory value, cumulative spending, CPU limits, finite recovery paths and losing controls rather than universal balance guarantees
 
 ## Earlier continuity fixes
 
