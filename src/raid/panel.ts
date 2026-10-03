@@ -6,6 +6,7 @@ import { createFixtureRaid, listRaidFixtures } from "./fixtures.js";
 import { raidComponentCaption, renderRaidScene } from "./render.js";
 import { verifyRaidBlueprint } from "./blueprint.js";
 import { normalizePublicPageUrl } from "./url.js";
+export { createLocalRaidSelection } from "./local-selection.js";
 import type {
   RaidBlueprint,
   RaidPanelCallbacks,
@@ -111,6 +112,17 @@ export function mountRaidPanel(
   fixtureBar.append(publicTest);
   const localHost = make("div");
   localHost.hidden = !callbacks.isLocalImportAllowed;
+  const localReturn = make("section", "raid-local-return"),
+    localReturnNote = make("p"),
+    localReturnActions = make("div", "raid-actions"),
+    resumeLocal = button("前のローカル近似を再開"),
+    clearLocal = button("一時保持だけを消去", "raid-subtle"),
+    editLocal = button("自分のページを編集して再戦", "raid-subtle");
+  resumeLocal.dataset.localSelection = "resume";
+  clearLocal.dataset.localSelection = "clear";
+  editLocal.dataset.localSelection = "edit";
+  localReturnActions.append(resumeLocal, clearLocal);
+  localReturn.append(localReturnNote, localReturnActions);
   const status = make("p", "raid-status", "付属ページを読み込んでいます。");
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
@@ -127,7 +139,7 @@ export function mountRaidPanel(
     challenge = button("このページに挑戦", "raid-action"),
     skip = button("今回は回収を見送る", "raid-subtle");
   skip.hidden = true;
-  actions.append(challenge, skip);
+  actions.append(challenge, editLocal, skip);
   const privacy = make(
     "p",
     "raid-privacy",
@@ -139,6 +151,7 @@ export function mountRaidPanel(
     form,
     fixtureBar,
     localHost,
+    localReturn,
     status,
     tabs,
     meta,
@@ -161,6 +174,20 @@ export function mountRaidPanel(
   const resize =
     typeof ResizeObserver === "function" ? new ResizeObserver(fit) : null;
   resize?.observe(viewport);
+  const selectionAvailable = () =>
+    !!callbacks.localSelection &&
+    localAllowed() &&
+    !saving &&
+    !restoring &&
+    !["battling", "won", "claiming"].includes(encounter.state.phase);
+  const readLocal = () => {
+    if (!selectionAvailable()) return undefined;
+    try {
+      return callbacks.localSelection?.read();
+    } catch {
+      return undefined;
+    }
+  };
   const sync = () => {
     const state = encounter.state,
       locked =
@@ -181,6 +208,19 @@ export function mountRaidPanel(
       state.phase === "battling" ? "対戦中…" : "このページに挑戦";
     skip.hidden = state.phase !== "won" || !callbacks.onDiscard;
     cancel.hidden = !(loading || localLoading) || saving;
+    const remembered = readLocal();
+    localReturn.hidden = !remembered;
+    resumeLocal.hidden = clearLocal.hidden = !remembered;
+    resumeLocal.disabled = clearLocal.disabled = !remembered;
+    editLocal.hidden =
+      !remembered ||
+      !callbacks.onEditLocal ||
+      state.blueprint?.source.kind !== "local-file" ||
+      state.blueprint.captureId !== remembered.captureId;
+    editLocal.disabled = editLocal.hidden || loading || localLoading;
+    localReturnNote.textContent = remembered
+      ? `${remembered.source.name}（近似 ${remembered.captureId.slice(-8)}）を、このタブの同じ実験室で一時保持しています。閉じて自分のページを編集した後、再解析せず明示的に再開できます。再読み込みや別のランへの切替で失われます。この再開用の一時保持には、元ファイルや生HTML・CSSを含めません。一時保持を消しても、表示中の相手・取得済み外観は変更しません。`
+      : "";
     localControls?.refresh();
     reconstruction.classList.toggle("is-selected", view === "reconstructed");
     reference.classList.toggle("is-selected", view === "reference");
@@ -252,13 +292,39 @@ export function mountRaidPanel(
   const select = async (
     blueprint: RaidBlueprint,
     isCurrent: () => boolean = () => !disposed,
+    rememberLocal = false,
   ) => {
     const result = await encounter.select(blueprint, isCurrent);
     if (disposed || !isCurrent()) return result;
     if (result.ok) {
+      let retentionError = "";
+      if (
+        rememberLocal &&
+        result.value.source.kind === "local-file" &&
+        callbacks.localSelection &&
+        localAllowed()
+      ) {
+        // Selection has already committed. Keep the painted opponent in step
+        // while return-memory verification waits or is explicitly cancelled.
+        view = "reconstructed";
+        claimedComponent = "";
+        say("ローカル近似を選択しました。再開用の一時保持を検証しています。");
+        draw();
+        try {
+          const retained = await callbacks.localSelection.remember(
+            result.value,
+            () => !disposed && localAllowed() && isCurrent(),
+          );
+          if (!retained.ok) retentionError = retained.error;
+        } catch {
+          retentionError =
+            "近似配置は選択しましたが、一時保持できませんでした。閉じた後は再読込が必要です。";
+        }
+        if (disposed || !isCurrent()) return result;
+      }
       view = "reconstructed";
       claimedComponent = "";
-      say(blueprint.warnings.join(" "));
+      say(retentionError || blueprint.warnings.join(" "), !!retentionError);
       draw();
     } else say(result.error, true);
     return result;
@@ -349,6 +415,58 @@ export function mountRaidPanel(
     void beginCapture();
   });
   cancel.addEventListener("click", stop);
+  resumeLocal.addEventListener("click", async () => {
+    const remembered = readLocal();
+    if (!remembered) return;
+    localControls?.cancel();
+    capture.cancel();
+    const mine = ++generation;
+    const current = () =>
+      !disposed && mine === generation && selectionAvailable();
+    loading = true;
+    say(
+      "一時保持したローカル近似を検証しています。元ファイルの再読込・外部通信は行いません。",
+    );
+    sync();
+    try {
+      await select(remembered, current);
+    } catch {
+      if (current())
+        say(
+          "ローカル近似を再開できませんでした。ファイルを選び直して再試行できます。",
+          true,
+        );
+    } finally {
+      if (!disposed && mine === generation) {
+        loading = false;
+        if (localAllowed()) sync();
+      }
+    }
+  });
+  clearLocal.addEventListener("click", () => {
+    if (!selectionAvailable()) return;
+    localControls?.cancel();
+    capture.cancel();
+    generation++;
+    loading = false;
+    callbacks.localSelection!.clear();
+    say(
+      "一時保持だけを消去しました。表示中の相手・取得済み外観は変更しません。閉じた後は再読込が必要です。",
+    );
+    sync();
+  });
+  editLocal.addEventListener("click", () => {
+    if (loading || localLoading || !callbacks.onEditLocal) return;
+    const remembered = readLocal(),
+      selected = encounter.state.blueprint;
+    if (
+      !remembered ||
+      selected?.source.kind !== "local-file" ||
+      selected.captureId !== remembered.captureId
+    )
+      return;
+    callbacks.onEditLocal();
+  });
   input.addEventListener("input", () => {
     if (loading || localLoading) stop();
   });
@@ -481,7 +599,11 @@ export function mountRaidPanel(
         sync();
       },
       onSelected: (blueprint, isCurrent) =>
-        select(blueprint, () => !disposed && localAllowed() && isCurrent()),
+        select(
+          blueprint,
+          () => !disposed && localAllowed() && isCurrent(),
+          true,
+        ),
     });
   }
   sync();

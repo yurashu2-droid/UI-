@@ -1,4 +1,5 @@
 import type { Item, Rect, Winner } from "../types.js";
+import type { LocalRaidSelection } from "./local-selection.js";
 
 export const RAID_LIMITS = Object.freeze({
   width: 960,
@@ -116,6 +117,10 @@ export interface RaidInitialRequest {
 export interface RaidPanelCallbacks {
   /** Live lab-only gate; absent, throwing or false disables local acquisition. */
   isLocalImportAllowed?(): boolean;
+  /** Same live laboratory/profile only; no source files or persistent storage. */
+  localSelection?: LocalRaidSelection;
+  /** Leave the current panel to edit the player's board before an explicit return. */
+  onEditLocal?(): void;
   /** Integration persists acquisition/energy receipts before the new opponent is selected. */
   onCaptured?(
     blueprint: RaidBlueprint,

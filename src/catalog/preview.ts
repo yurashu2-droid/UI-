@@ -1,6 +1,7 @@
 import {previewTransfer} from "./transfer-render.js";
 import {previewPagination} from "./pagination.js";
 import {setSubscriptionState} from "./subscription-state.js";
+import {setFollowState} from "./follow-state.js";
 /** Cosmetic local demonstration only. This helper has no battle, network or currency access. */
 export function previewCatalogueAction(control: HTMLElement, node: HTMLElement | null): boolean {
   const kind = control.dataset.ui;
@@ -14,11 +15,12 @@ export function previewCatalogueAction(control: HTMLElement, node: HTMLElement |
   }
   if (kind && ['retweet','favorite','follow','bookmark'].includes(kind)) {
     const pressed = control.getAttribute('aria-pressed') !== 'true';
-    control.setAttribute('aria-pressed', String(pressed));
+    if (kind === 'follow') setFollowState(control, pressed);
+    else control.setAttribute('aria-pressed', String(pressed));
     control.setAttribute('title', pressed ? 'ページ内のプレビューです。外部へは送信しません。' : 'プレビューを解除しました');
-    if (kind === 'favorite' || kind === 'follow') {
+    if (kind === 'favorite') {
       const symbol = control.querySelector('b');
-      if (symbol) symbol.textContent = kind === 'favorite' ? (pressed ? '★' : '☆') : (pressed ? '✓' : '＋');
+      if (symbol) symbol.textContent = pressed ? '★' : '☆';
     }
     return true;
   }

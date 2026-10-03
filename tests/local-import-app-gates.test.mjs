@@ -16,6 +16,7 @@ import { createFixtureRaid } from "../src/raid/fixtures.js";
 import { createRaidEnemy, prepareRaidRewards, verifyRaidBlueprint } from "../src/raid/blueprint.js";
 import { registerRaidBlueprint } from "../src/raid/registry.js";
 import { mountRaidPanel } from "../src/raid/panel.js";
+import { createLocalRaidSelection } from "../src/raid/local-selection.js";
 import { ElementAdapter, deferred, settle, until } from "./helpers/local-import-dom.mjs";
 
 // Execute the actual app modal, deferred-loader, raid callbacks and battle bridge.
@@ -130,6 +131,7 @@ function environment(options = {}) {
     ResizeObserver: class { observe() {} disconnect() {} },
     applyCombatFeedback() {}, combatFeedback() {}, targetCaption() {}, setTimeout,
     loadRaidModule: async () => ({
+      createLocalRaidSelection,
       mountRaidPanel(host, callbacks, saved, initialRequest) {
         calls.mounts.push({ host, callbacks, resume: saved, initialRequest });
         const panel = options.realPanel ? mountRaidPanel(host, callbacks, saved, initialRequest) : { dispose() {} };
@@ -437,4 +439,77 @@ test("pending notice counts only filtered local entries and keeps fixture-only r
   const f = environment({ pending: [localPending, resume(localBlueprint, "second_local_pending"), fixturePending], run: R.newRun("campaign") });
   await f.open(); assert.equal(f.mount.resume?.battleId, fixturePending.battleId); recoveryNote(f, 2);
   assert.equal(f.calls.discards.length, 0); f.close();
+});
+
+test("local rematch survives close and edits in the same lab run without automatically restoring an opponent", async () => {
+  const f = environment(); await f.open();
+  const memory = f.mount.callbacks.localSelection;
+  assert.ok(memory, "lab panel has bounded transient return memory");
+  assert.equal((await memory.remember(localBlueprint, f.mount.callbacks.isLocalImportAllowed)).ok, true);
+  f.close(); f.c.run.page.name = "Edited between attempts";
+  await f.open();
+  assert.equal(f.mount.callbacks.localSelection, memory);
+  assert.equal(memory.read().captureId, localBlueprint.captureId);
+  assert.equal(f.mount.resume, undefined);
+  assert.equal(f.mount.initialRequest, undefined);
+  assert.equal(f.calls.preparations.length, 0);
+  assert.equal(f.calls.claims.length, 0);
+  f.close();
+});
+
+test("local rematch memory is cleared when run, mode, story or profile ownership changes", async t => {
+  const cases = {
+    "new lab run": f => { f.c.run = R.newRun("lab"); },
+    "same object leaves laboratory": f => { f.c.run.mode = "campaign"; },
+    "story activation": f => { f.c.storyActive = true; },
+    "profile replacement": f => { f.c.profileStore = { ...f.store }; },
+  };
+  for (const [name, change] of Object.entries(cases)) await t.test(name, async () => {
+    const f = environment(); await f.open();
+    const previous = f.mount.callbacks.localSelection;
+    assert.ok(previous, "initial lab selection memory exists");
+    assert.equal((await previous.remember(localBlueprint, f.mount.callbacks.isLocalImportAllowed)).ok, true);
+    f.close(); change(f); await f.open();
+    assert.equal(previous.read(), undefined, "old owner cannot retain a return entry");
+    assert.equal(f.mount.callbacks.localSelection?.read(), undefined);
+    assert.equal(f.calls.preparations.length, 0);
+    f.close();
+  });
+});
+
+test("edit-and-rematch closes only its current laboratory panel and returns to the player's board", async () => {
+  const f = environment(); await f.open();
+  const current = f.mount.callbacks;
+  assert.equal(typeof current.onEditLocal, "function");
+  assert.equal((await current.localSelection.remember(localBlueprint, current.isLocalImportAllowed)).ok, true);
+  const before = f.snapshot(); f.c.view = "enemy";
+  current.onEditLocal();
+  assert.equal(f.dialog.open, false);
+  assert.equal(f.c.view, "self");
+  assert.equal(f.calls.renders, 1);
+  assert.equal(f.snapshot(), before);
+  await f.open();
+  current.onEditLocal();
+  assert.equal(f.dialog.open, true, "the old callback cannot close a replacement modal");
+  assert.equal(f.calls.renders, 1);
+  f.close();
+});
+
+test("edit-and-rematch does not act after laboratory eligibility or transient memory is lost", async t => {
+  for (const [name, invalidate] of Object.entries({
+    "memory cleared": f => f.mount.callbacks.localSelection.clear(),
+    "preview enabled": f => { f.c.preview = true; },
+    "run replaced": f => { f.c.run = R.newRun("lab"); },
+    "native modal closed": f => { f.dialog.open = false; },
+  })) await t.test(name, async () => {
+    const f = environment(); await f.open();
+    const callbacks = f.mount.callbacks;
+    assert.equal(typeof callbacks.onEditLocal, "function");
+    assert.equal((await callbacks.localSelection.remember(localBlueprint, callbacks.isLocalImportAllowed)).ok, true);
+    invalidate(f); const wasOpen = f.dialog.open;
+    callbacks.onEditLocal();
+    assert.equal(f.dialog.open, wasOpen);
+    assert.equal(f.calls.renders, 0);
+    f.close();
+  });
 });

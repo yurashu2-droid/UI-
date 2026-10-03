@@ -14,6 +14,7 @@ import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.j
 import { targetCaption } from "./catalog/target-caption.js";
 import { advancePagination } from "./catalog/pagination.js";
 import { setSubscriptionState } from "./catalog/subscription-state.js";
+import { setFollowState } from "./catalog/follow-state.js";
 import { applyAudienceFeedback } from "./catalog/audience-feedback.js";
 import { applyHistoryFeedback, historyFeedback } from "./catalog/history-render.js";
 
@@ -443,10 +444,14 @@ class Effects {
         q("button")?.setAttribute("aria-pressed", "true");
         break;
       }
-      case "tw_follow":
-        q("button")?.setAttribute("aria-pressed", "true");
-        q("button")?.setAttribute("title", "フォロー中・常連を呼び戻しました");
+      case "tw_follow": {
+        const button = q("button");
+        if (button) {
+          setFollowState(button, true);
+          button.setAttribute("title", "フォロー中・常連を呼び戻しました");
+        }
         break;
+      }
       case "x_bookmark":
         q("button")?.setAttribute("aria-pressed", "true");
         q("button")?.setAttribute("title", "保存済み・閲覧者が戻りました");

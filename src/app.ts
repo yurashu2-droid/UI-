@@ -42,6 +42,7 @@ import { createRaidEnemy } from "./raid/blueprint.js";
 import { registerRaidBlueprint } from "./raid/registry.js";
 import { applyRaidAppearance, renderRaidAppearance } from "./raid/render.js";
 import type { RaidBlueprint, RaidInitialRequest } from "./raid/types.js";
+import type { LocalRaidSelection } from "./raid/local-selection.js";
 import { currentStoryEncounter, currentStoryStage } from "./story/state.js";
 import { STORY_WORLD } from "./story/content.js";
 import * as StorySession from "./story/session.js";
@@ -1646,6 +1647,7 @@ function celebrateFusions() {
 
 /* ---------- Modals ---------- */
 let modalFeatureDispose: (() => void) | undefined;
+let localRaidReturn: { run: Run; store: NonNullable<typeof profileStore>; selection: LocalRaidSelection } | undefined;
 function openModal(html: string) {
   modalFeatureDispose?.(); modalFeatureDispose = undefined;
   $("#modal").classList.remove("feature-modal");
@@ -1917,6 +1919,11 @@ async function playRaidChallenge(host: HTMLElement, blueprint: RaidBlueprint, si
   });
 }
 async function raidPanel(initialRequest?: RaidInitialRequest) {
+  if (localRaidReturn && (storyActive || run.mode !== "lab" ||
+    localRaidReturn.run !== run || localRaidReturn.store !== profileStore)) {
+    localRaidReturn.selection.clear();
+    localRaidReturn = undefined;
+  }
   if (!profileStore) { toast("個人コレクションの保存領域を開けないため、回収を開始できません。"); return; }
   const store = profileStore, sourceRun = run, sourceStory = storySession, sourceStoryMode = storyActive, sourceMode = run.mode;
   openModal(`<div class="modal-inner">${modalHead(run.mode === "lab" && !storyActive ? "UI RAID" : "URL RAID", run.mode === "lab" && !storyActive ? "URLとローカルHTMLから回収" : "ページを巡回する")}<div id="raid-feature-host">保存された報酬を確認しています…</div></div>`);
@@ -1928,13 +1935,25 @@ async function raidPanel(initialRequest?: RaidInitialRequest) {
   const isLocalImportAllowed = () => ownsPanel() && localRaidEditingAllowed();
   const feature = deferredModalFeature(host,
     () => Promise.all([import("./raid/panel.js"), store.listPendingRaids()]),
-    ([{ mountRaidPanel }, pending]) => {
+    ([{ mountRaidPanel, createLocalRaidSelection }, pending]) => {
       if (!ownsPanel()) return { dispose() {} };
       const localAllowed = isLocalImportAllowed();
+      if (localAllowed && !localRaidReturn)
+        localRaidReturn = { run: sourceRun, store, selection: createLocalRaidSelection() };
+      const localSelection = localAllowed ? localRaidReturn?.selection : undefined;
       const hiddenLocalCount = localAllowed ? 0 : pending.filter(saved => saved.blueprint.source?.kind === "local-file").length;
       const resume = pending.find(saved => saved.blueprint.source?.kind !== "local-file" || localAllowed);
       const panel = mountRaidPanel(host, {
       isLocalImportAllowed,
+      localSelection,
+      onEditLocal: localSelection ? () => {
+        if (!isLocalImportAllowed() || localRaidReturn?.selection !== localSelection ||
+          !localSelection.read()) return;
+        view = "self";
+        closeModal();
+        render();
+        toast("自分のページを編集できます。メニューのURLレイドから、前のローカル近似を再開してください。");
+      } : undefined,
       onCaptured: async (blueprint,kind) => {
         if (blueprint.source.kind === "local-file") throw new Error("ローカルHTMLは実験室の専用取り込みから解析してください。");
         if(!storyActive||!storySession)return;

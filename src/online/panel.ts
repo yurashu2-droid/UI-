@@ -295,7 +295,7 @@ export function mountOnlinePanel(
        ${view!.online.inbox.length ? `<button data-arena="inbox" ${!build || locked() ? "disabled" : ""}>受取箱 ${view!.online.inbox.length}個を移動</button>` : ""}
        <h2>管理設備</h2><p>${s.admin.map((a) => esc(D.ADMIN[a]?.name ?? a)).join(" / ") || "まだありません"}</p><small>報酬で解放 · 次の枠 ${R.adminSlots(s)}</small>
        <details><summary>オンラインの仮ルール</summary><p>8ラウンド・残機3・初期資金10。基本収入6＋勝利4＋戦闘収益の半分（最大10）。引き分けは残機を1消費。レートは勝利+16／敗北−16、引き分け±0。</p><p>このブラウザのゲストとして保存。24時間操作がないと接続が期限切れになります。オフラインのセーブとは独立しています。</p></details></aside>
-       <main class="arena-main">${page(!build && match ? match.player.items : (draft ?? s.owned), "self", !build && match ? "対戦時のあなたのページ" : "あなたのページ")}<p class="arena-hint">${build ? "UIをドラッグして配置。選択したUIのサイズ・接続先を右側で調整できます。" : "自動戦闘の入力は固定されています。"}</p>
+       <main class="arena-main">${page(!build && match ? match.player.items : (draft ?? s.owned), "self", !build && match ? "対戦時のあなたのページ" : "あなたのページ")}<p class="arena-hint">${build ? "UIをドラッグして配置。TabでUIに移動し、Enter / Spaceでも選択できます。選択したUIのサイズ・接続先を右側で調整できます。" : "自動戦闘の入力は固定されています。"}</p>
        ${match && !build ? `<div class="arena-match-label">対戦相手：ほかのプレイヤーが登録した保存ビルド · ROUND ${match.opponent.round + 1} · ${match.opponent.wins}勝 · 記録時レート${match.opponent.rating}</div>${page(match.opponent.items, "opponent", "保存された相手のページ")}<div class="arena-replay"><button data-arena="replay">▶ リプレイ</button><button data-arena="pause">一時停止 / 再開</button><select data-arena-speed aria-label="リプレイ速度"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select><span data-arena-clock>サーバー結果: ${match.winner === "player" ? "勝利" : match.winner === "enemy" ? "敗北" : "引き分け"} · ${match.summary.time.toFixed(1)}秒</span></div>` : ""}
        </main>
        <aside class="arena-inspector">${build ? selection() : ""}
@@ -702,6 +702,53 @@ export function mountOnlinePanel(
     "keydown",
     (e) => {
       e.stopPropagation();
+      const target = e.target;
+      if (
+        editable() &&
+        !drag &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !e.shiftKey &&
+        !e.isComposing &&
+        (e.key === "Enter" || e.key === " ") &&
+        target instanceof HTMLElement &&
+        target === document.activeElement &&
+        !target.isContentEditable &&
+        root.isConnected &&
+        target.matches('.web-node[data-side="player"]')
+      ) {
+        const board = root.querySelector('[data-arena-board="self"]');
+        const item = view!.run.owned.find(
+          (part) => part.id === target.dataset.id,
+        );
+        const current =
+          board &&
+          [...board.querySelectorAll<HTMLElement>(".web-node")].find(
+            (node) => node.dataset.id === item?.id,
+          );
+        if (!item || !C.placed(item) || current !== target) return;
+        e.preventDefault();
+        // A held key must not scroll; reselecting must not erase inspector edits.
+        if (e.repeat || selected === item.id) return;
+        selected = item.id;
+        render();
+        // Follow this synchronous replacement only, never a deliberate focus move.
+        if (
+          !disposed &&
+          root.isConnected &&
+          host.contains(root) &&
+          document.activeElement === document.body
+        ) {
+          const replacement = [
+            ...root.querySelectorAll<HTMLElement>(
+              '[data-arena-board="self"] .web-node',
+            ),
+          ].find((node) => node.dataset.id === item.id);
+          replacement?.focus({ preventScroll: true });
+        }
+        return;
+      }
       if (e.key === "Escape") {
         e.preventDefault();
         if (drag) cancelDrag();
