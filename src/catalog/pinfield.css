@@ -1,0 +1,75 @@
+/* Original CSS-only discovery board. No native control overrides or external art. */
+.site-theme-pinfield .site-header { gap: 28px; padding: 0 24px; background: #fffdf8; border-bottom: 1px solid #dbd3c7; color: #292622; }
+.pinfield-word { display: flex; align-items: center; gap: 10px; color: #292622; font: 700 22px/24px Georgia, serif; letter-spacing: -.6px; }
+.pinfield-word > i { display: flex; align-items: flex-start; gap: 3px; width: 26px; height: 27px; }
+.pinfield-word > i span { display: block; width: 6px; height: 23px; background: #80413b; border-radius: 3px; }
+.pinfield-word > i span:nth-child(2) { margin-top: 5px; height: 18px; }
+.pinfield-word > i span:nth-child(3) { margin-top: 2px; height: 25px; }
+.pinfield-word small { display: block; margin-top: 3px; color: #59534d; font: 10px/13px Arial, sans-serif; letter-spacing: 0; }
+.pinfield-header-context { color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-header-local { margin-left: auto; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.site-theme-pinfield .page-body { background: #fffdf8; color: #292622; }
+.site-theme-pinfield .page-decor { z-index: 1; pointer-events: none; font-family: Arial, sans-serif; }
+.site-theme-pinfield .site-footer { background: #f2eee5; border-top: 1px solid #dbd3c7; color: #59534d; }
+.pinfield-search-note { margin: 0; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-search-seat { margin: 0; color: #80413b; font: 11px/16px Arial, sans-serif; }
+.pinfield-board-heading { display: flex; justify-content: space-between; align-items: center; height: 100%; }
+.pinfield-board-heading h1 { margin: 0; color: #292622; font: 700 21px/24px Georgia, serif; letter-spacing: -.5px; }
+.pinfield-board-heading p { margin: 0; color: #59534d; font: 10px/12px Arial, sans-serif; }
+.pinfield-chips { display: flex; align-items: center; gap: 9px; }
+.pinfield-chip-label { margin-right: 3px; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-chip { display: block; padding: 7px 15px; border-radius: 18px; background: #f2eee5; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-column-title { margin: 0; color: #292622; font: 700 12px/24px Arial, sans-serif; }
+.pinfield-column-title small { margin-left: 9px; font: 11px/24px Arial, sans-serif; }
+/* Card names inherit the measured solid surface foreground; art never sits behind text. */
+.pinfield-paper-card { position: relative; box-sizing: border-box; height: 100%; margin: 0; border-radius: 15px; background: #f2eee5; color: #59534d; }
+.pinfield-window-card { position: relative; box-sizing: border-box; height: 100%; margin: 0; border-radius: 15px; background: #e5eee4; color: #59534d; }
+.pinfield-art { position: absolute; inset: 0 0 42px; overflow: hidden; border-radius: 15px 15px 0 0; }
+.pinfield-card-label { position: absolute; right: 12px; bottom: 7px; left: 12px; }
+.pinfield-card-label b { display: block; font: 700 12px/17px Arial, sans-serif; }
+.pinfield-card-label small { display: block; font: 10px/13px Arial, sans-serif; }
+/* Paper silhouettes: two folded sheets and a cut-out ring. */
+.pinfield-paper-scene { background: #f2eee5; }
+.pinfield-paper-sheet { position: absolute; width: 92px; height: 105px; border: 1px solid #b8a997; border-radius: 2px; }
+.pinfield-paper-back { left: 67px; top: 18px; transform: rotate(-14deg); background: #e6c7af; }
+.pinfield-paper-front { left: 125px; top: 6px; transform: rotate(11deg); background: #fffdf8; }
+.pinfield-paper-front::before { content: ""; position: absolute; top: 0; right: 0; border-top: 23px solid #f2eee5; border-left: 23px solid #d9cdbf; }
+.pinfield-paper-front::after { content: ""; position: absolute; left: 14px; right: 17px; top: 48px; height: 22px; border-top: 2px solid #b8a997; border-bottom: 1px solid #b8a997; }
+.pinfield-paper-ring { position: absolute; top: 76px; left: 41px; width: 45px; height: 45px; border: 11px solid #a36653; border-radius: 50%; }
+/* An original window and botanical silhouette, entirely CSS. */
+.pinfield-window-scene { background: #e5eee4; }
+.pinfield-window-frame { position: absolute; top: 16px; left: 83px; width: 131px; height: 155px; border: 9px solid #fffdf8; border-radius: 65px 65px 1px 1px; background: #c9d8c9; }
+.pinfield-window-frame::before { content: ""; position: absolute; top: 0; bottom: 0; left: 57px; width: 7px; background: #fffdf8; }
+.pinfield-window-frame::after { content: ""; position: absolute; top: 76px; right: 0; left: 0; height: 7px; background: #fffdf8; }
+.pinfield-window-light { position: absolute; top: 180px; left: 29px; width: 240px; height: 18px; background: #cedcc7; transform: skewX(-31deg); }
+.pinfield-stem { position: absolute; top: 81px; left: 79px; width: 4px; height: 103px; border-radius: 50%; background: #65735b; transform: rotate(-7deg); }
+.pinfield-leaf { position: absolute; width: 43px; height: 23px; border-radius: 4px 90% 4px 90%; background: #7e8e6e; }
+.pinfield-leaf-one { top: 78px; left: 37px; transform: rotate(25deg); }
+.pinfield-leaf-two { top: 105px; left: 79px; transform: rotate(-42deg); }
+.pinfield-leaf-three { top: 133px; left: 34px; transform: rotate(24deg); }
+.pinfield-pot { position: absolute; top: 171px; left: 58px; width: 52px; height: 37px; border-radius: 3px 3px 17px 17px; background: #a57861; }
+/* Declared supporting line budgets: 2×16, 2×16, 3×16, 2×16 and 3×16px. */
+.pinfield-video-note { margin: 0; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-video-note b { color: #80413b; font-weight: 700; }
+.pinfield-video-detail { margin: 0; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-link-note { margin: 0; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-link-note b { color: #292622; font-weight: 700; }
+.pinfield-detached-title { margin: 0; color: #292622; font: 700 12px/24px Arial, sans-serif; }
+.pinfield-detached-title small { margin-left: 8px; font: 10px/24px Arial, sans-serif; }
+.pinfield-detached-note { margin: 0; color: #80413b; font: 11px/16px Arial, sans-serif; }
+.pinfield-offset-note { margin: 0; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-paper-strip { position: relative; height: 100%; margin: 0; border-radius: 15px; background: #f6e5db; color: #80413b; }
+.pinfield-window-strip { position: relative; height: 100%; margin: 0; border-radius: 15px; background: #f2eee5; color: #59534d; }
+.pinfield-strip-label { position: absolute; top: 50%; right: 12px; width: 122px; transform: translateY(-50%); }
+.pinfield-strip-label b { display: block; font: 700 12px/18px Arial, sans-serif; }
+.pinfield-strip-label small { display: block; font: 10px/15px Arial, sans-serif; }
+.pinfield-paper-swatches { position: absolute; top: 17px; left: 21px; width: 116px; height: 50px; }
+.pinfield-paper-swatches i { position: absolute; width: 42px; height: 50px; border: 1px solid #b88771; border-radius: 3px; background: #e6b698; transform: rotate(-15deg); }
+.pinfield-paper-swatches i:nth-child(2) { left: 31px; background: #f2eee5; transform: rotate(0); }
+.pinfield-paper-swatches i:nth-child(3) { left: 62px; background: #d2bfb2; transform: rotate(15deg); }
+.pinfield-window-study { position: absolute; top: 18px; left: 22px; width: 108px; height: 83px; border: 5px solid #c2ae98; border-radius: 3px; background: #fffdf8; }
+.pinfield-window-study i { position: absolute; top: 0; bottom: 0; left: 48px; width: 4px; background: #c2ae98; }
+.pinfield-window-study i:nth-child(2) { top: 35px; left: 0; right: 0; bottom: auto; width: auto; height: 4px; }
+/* Four explicit 16px lines + 1px rule + 2px top padding = 67px within 912×68. */
+.pinfield-comparison { box-sizing: border-box; height: 100%; padding-top: 2px; border-top: 1px solid #dbd3c7; color: #59534d; font: 11px/16px Arial, sans-serif; }
+.pinfield-comparison p { margin: 0; }

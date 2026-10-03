@@ -81,6 +81,10 @@ const FACTIONS: Record<
     name: "Trello風", short: "BOARD", color: "#216d99", era: "PROJECT BOARD",
     set: "テンプレート専用：既存UIで構成・追加補正なし",
   },
+  pinfield: {
+    name: "Pinterest風", short: "PIN", color: "#80413b", era: "IDEAS / DISCOVERY BOARD",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
   notebook: {
     name: "Notion風", short: "NOTE", color: "#756b5d", era: "NOTEBOOK / WIKI HOME",
     set: "テンプレート専用：既存UIで構成・追加補正なし",

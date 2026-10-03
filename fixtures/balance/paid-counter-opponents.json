@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "note": "Exact sampled completed-board references, not paid acquisition witnesses or globally strongest boards. Source reports are provenance only; reproduction reads this fixture.",
+  "opponents": [
+    {
+      "id": "s3-candidate-1100144",
+      "origin": "b_cart-fused",
+      "capacity": 35,
+      "admin": ["server", "backup"],
+      "source": {
+        "path": ".verification/balance/repeat-search-w030-s202-c35.json",
+        "sha256": "27cba09debdab4451f8cd6589bf1a1e28d0f60fdcf6f9daaf421a9e1118d1cdc",
+        "repeatCadence": {
+          "freeCopies": 2,
+          "extraWeight": 0.3
+        }
+      },
+      "layout": [
+        ["am_product", 24, 24, 560, 300, "source", ""],
+        ["am_quantity", 24, 324, 112, 40, "source", ""],
+        ["am_prime", 304, 324, 144, 40, "source", ""],
+        ["am_rating", 24, 372, 560, 32, "source", ""],
+        ["am_deal", 608, 24, 328, 52, "source", ""],
+        ["am_coupon", 608, 84, 328, 36, "source", ""],
+        ["yt_ad", 608, 236, 328, 80, "source", ""],
+        ["yt_play", 608, 324, 328, 184, "source", ""],
+        ["yt_speed", 608, 508, 104, 40, "source", ""],
+        ["am_oneclick", 136, 324, 168, 40, "source", ""],
+        ["am_deal", 608, 184, 280, 52],
+        ["ab_nav", 728, 508, 176, 112],
+        ["ab_nav", 608, 0, 336, 24]
+      ]
+    },
+    {
+      "id": "s0-candidate-432",
+      "origin": "six-onestop",
+      "capacity": 26,
+      "admin": ["server", "backup"],
+      "source": {
+        "path": ".verification/balance/repeat-search-w025-s101-c26.json",
+        "sha256": "1deb60850472664c4551bcd1c0e6073ca350ea685f0839950836ce5ba5b8f2b2",
+        "repeatCadence": {
+          "freeCopies": 2,
+          "extraWeight": 0.25
+        }
+      },
+      "layout": [
+        ["gov_form", 16, 16, 920, 300],
+        ["gov_breadcrumb", 32, 72, 560, 28],
+        ["gov_font", 32, 156, 232, 36],
+        ["gov_onestop", 32, 108, 136, 40],
+        ["gov_onestop", 168, 108, 136, 40],
+        ["gov_onestop", 304, 108, 136, 40],
+        ["gov_onestop", 440, 108, 136, 40],
+        ["gov_onestop", 576, 108, 136, 40],
+        ["gov_onestop", 712, 108, 136, 40],
+        ["go_suggest", 280, 156, 580, 84]
+      ]
+    }
+  ]
+}

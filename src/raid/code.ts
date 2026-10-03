@@ -73,6 +73,44 @@ function rawText(n: Node, depth = 0): string {
     .map((c) => rawText(c, depth + 1))
     .join(" ");
 }
+/** Only these explicit input types use value as their visible button caption. */
+function localInputPurchaseLabels(
+  nodes: Node[],
+  hidden: (node: Node) => boolean | undefined,
+): Map<Node, string> {
+  const labels = new Map<Node, string>();
+  for (const n of nodes) {
+    if (tag(n) !== "input" || !/^(submit|button)$/i.test(attr(n, "type") ?? ""))
+      continue;
+    let eligible = true;
+    // The tree and ancestry depth are already bounded. Use parse5's repaired
+    // ancestry, including namespace boundaries, without resolving ARIA names.
+    for (
+      let p: Node | null = n;
+      p;
+      p = "parentNode" in p ? p.parentNode : null
+    ) {
+      const name = tag(p);
+      if (
+        (name &&
+          (!("namespaceURI" in p) ||
+            p.namespaceURI !== "http://www.w3.org/1999/xhtml")) ||
+        hidden(p) ||
+        attr(p, "inert") !== undefined ||
+        name === "datalist" ||
+        (p !== n && (omit.has(name) || name === "button" || name === "a"))
+      ) {
+        eligible = false;
+        break;
+      }
+    }
+    if (!eligible) continue;
+    const label = clean(attr(n, "value") ?? "");
+    if (/add to (?:basket|cart)|buy|購入|カート|かご/i.test(label))
+      labels.set(n, label);
+  }
+  return labels;
+}
 /** Local-only structural labels; never an ARIA/accessibility-name resolver. */
 function localCheckboxLabels(
   nodes: Node[],
@@ -266,6 +304,9 @@ function analyzeCode(
         : [c, ...descendants(c)],
     );
   const localLabels = local ? localCheckboxLabels(nodes, hidden) : undefined;
+  const localPurchases = local
+    ? localInputPurchaseLabels(nodes, hidden)
+    : undefined;
   const candidates: Candidate[] = [];
   let count = 0,
     order = 0,
@@ -280,8 +321,9 @@ function analyzeCode(
     inherited: Style = {},
   ) {
     const name = tag(n),
-      current = ++order;
-    if (omit.has(name) || hidden(n)) return;
+      current = ++order,
+      inputLabel = localPurchases?.get(n);
+    if ((omit.has(name) && !inputLabel) || hidden(n)) return;
     const style = { ...styleFor(n, inherited) };
     if (name === "title") {
       title = clean(rawText(n)) || title;
@@ -296,14 +338,17 @@ function analyzeCode(
       region = "navigation";
     const sourceClasses = classes(n);
     let kind: Candidate["kind"] | undefined,
-      label = clean(visibleText(n));
+      label = inputLabel ?? clean(visibleText(n));
     const details: ProductDetail[] = [];
     const product =
       name === "article" &&
       descendants(n).some(
         (c) =>
-          tag(c) === "button" &&
-          /add to (?:basket|cart)|buy|購入|カート|かご/i.test(visibleText(c)),
+          (tag(c) === "button" &&
+            /add to (?:basket|cart)|buy|購入|カート|かご/i.test(
+              visibleText(c),
+            )) ||
+          localPurchases?.has(c),
       );
     if (product) {
       group = current;
@@ -343,7 +388,7 @@ function analyzeCode(
     } else if (/^h[1-3]$/.test(name) && !group) kind = "heading";
     else if (name === "a" && !group) kind = "navigation";
     else if (
-      name === "button" &&
+      (name === "button" || inputLabel !== undefined) &&
       /add to (?:basket|cart)|buy|購入|カート|かご/i.test(label)
     )
       kind = "purchase";
