@@ -70,6 +70,13 @@ function wordGoogle() {
 function text(p: Item, fallback: string) {
   return esc(p.label || fallback);
 }
+function videoCopy(p: Item, kicker: string, fallback: [string, string]) {
+  const custom = p.label.trim().length > 0;
+  const title = custom
+    ? `<strong title="${esc(p.label)}">${esc(p.label)}</strong>`
+    : `<strong>${fallback.map(esc).join("<br>")}</strong>`;
+  return `<div class="video-copy${custom ? " has-custom-title" : ""}"><small>${esc(kicker)}</small>${title}</div>`;
+}
 function button(content: string, cls = "", action = "press") {
   return `<button type="button" class="native-button ${cls}" data-ui="${action}">${content}</button>`;
 }
@@ -77,7 +84,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
   const t = p.type;
   switch (t) {
     case "yt_play":
-      return `<div class="native-video"><div class="video-grain"></div><div class="video-landscape"><i></i><i></i><i></i></div><div class="video-top"><span class="live-tag">● LIVE</span><span>RECOVERED SIGNAL / 04</span></div><div class="video-copy"><small>A FILM FROM THE OLD WEB</small><strong>THE INTERNET<br>IS STILL YOURS.</strong></div><span class="video-caption"></span><button class="video-play" type="button" data-ui="play" aria-label="動画を再生">${icon("play")}</button><div class="native-video-controls"><span>${icon("play")}${icon("volume")}<span class="video-time">0:00</span><i>/ 3:42</i></span><span>${icon("settings")}<b>⛶</b></span></div></div>`;
+      return `<div class="native-video"><div class="video-grain"></div><div class="video-landscape"><i></i><i></i><i></i></div><div class="video-top"><span class="live-tag">● LIVE</span><span>RECOVERED SIGNAL / 04</span></div>${videoCopy(p, "A FILM FROM THE OLD WEB", ["THE INTERNET", "IS STILL YOURS."])}<span class="video-caption"></span><button class="video-play" type="button" data-ui="play" aria-label="動画を再生">${icon("play")}</button><div class="native-video-controls"><span>${icon("play")}${icon("volume")}<span class="video-time">0:00</span><i>/ 3:42</i></span><span>${icon("settings")}<b>⛶</b></span></div></div>`;
     case "yt_speed":
       return button(
         `<b class="speed-num">2×</b><span class="chev">⌄</span>`,
@@ -194,7 +201,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "am_oneclick":
       return button(`<span class="oneclick-cart">${icon("cart")}<b class="cart-state">0</b></span><span>${text(p, "1-Click で今すぐ買う")}</span>`, "buy-button fused-oneclick", "buy");
     case "yt_embed":
-      return `<div class="native-video fused-embed"><div class="video-grain"></div><div class="video-landscape"><i></i><i></i><i></i></div><div class="video-top"><span class="embed-tag">&lt;iframe&gt; EMBED</span><span>どこでも再生</span></div><div class="video-copy"><small>EMBEDDED ANYWHERE</small><strong>ONE PLAYER,<br>EVERY PAGE.</strong></div><span class="video-caption"></span><button class="video-play" type="button" data-ui="play" aria-label="動画を再生">${icon("play")}</button><div class="embed-seek"><i></i></div></div>`;
+      return `<div class="native-video fused-embed"><div class="video-grain"></div><div class="video-landscape"><i></i><i></i><i></i></div><div class="video-top"><span class="embed-tag">&lt;iframe&gt; EMBED</span><span>どこでも再生</span></div>${videoCopy(p, "EMBEDDED ANYWHERE", ["ONE PLAYER,", "EVERY PAGE."])}<span class="video-caption"></span><button class="video-play" type="button" data-ui="play" aria-label="動画を再生">${icon("play")}</button><div class="embed-seek"><i></i></div></div>`;
     case "ab_ticker":
       return `<div class="native-marquee fused-ticker"><b class="ticker-flag">速報</b><span>${text(p, "UIの統合が進んでいます")}　◆　インスタント検索が登場　◆　ワンクリック購入が話題に　◆　</span></div>`;
     case "ab_blog":

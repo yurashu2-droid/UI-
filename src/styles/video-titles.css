@@ -1,0 +1,41 @@
+/* Custom titles share the native artwork, with room for play and caption lanes.
+   The complete text stays in the DOM and title attribute. Empty-label art is unchanged. */
+.native-video .video-copy.has-custom-title {
+  right: calc(22% + 70px);
+  top: min(36%, calc(100% - 140px));
+  max-width: 100%;
+  overflow: hidden;
+}
+.native-video .video-copy.has-custom-title small {
+  display: block;
+  font-size: 8px;
+  line-height: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.native-video .video-copy.has-custom-title strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-width: 100%;
+  max-height: 56px;
+  margin-top: 10px;
+  line-height: 28px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+}
+.compact-ui .native-video .video-copy.has-custom-title {
+  right: calc(12% + 47px);
+  top: min(34%, calc(100% - 104px));
+}
+.compact-ui .native-video .video-copy.has-custom-title small {
+  font-size: 6px;
+  line-height: 8px;
+}
+.compact-ui .native-video .video-copy.has-custom-title strong {
+  max-height: 40px;
+  margin-top: 6px;
+  line-height: 20px;
+}
