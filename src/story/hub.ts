@@ -29,6 +29,13 @@ export function mountStoryHub(
   let ownPreview: { viewport: HTMLElement; paper: HTMLElement } | null = null;
   let previewResize: ResizeObserver | null = null;
   let namingDraft: { owner: StoryState; input: HTMLInputElement } | null = null;
+  let machineDraft: {
+    owner: StoryState;
+    stageId: StoryState["stageId"];
+    input: HTMLInputElement;
+    kind: HTMLSelectElement;
+    details: HTMLDetailsElement;
+  } | null = null;
   let postgameWorkshop = false;
   let selected: ObjectId = "junk",
     busy = false,
@@ -242,10 +249,13 @@ export function mountStoryHub(
     input.spellcheck = false;
     input.placeholder = "https://example.com/";
     input.maxLength = 2048;
+    // Repair stays only in this machine view's live controls, never the save.
+    const draft = machineDraft;
+    input.value = draft?.input.value ?? "";
+    details.open = draft?.details.open ?? false;
     label.append(input);
     const kind = make("select");
     kind.setAttribute("aria-label", "解析方法");
-    kind.value = "new";
     for (const [value, title] of [
       ["new", "新しく解析 / エネルギー1"],
       ["cached", "保存済みの結果を使う / 0"],
@@ -255,13 +265,19 @@ export function mountStoryHub(
       option.value = value;
       kind.append(option);
     }
+    kind.value = draft && ["new", "cached", "reanalyze"].includes(draft.kind.value)
+      ? draft.kind.value : "new";
+    machineDraft = { owner: state, stageId: state.stageId, input, kind, details };
     const submit = make("button", "story-secondary", "追加接続へ");
     submit.type = "submit";
     submit.disabled = busy || !callbacks.onOptionalRaid;
     form.append(label, kind, submit);
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (busy || disposed) return;
+      if (
+        busy || disposed || machineDraft?.input !== input ||
+        callbacks.getState() !== state || machineDraft.stageId !== state.stageId
+      ) return;
       let url: URL;
       try {
         url = new URL(input.value);
@@ -604,7 +620,15 @@ export function mountStoryHub(
     const state = callbacks.getState(),
       stage = currentStoryStage(state),
       root = make("section", "story-hub");
+    const endingVisible =
+      ["archive", "restoration", "link", "complete"].includes(state.phase) &&
+      !(state.phase === "complete" && postgameWorkshop);
     if (state.phase !== "naming") namingDraft = null;
+    if (
+      machineDraft?.owner !== state || machineDraft?.stageId !== state.stageId ||
+      selected !== "machine" || state.phase === "naming" ||
+      state.phase === "record" || endingVisible
+    ) machineDraft = null;
     const header = make("header", "story-header"),
       brand = make("div");
     brand.append(
@@ -632,11 +656,7 @@ export function mountStoryHub(
     }
     if (state.phase === "naming") renderNaming(root);
     else if (state.phase === "record") renderRecord(root);
-    else if (
-      ["archive", "restoration", "link", "complete"].includes(state.phase) &&
-      !(state.phase === "complete" && postgameWorkshop)
-    )
-      renderEnding(root);
+    else if (endingVisible) renderEnding(root);
     else {
       root.append(make("p", "story-objective", stage.objective));
       if (stage.id === "delivery" && !state.fusionWitnessed) {
@@ -754,6 +774,7 @@ export function mountStoryHub(
       previewResize?.disconnect();
       disposed = true;
       namingDraft = null;
+      machineDraft = null;
       host.replaceChildren();
     },
   };
