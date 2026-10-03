@@ -70,6 +70,24 @@ The opt-in option is `{recovery:"seed-101-instant-navigation"}`. It rejects othe
 
 The five added regressions (four route tests and one independent QA test) cover the original paid prefix, the full ending, untouched post-repair board with held loot, current-shop paid alternatives, bounded option scope, the coordinate-only delta, real loss replay and non-winning controls. Independent QA also rebuilt the baseline from a fresh session and confirmed exact snapshot/ledger agreement. Generated evidence is local under `/tmp/ui-raid-story-recovery/` and `/tmp/ui-raid-story-recovery-qa/`; maintained reproduction does not require those files. At this recovery checkpoint, all 700 repository tests, all 47 story/session/QA tests, and the typechecked production build pass. This is engine/session evidence, not browser visual QA or a proof for other failed policies.
 
+## Seed 101: paid navigation recovery and the whitespace boundary
+
+The unchanged navigation policy still ends **0/30** in the bounded baseline. This separate witness replays seed 101's original purchases, rerolls, loot, legal placements and tutorial fusion through a fresh production session. It keeps the first real `permission-desk` loss: 19.50s, enemy 66 HP, entering with $92, three lives and load 31/capacity 35. Actual settlement leaves $108 and two lives, and fuses the existing guestbook/counter into a Blog. An unchanged post-loss retry still loses (enemy 21 HP); the different result reflects that real settlement fusion, not a changed opponent.
+
+From that recorded post-loss state:
+
+1. Buy the currently offered Search Result for **$6**. Place it at `(32,272)` with size **260×80**. Retry `permission-desk`: win at 20.10s with 9 HP. Claim the breadcrumb reward and leave it in inventory.
+2. Before `permission-proof`, buy its actually offered Star Review for **$4**. Move existing heading `p1` to `(32,384)`, then place the new review at `(512,96)` with size **280×32**. No other previously owned UI moves or changes size. Retry: win at 20.10s with 9 HP.
+3. Keep that board unchanged, claim the first offered UI each time, and leave new loot in inventory. The next three fights finish with 318, 289 and 155 HP. The route obtains all fifteen canonical victories and eight records, restores the archive, places the ending link and makes the first restored-page visit.
+
+Total new recovery spending is $10; the entire paid route ends with **$196 = $11 − $50 purchases − $18 rerolls + $253 earnings**. Purchased capacity remains 35, final fighting load is 34, and there are no admins. No cash, stock, loot or capacity is injected and no game rule, opponent or story content is changed.
+
+This is a narrow arrangement, not “buy any two attacks.” The review supports both existing purchase buttons (`p12`, `p14`), giving each ×1.20 power. Its compact partner preserves **60.11% free space**, keeping the first two navigation links' existing whitespace bonus. Holding the same paid review away from those buttons loses. Enlarging the Search Result to 280×96 drops free space below 60%, reducing each highlighted link’s additive whitespace bonus from +3 to +2, and also loses. Buying only the Search Result wins the desk but then loses the proof (enemy 16 HP).
+
+**Player lesson:** before adding or enlarging UI, compare both actual support targets and page whitespace. Extra occupied area can lower the links’ additive whitespace bonus from +3 to +2 even when CPU still fits. The coordinates above apply to this exact recorded board; they are not a universal layout or an improved baseline completion rate.
+
+Reproduce with `node --import tsx scripts/navigation-recovery.ts` and `node --import tsx --test tests/navigation-recovery.test.mjs`. The script outputs before/after-loss saves, both paid recovery builds, the exact original paid prefix, full cash ledger and terminal session. Six regressions cover full completion, original-prefix agreement, the one-existing-item move, unchanged board/capacity through the ending, non-winning unchanged/one-purchase controls, disconnected review and oversized-result controls. Browser visuals remain unverified.
+
 ## Earlier bottleneck study and bounded correction
 
 The following candidate comparison and independent holdout are retained historical evidence, not fresh v4 runs of every rejected opponent. The six-part authored board remains current and is the board used in the recheck above.

@@ -2,6 +2,20 @@ import D from "./data.js";
 import type { BattleAnalysis, Item } from "./types.js";
 
 export const VIDEO_SPEED_HELP = "動画の下に操作列として接続すると、同じ動画プレイヤー構造の動画本体を2倍速に（上限2倍）。文字・購入・再発動UIは対象外";
+export const INSTANT_SEARCH_HELP = "自分の内蔵サジェストと、接続した文字攻撃の威力 +45%。同じサジェスト系の効果は重複せず、強い方だけ適用。最終倍率は対象UIの「威力」で確認できます。";
+
+/** Describe outgoing engine connections, not an additional/stacked damage gain. */
+export function instantSearchSupport(item: Item, info: BattleAnalysis) {
+  if (item.type !== "go_instant") return null;
+  const placed = info.board.some(part => part.id === item.id);
+  const targetIds = new Set(info.relations
+    .filter(relation => relation.from === item.id && relation.kind === "power")
+    .map(relation => relation.to));
+  return {
+    placed,
+    targets: placed ? info.board.filter(part => part.id !== item.id && targetIds.has(part.id)) : [],
+  };
+}
 
 export function isVideoSource(item: Pick<Item, "type">) {
   const part = D.PARTS[item.type];

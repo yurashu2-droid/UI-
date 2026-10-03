@@ -28,7 +28,7 @@ import { createProfileStore } from "./profile-store.js";
 import { prepareRaidChallenge } from "./raid-challenge.js";
 import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
 import { previewCatalogueAction } from "./catalog/preview.js";
-import { VIDEO_SPEED_HELP, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
+import { VIDEO_SPEED_HELP, INSTANT_SEARCH_HELP, instantSearchSupport, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
 import { createDeferredMount } from "./feature-loader.js";
 import { createRaidEnemy } from "./raid/blueprint.js";
 import { registerRaidBlueprint } from "./raid/registry.js";
@@ -387,6 +387,7 @@ const NEEDS: Record<string, { t: (item: Item) => boolean; x: string }> = {
   },
 };
 function connectText(t: string) {
+  if (t === "go_instant") return INSTANT_SEARCH_HELP;
   if (t === "go_jobs") return "文字・動画 → 隣の広告などの収益UI → 隣のジョブ一覧。収益の行き先は1つだけ。実験室の一時サーバー負荷ルールを選んでください。";
   const d = P[t];
   if (NEEDS[t]) return NEEDS[t].x;
@@ -1150,7 +1151,8 @@ function selectionCard(sel: Item[], info: EngineInfo) {
     m = info.mods[p.id] || { speed: 1, power: 1, notes: [] },
     groups = info.member[p.id] || [],
     parent = info.parents[p.id],
-    ok = working(p, info);
+    ok = working(p, info),
+    instantSupport = instantSearchSupport(p, info);
   const interval=battle?.player.parts.find(part=>part.id===p.id)?.period ?? E.naturalPeriod(p,info,battle?.player.capacity??(labPressureCapacity()??(run.mode==="lab"&&!storyActive?Infinity:R.capacity(run))));
   const notes = [...m.notes];
   if (parent)
@@ -1168,6 +1170,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
      : ""
  }
  ${ok ? "" : `<p class="sel-warn">⚠ 今は働いていません</p>`}<div class="sel-connect"><b>つなぎ方</b>${esc(connectText(p.type))}</div>
+ ${instantSupport ? `<div class="sel-connect"><b>接続している文字攻撃</b>${!instantSupport.placed ? "未配置：ページに置くと、自分の攻撃と近くの文字攻撃を支援します。" : instantSupport.targets.length ? `<ul class="sel-bonus">${instantSupport.targets.map(target => `<li>${esc(target.label || P[target.type].name)}</li>`).join("")}</ul>` : "ほかの文字攻撃には未接続。自分の内蔵サジェストは有効です。"}</div>` : ""}
  <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>
  ${p.appearanceId ? '<p class="muted">取得元の外観を使用中。合成後は標準表示になりますが、元の外観と由来はコレクションに残ります。</p>' : ""}
  <details class="sel-more"><summary>見た目（時代）・表示テキストを変える</summary>${skinPicker(p)}<label class="field-label">表示テキスト<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="元のテキストを使用"></label></details>
@@ -1550,9 +1553,15 @@ $("#modal").addEventListener("close", () => {
 });
 /* ---------- Isolated story profile and actual editor/battle bridge ---------- */
 function commitStorySession(next: StorySession.StorySession) {
+  // Story transactions establish a new inventory/economy baseline. Ordinary
+  // editor saves bypass this bridge; story-only dialogue/start/cancel retains
+  // history. Compare canonical runs, not the live run's temporary battle phase.
+  const changedRun=!storySession||JSON.stringify(storySession.run)!==JSON.stringify(next.run);
   const stored=storyPersistence.save(next);
   if(!stored.ok)throw new Error(stored.error);
-  storySession=clone(next);run=clone(next.run);saveOK=true;saveProblem="";renderStorageNotice();
+  storySession=clone(next);run=clone(next.run);
+  if(changedRun)editor.reset();
+  saveOK=true;saveProblem="";renderStorageNotice();
 }
 function enterStory(fresh=false) {
   if(battle)return;
@@ -2772,7 +2781,7 @@ document.addEventListener("click", (e) => {
       if(!pendingStorySettlement||!window.confirm("未保存のこの対戦結果を破棄して、保存されている記録に戻りますか？必要なら先に結果をバックアップしてください。"))break;
       const latest=storyPersistence.load();
       if(latest.status!=="loaded"){toast("保存済みの記録を確認できないため、この結果を保全しています。");break;}
-      pendingStorySettlement=null;storySession=clone(latest.session);run=clone(latest.session.run);leaveBattle();openStoryHub();break;
+      pendingStorySettlement=null;storySession=clone(latest.session);run=clone(latest.session.run);editor.reset();leaveBattle();openStoryHub();break;
     }
     case "story-export-pending":
       exportFile(); break;
