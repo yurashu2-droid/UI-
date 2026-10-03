@@ -1,0 +1,6821 @@
+{
+  "rulesVersion": "combat-v2",
+  "hash": "sha256(JSON.stringify(value))",
+  "caseCount": 20,
+  "cases": [
+    {
+      "key": "mixed/retro",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 12,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 24,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "go_search",
+            "x": 32,
+            "y": 92,
+            "w": 428,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_buy",
+            "x": 460,
+            "y": 92,
+            "w": 148,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "yt_like",
+            "x": 648,
+            "y": 92,
+            "w": 104,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "yt_sub",
+            "x": 752,
+            "y": 92,
+            "w": 176,
+            "h": 44,
+            "shape": "glass",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "yt_play",
+            "x": 32,
+            "y": 164,
+            "w": 576,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "yt_progress",
+            "x": 32,
+            "y": 428,
+            "w": 576,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "yt_speed",
+            "x": 32,
+            "y": 450,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "yt_autoplay",
+            "x": 136,
+            "y": 450,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "yt_caption",
+            "x": 312,
+            "y": 450,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "yt_notify",
+            "x": 400,
+            "y": 450,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "am_product",
+            "x": 648,
+            "y": 164,
+            "w": 280,
+            "h": 176,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "am_quantity",
+            "x": 648,
+            "y": 340,
+            "w": 112,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "am_prime",
+            "x": 760,
+            "y": 340,
+            "w": 168,
+            "h": 40,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "am_coupon",
+            "x": 648,
+            "y": 392,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "am_cart",
+            "x": 648,
+            "y": 440,
+            "w": 280,
+            "h": 92,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "yt_ad",
+            "x": 32,
+            "y": 512,
+            "w": 576,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p19",
+            "type": "gov_pdf",
+            "x": 648,
+            "y": 560,
+            "w": 280,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p20",
+            "type": "ab_link",
+            "x": 32,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p21",
+            "type": "ab_nav",
+            "x": 208,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p22",
+            "type": "ab_mail",
+            "x": 384,
+            "y": 592,
+            "w": 224,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p23",
+            "type": "ab_counter",
+            "x": 32,
+            "y": 640,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p24",
+            "type": "ab_marquee",
+            "x": 344,
+            "y": 640,
+            "w": 584,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 24,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_link",
+            "x": 32,
+            "y": 56,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": "最新情報"
+          },
+          {
+            "id": "e2",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 88,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "ab_heading",
+            "x": 272,
+            "y": 20,
+            "w": 624,
+            "h": 56,
+            "shape": "source",
+            "label": "ようこそ！僕のホームページへ"
+          },
+          {
+            "id": "e4",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 84,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "ab_marquee",
+            "x": 272,
+            "y": 108,
+            "w": 624,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "ab_table",
+            "x": 32,
+            "y": 140,
+            "w": 208,
+            "h": 228,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "ab_link",
+            "x": 48,
+            "y": 188,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "写真館"
+          },
+          {
+            "id": "e8",
+            "type": "ab_nav",
+            "x": 48,
+            "y": 220,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "リンク集"
+          },
+          {
+            "id": "e9",
+            "type": "ab_counter",
+            "x": 584,
+            "y": 152,
+            "w": 312,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "ab_guestbook",
+            "x": 272,
+            "y": 300,
+            "w": 624,
+            "h": 150,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "ab_link",
+            "x": 272,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": "サイトマップ"
+          },
+          {
+            "id": "e12",
+            "type": "ab_mail",
+            "x": 584,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 510,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 270,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "moderator",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "4533f5c2f390f477d63c5b8ae3d5d1b42654d90076247e70990415a357379806",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 10.5,
+          "income": 32
+        },
+        "ticks": 210,
+        "playerHp": 220.39999999999998,
+        "enemyHp": 0,
+        "eventsHash": "3e91b361184db21d4994bc26b35234b5af8e9be721ded402d05e9748dc6f76c3"
+      }
+    },
+    {
+      "key": "mixed/gov",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 12,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 24,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "go_search",
+            "x": 32,
+            "y": 92,
+            "w": 428,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_buy",
+            "x": 460,
+            "y": 92,
+            "w": 148,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "yt_like",
+            "x": 648,
+            "y": 92,
+            "w": 104,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "yt_sub",
+            "x": 752,
+            "y": 92,
+            "w": 176,
+            "h": 44,
+            "shape": "glass",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "yt_play",
+            "x": 32,
+            "y": 164,
+            "w": 576,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "yt_progress",
+            "x": 32,
+            "y": 428,
+            "w": 576,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "yt_speed",
+            "x": 32,
+            "y": 450,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "yt_autoplay",
+            "x": 136,
+            "y": 450,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "yt_caption",
+            "x": 312,
+            "y": 450,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "yt_notify",
+            "x": 400,
+            "y": 450,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "am_product",
+            "x": 648,
+            "y": 164,
+            "w": 280,
+            "h": 176,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "am_quantity",
+            "x": 648,
+            "y": 340,
+            "w": 112,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "am_prime",
+            "x": 760,
+            "y": 340,
+            "w": 168,
+            "h": 40,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "am_coupon",
+            "x": 648,
+            "y": 392,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "am_cart",
+            "x": 648,
+            "y": 440,
+            "w": 280,
+            "h": 92,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "yt_ad",
+            "x": 32,
+            "y": 512,
+            "w": 576,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p19",
+            "type": "gov_pdf",
+            "x": 648,
+            "y": 560,
+            "w": 280,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p20",
+            "type": "ab_link",
+            "x": 32,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p21",
+            "type": "ab_nav",
+            "x": 208,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p22",
+            "type": "ab_mail",
+            "x": 384,
+            "y": 592,
+            "w": 224,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p23",
+            "type": "ab_counter",
+            "x": 32,
+            "y": 640,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p24",
+            "type": "ab_marquee",
+            "x": 344,
+            "y": 640,
+            "w": 584,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_heading",
+            "x": 256,
+            "y": 44,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": "各種申請・お手続き"
+          },
+          {
+            "id": "e2",
+            "type": "gov_notice",
+            "x": 256,
+            "y": 108,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "gov_form",
+            "x": 256,
+            "y": 180,
+            "w": 416,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "gov_check",
+            "x": 272,
+            "y": 244,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_search",
+            "x": 272,
+            "y": 292,
+            "w": 248,
+            "h": 44,
+            "shape": "square",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "gov_submit",
+            "x": 520,
+            "y": 292,
+            "w": 136,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "gov_pdf",
+            "x": 272,
+            "y": 352,
+            "w": 384,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "gov_accordion",
+            "x": 688,
+            "y": 180,
+            "w": 240,
+            "h": 236,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "ab_link",
+            "x": 700,
+            "y": 228,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "手数料について"
+          },
+          {
+            "id": "e10",
+            "type": "ab_mail",
+            "x": 700,
+            "y": 260,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "担当課へのお問合せ"
+          },
+          {
+            "id": "e11",
+            "type": "gov_pdf",
+            "x": 700,
+            "y": 300,
+            "w": 216,
+            "h": 48,
+            "shape": "source",
+            "label": "様式第1号"
+          },
+          {
+            "id": "e12",
+            "type": "gov_font",
+            "x": 696,
+            "y": 436,
+            "w": 232,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "gov_page",
+            "x": 256,
+            "y": 496,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e14",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 350,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "captcha",
+            "moderator",
+            "server",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "1c0f569542326657b7ccd440ce9a86c19eb91beebe341b8fd7c2e646f9712f5f",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 17.35,
+          "income": 56
+        },
+        "ticks": 347,
+        "playerHp": 88,
+        "enemyHp": 0,
+        "eventsHash": "d80158c55020236a031439ca1bb5eb31db5f197dcc823526a27613d221d2f07a"
+      }
+    },
+    {
+      "key": "mixed/google",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 12,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 24,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "go_search",
+            "x": 32,
+            "y": 92,
+            "w": 428,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_buy",
+            "x": 460,
+            "y": 92,
+            "w": 148,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "yt_like",
+            "x": 648,
+            "y": 92,
+            "w": 104,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "yt_sub",
+            "x": 752,
+            "y": 92,
+            "w": 176,
+            "h": 44,
+            "shape": "glass",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "yt_play",
+            "x": 32,
+            "y": 164,
+            "w": 576,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "yt_progress",
+            "x": 32,
+            "y": 428,
+            "w": 576,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "yt_speed",
+            "x": 32,
+            "y": 450,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "yt_autoplay",
+            "x": 136,
+            "y": 450,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "yt_caption",
+            "x": 312,
+            "y": 450,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "yt_notify",
+            "x": 400,
+            "y": 450,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "am_product",
+            "x": 648,
+            "y": 164,
+            "w": 280,
+            "h": 176,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "am_quantity",
+            "x": 648,
+            "y": 340,
+            "w": 112,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "am_prime",
+            "x": 760,
+            "y": 340,
+            "w": 168,
+            "h": 40,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "am_coupon",
+            "x": 648,
+            "y": 392,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "am_cart",
+            "x": 648,
+            "y": 440,
+            "w": 280,
+            "h": 92,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "yt_ad",
+            "x": 32,
+            "y": 512,
+            "w": 576,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p19",
+            "type": "gov_pdf",
+            "x": 648,
+            "y": 560,
+            "w": 280,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p20",
+            "type": "ab_link",
+            "x": 32,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p21",
+            "type": "ab_nav",
+            "x": 208,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p22",
+            "type": "ab_mail",
+            "x": 384,
+            "y": 592,
+            "w": 224,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p23",
+            "type": "ab_counter",
+            "x": 32,
+            "y": 640,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p24",
+            "type": "ab_marquee",
+            "x": 344,
+            "y": 640,
+            "w": 584,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "go_search",
+            "x": 96,
+            "y": 14,
+            "w": 560,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "go_voice",
+            "x": 656,
+            "y": 14,
+            "w": 56,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 14,
+            "w": 184,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "go_tabs",
+            "x": 96,
+            "y": 70,
+            "w": 640,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "go_ads",
+            "x": 96,
+            "y": 148,
+            "w": 600,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_result",
+            "x": 96,
+            "y": 244,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "go_result",
+            "x": 96,
+            "y": 512,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": "UIの寄せ集めで勝つための10の方法"
+          },
+          {
+            "id": "e7",
+            "type": "go_translate",
+            "x": 744,
+            "y": 148,
+            "w": 192,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "go_suggest",
+            "x": 744,
+            "y": 196,
+            "w": 192,
+            "h": 112,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "go_page",
+            "x": 96,
+            "y": 624,
+            "w": 408,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 390,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "cdn",
+            "server",
+            "captcha"
+          ]
+        }
+      },
+      "inputHash": "679ec62e19f0e974efefba0013d277a8c74eae737e0ea56f5edfab593e90e0ca",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 13.700000000000001,
+          "income": 44
+        },
+        "ticks": 274,
+        "playerHp": 256.9000000000001,
+        "enemyHp": 0,
+        "eventsHash": "7b5e909553aeefcc3b8bc342cc9e73dc43c6c97274d48e66f27304a84eaf876e"
+      }
+    },
+    {
+      "key": "mixed/amazon",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 12,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 24,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "go_search",
+            "x": 32,
+            "y": 92,
+            "w": 428,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_buy",
+            "x": 460,
+            "y": 92,
+            "w": 148,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "yt_like",
+            "x": 648,
+            "y": 92,
+            "w": 104,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "yt_sub",
+            "x": 752,
+            "y": 92,
+            "w": 176,
+            "h": 44,
+            "shape": "glass",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "yt_play",
+            "x": 32,
+            "y": 164,
+            "w": 576,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "yt_progress",
+            "x": 32,
+            "y": 428,
+            "w": 576,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "yt_speed",
+            "x": 32,
+            "y": 450,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "yt_autoplay",
+            "x": 136,
+            "y": 450,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "yt_caption",
+            "x": 312,
+            "y": 450,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "yt_notify",
+            "x": 400,
+            "y": 450,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "am_product",
+            "x": 648,
+            "y": 164,
+            "w": 280,
+            "h": 176,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "am_quantity",
+            "x": 648,
+            "y": 340,
+            "w": 112,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "am_prime",
+            "x": 760,
+            "y": 340,
+            "w": 168,
+            "h": 40,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "am_coupon",
+            "x": 648,
+            "y": 392,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "am_cart",
+            "x": 648,
+            "y": 440,
+            "w": 280,
+            "h": 92,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "yt_ad",
+            "x": 32,
+            "y": 512,
+            "w": 576,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p19",
+            "type": "gov_pdf",
+            "x": 648,
+            "y": 560,
+            "w": 280,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p20",
+            "type": "ab_link",
+            "x": 32,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p21",
+            "type": "ab_nav",
+            "x": 208,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p22",
+            "type": "ab_mail",
+            "x": 384,
+            "y": 592,
+            "w": 224,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p23",
+            "type": "ab_counter",
+            "x": 32,
+            "y": 640,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p24",
+            "type": "ab_marquee",
+            "x": 344,
+            "y": 640,
+            "w": 584,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "am_product",
+            "x": 24,
+            "y": 64,
+            "w": 560,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "am_deal",
+            "x": 608,
+            "y": 64,
+            "w": 328,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "am_rating",
+            "x": 608,
+            "y": 124,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "am_quantity",
+            "x": 608,
+            "y": 168,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "am_buy",
+            "x": 720,
+            "y": 168,
+            "w": 216,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "am_prime",
+            "x": 608,
+            "y": 216,
+            "w": 152,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "am_wish",
+            "x": 760,
+            "y": 216,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "am_coupon",
+            "x": 608,
+            "y": 268,
+            "w": 328,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "am_cart",
+            "x": 608,
+            "y": 316,
+            "w": 328,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "am_buy",
+            "x": 608,
+            "y": 424,
+            "w": 328,
+            "h": 40,
+            "shape": "source",
+            "label": "今すぐ買う"
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 460,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "adnet",
+            "cdn",
+            "server"
+          ]
+        }
+      },
+      "inputHash": "4f136b8ad2f0bde6a40e23d06c24986253ea4598bf7216a2d07bd802ffd49dc8",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 16.25,
+          "income": 53.5
+        },
+        "ticks": 325,
+        "playerHp": 93.79999999999995,
+        "enemyHp": 0,
+        "eventsHash": "8ff87f4796a3522c0b2e78e29f688066614e8d71874b1aac7bcc10c3092735f2"
+      }
+    },
+    {
+      "key": "mixed/youtube",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 12,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 24,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "go_search",
+            "x": 32,
+            "y": 92,
+            "w": 428,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_buy",
+            "x": 460,
+            "y": 92,
+            "w": 148,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "yt_like",
+            "x": 648,
+            "y": 92,
+            "w": 104,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "yt_sub",
+            "x": 752,
+            "y": 92,
+            "w": 176,
+            "h": 44,
+            "shape": "glass",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "yt_play",
+            "x": 32,
+            "y": 164,
+            "w": 576,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "yt_progress",
+            "x": 32,
+            "y": 428,
+            "w": 576,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "yt_speed",
+            "x": 32,
+            "y": 450,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "yt_autoplay",
+            "x": 136,
+            "y": 450,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "yt_caption",
+            "x": 312,
+            "y": 450,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "yt_notify",
+            "x": 400,
+            "y": 450,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "am_product",
+            "x": 648,
+            "y": 164,
+            "w": 280,
+            "h": 176,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "am_quantity",
+            "x": 648,
+            "y": 340,
+            "w": 112,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "am_prime",
+            "x": 760,
+            "y": 340,
+            "w": 168,
+            "h": 40,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "am_coupon",
+            "x": 648,
+            "y": 392,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "am_cart",
+            "x": 648,
+            "y": 440,
+            "w": 280,
+            "h": 92,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "yt_ad",
+            "x": 32,
+            "y": 512,
+            "w": 576,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p19",
+            "type": "gov_pdf",
+            "x": 648,
+            "y": 560,
+            "w": 280,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p20",
+            "type": "ab_link",
+            "x": 32,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p21",
+            "type": "ab_nav",
+            "x": 208,
+            "y": 592,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p22",
+            "type": "ab_mail",
+            "x": 384,
+            "y": 592,
+            "w": 224,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p23",
+            "type": "ab_counter",
+            "x": 32,
+            "y": 640,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p24",
+            "type": "ab_marquee",
+            "x": 344,
+            "y": 640,
+            "w": 584,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "yt_play",
+            "x": 24,
+            "y": 16,
+            "w": 600,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "yt_progress",
+            "x": 24,
+            "y": 316,
+            "w": 600,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "yt_speed",
+            "x": 24,
+            "y": 338,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "yt_autoplay",
+            "x": 128,
+            "y": 338,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "yt_caption",
+            "x": 304,
+            "y": 338,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "yt_like",
+            "x": 392,
+            "y": 338,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "yt_notify",
+            "x": 504,
+            "y": 338,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "yt_sub",
+            "x": 336,
+            "y": 452,
+            "w": 184,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "yt_like",
+            "x": 520,
+            "y": 452,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "yt_ad",
+            "x": 24,
+            "y": 504,
+            "w": 600,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "yt_play",
+            "x": 648,
+            "y": 56,
+            "w": 288,
+            "h": 162,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "yt_progress",
+            "x": 648,
+            "y": 218,
+            "w": 288,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e12",
+            "type": "yt_ad",
+            "x": 648,
+            "y": 488,
+            "w": 280,
+            "h": 80,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 540,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "sns",
+            "adnet",
+            "sakura",
+            "troll"
+          ]
+        }
+      },
+      "inputHash": "437d22aee9e4395c60016c19d0828b46e7a3f44466686eeef2b741a3508e8ce2",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 13.75,
+          "income": 44
+        },
+        "ticks": 275,
+        "playerHp": 162.90000000000003,
+        "enemyHp": 0,
+        "eventsHash": "74a194cbad56185b102077bcae8d13cbc2aaf9b4267279e3c743fe3810847617"
+      }
+    },
+    {
+      "key": "text/retro",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 20,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 80,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "go_search",
+            "x": 256,
+            "y": 128,
+            "w": 456,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 128,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_suggest",
+            "x": 256,
+            "y": 172,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 128,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "ab_link",
+            "x": 32,
+            "y": 160,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 192,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "go_result",
+            "x": 256,
+            "y": 288,
+            "w": 640,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "go_ads",
+            "x": 256,
+            "y": 408,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "gov_form",
+            "x": 32,
+            "y": 288,
+            "w": 224,
+            "h": 216,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_check",
+            "x": 48,
+            "y": 360,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_submit",
+            "x": 48,
+            "y": 408,
+            "w": 192,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "go_page",
+            "x": 320,
+            "y": 520,
+            "w": 400,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_guestbook",
+            "x": 32,
+            "y": 536,
+            "w": 256,
+            "h": 108,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "gov_pdf",
+            "x": 320,
+            "y": 580,
+            "w": 576,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "ab_counter",
+            "x": 320,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 24,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_link",
+            "x": 32,
+            "y": 56,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": "最新情報"
+          },
+          {
+            "id": "e2",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 88,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "ab_heading",
+            "x": 272,
+            "y": 20,
+            "w": 624,
+            "h": 56,
+            "shape": "source",
+            "label": "ようこそ！僕のホームページへ"
+          },
+          {
+            "id": "e4",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 84,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "ab_marquee",
+            "x": 272,
+            "y": 108,
+            "w": 624,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "ab_table",
+            "x": 32,
+            "y": 140,
+            "w": 208,
+            "h": 228,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "ab_link",
+            "x": 48,
+            "y": 188,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "写真館"
+          },
+          {
+            "id": "e8",
+            "type": "ab_nav",
+            "x": 48,
+            "y": 220,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "リンク集"
+          },
+          {
+            "id": "e9",
+            "type": "ab_counter",
+            "x": 584,
+            "y": 152,
+            "w": 312,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "ab_guestbook",
+            "x": 272,
+            "y": 300,
+            "w": 624,
+            "h": 150,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "ab_link",
+            "x": 272,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": "サイトマップ"
+          },
+          {
+            "id": "e12",
+            "type": "ab_mail",
+            "x": 584,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 510,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 270,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "moderator",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "d233ae503fcba61e5250ed82730ae62b5bc8e115352e10b8e370701226d26ab5",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 15.75,
+          "income": 28.5
+        },
+        "ticks": 315,
+        "playerHp": 186.09999999999997,
+        "enemyHp": 0,
+        "eventsHash": "72ceb95874507a4d00162ccd28beb6f4057dc0e1eea995c9324826261ba93009"
+      }
+    },
+    {
+      "key": "text/gov",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 20,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 80,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "go_search",
+            "x": 256,
+            "y": 128,
+            "w": 456,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 128,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_suggest",
+            "x": 256,
+            "y": 172,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 128,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "ab_link",
+            "x": 32,
+            "y": 160,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 192,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "go_result",
+            "x": 256,
+            "y": 288,
+            "w": 640,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "go_ads",
+            "x": 256,
+            "y": 408,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "gov_form",
+            "x": 32,
+            "y": 288,
+            "w": 224,
+            "h": 216,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_check",
+            "x": 48,
+            "y": 360,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_submit",
+            "x": 48,
+            "y": 408,
+            "w": 192,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "go_page",
+            "x": 320,
+            "y": 520,
+            "w": 400,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_guestbook",
+            "x": 32,
+            "y": 536,
+            "w": 256,
+            "h": 108,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "gov_pdf",
+            "x": 320,
+            "y": 580,
+            "w": 576,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "ab_counter",
+            "x": 320,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_heading",
+            "x": 256,
+            "y": 44,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": "各種申請・お手続き"
+          },
+          {
+            "id": "e2",
+            "type": "gov_notice",
+            "x": 256,
+            "y": 108,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "gov_form",
+            "x": 256,
+            "y": 180,
+            "w": 416,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "gov_check",
+            "x": 272,
+            "y": 244,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_search",
+            "x": 272,
+            "y": 292,
+            "w": 248,
+            "h": 44,
+            "shape": "square",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "gov_submit",
+            "x": 520,
+            "y": 292,
+            "w": 136,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "gov_pdf",
+            "x": 272,
+            "y": 352,
+            "w": 384,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "gov_accordion",
+            "x": 688,
+            "y": 180,
+            "w": 240,
+            "h": 236,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "ab_link",
+            "x": 700,
+            "y": 228,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "手数料について"
+          },
+          {
+            "id": "e10",
+            "type": "ab_mail",
+            "x": 700,
+            "y": 260,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "担当課へのお問合せ"
+          },
+          {
+            "id": "e11",
+            "type": "gov_pdf",
+            "x": 700,
+            "y": 300,
+            "w": 216,
+            "h": 48,
+            "shape": "source",
+            "label": "様式第1号"
+          },
+          {
+            "id": "e12",
+            "type": "gov_font",
+            "x": 696,
+            "y": 436,
+            "w": 232,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "gov_page",
+            "x": 256,
+            "y": 496,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e14",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 350,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "captcha",
+            "moderator",
+            "server",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "ebf794b0e3665943434d912b2f84fc2c5712d7a3b8684aa7c91b4a72ea29fd2e",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 26.55,
+          "income": 52.5
+        },
+        "ticks": 531,
+        "playerHp": 6,
+        "enemyHp": 0,
+        "eventsHash": "c2d32a07e903ec2e182fbfcee574b1163f22149037b21668b12f93a63fc5e7a1"
+      }
+    },
+    {
+      "key": "text/google",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 20,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 80,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "go_search",
+            "x": 256,
+            "y": 128,
+            "w": 456,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 128,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_suggest",
+            "x": 256,
+            "y": 172,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 128,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "ab_link",
+            "x": 32,
+            "y": 160,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 192,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "go_result",
+            "x": 256,
+            "y": 288,
+            "w": 640,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "go_ads",
+            "x": 256,
+            "y": 408,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "gov_form",
+            "x": 32,
+            "y": 288,
+            "w": 224,
+            "h": 216,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_check",
+            "x": 48,
+            "y": 360,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_submit",
+            "x": 48,
+            "y": 408,
+            "w": 192,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "go_page",
+            "x": 320,
+            "y": 520,
+            "w": 400,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_guestbook",
+            "x": 32,
+            "y": 536,
+            "w": 256,
+            "h": 108,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "gov_pdf",
+            "x": 320,
+            "y": 580,
+            "w": 576,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "ab_counter",
+            "x": 320,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "go_search",
+            "x": 96,
+            "y": 14,
+            "w": 560,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "go_voice",
+            "x": 656,
+            "y": 14,
+            "w": 56,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 14,
+            "w": 184,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "go_tabs",
+            "x": 96,
+            "y": 70,
+            "w": 640,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "go_ads",
+            "x": 96,
+            "y": 148,
+            "w": 600,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_result",
+            "x": 96,
+            "y": 244,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "go_result",
+            "x": 96,
+            "y": 512,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": "UIの寄せ集めで勝つための10の方法"
+          },
+          {
+            "id": "e7",
+            "type": "go_translate",
+            "x": 744,
+            "y": 148,
+            "w": 192,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "go_suggest",
+            "x": 744,
+            "y": 196,
+            "w": 192,
+            "h": 112,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "go_page",
+            "x": 96,
+            "y": 624,
+            "w": 408,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 390,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "cdn",
+            "server",
+            "captcha"
+          ]
+        }
+      },
+      "inputHash": "8bfefbc8d5d2252903d939da0218ec2645b7dc91689bacda90d50542b0b9a716",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 19.25,
+          "income": 37.5
+        },
+        "ticks": 385,
+        "playerHp": 246.90000000000012,
+        "enemyHp": 0,
+        "eventsHash": "7c0b47f85a51143b9cd0a1cea60cdecc5dbd6dadbbc1df9b7ccf6247cff6684d"
+      }
+    },
+    {
+      "key": "text/amazon",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 20,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 80,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "go_search",
+            "x": 256,
+            "y": 128,
+            "w": 456,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 128,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_suggest",
+            "x": 256,
+            "y": 172,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 128,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "ab_link",
+            "x": 32,
+            "y": 160,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 192,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "go_result",
+            "x": 256,
+            "y": 288,
+            "w": 640,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "go_ads",
+            "x": 256,
+            "y": 408,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "gov_form",
+            "x": 32,
+            "y": 288,
+            "w": 224,
+            "h": 216,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_check",
+            "x": 48,
+            "y": 360,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_submit",
+            "x": 48,
+            "y": 408,
+            "w": 192,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "go_page",
+            "x": 320,
+            "y": 520,
+            "w": 400,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_guestbook",
+            "x": 32,
+            "y": 536,
+            "w": 256,
+            "h": 108,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "gov_pdf",
+            "x": 320,
+            "y": 580,
+            "w": 576,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "ab_counter",
+            "x": 320,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "am_product",
+            "x": 24,
+            "y": 64,
+            "w": 560,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "am_deal",
+            "x": 608,
+            "y": 64,
+            "w": 328,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "am_rating",
+            "x": 608,
+            "y": 124,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "am_quantity",
+            "x": 608,
+            "y": 168,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "am_buy",
+            "x": 720,
+            "y": 168,
+            "w": 216,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "am_prime",
+            "x": 608,
+            "y": 216,
+            "w": 152,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "am_wish",
+            "x": 760,
+            "y": 216,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "am_coupon",
+            "x": 608,
+            "y": 268,
+            "w": 328,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "am_cart",
+            "x": 608,
+            "y": 316,
+            "w": 328,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "am_buy",
+            "x": 608,
+            "y": 424,
+            "w": 328,
+            "h": 40,
+            "shape": "source",
+            "label": "今すぐ買う"
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 460,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "adnet",
+            "cdn",
+            "server"
+          ]
+        }
+      },
+      "inputHash": "36c6e9e838d77485bfba1befb664ecb62b570f43256575c2cae19ea7692c95dd",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 22.700000000000003,
+          "income": 45
+        },
+        "ticks": 454,
+        "playerHp": 0,
+        "enemyHp": 27.51200000000057,
+        "eventsHash": "ce888340f942654fe6c2aa9a6211b2f96a17901f5a2d33d9fc4fc58a532b6360"
+      }
+    },
+    {
+      "key": "text/youtube",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 576,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "gov_font",
+            "x": 652,
+            "y": 20,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 80,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "go_search",
+            "x": 256,
+            "y": 128,
+            "w": 456,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 128,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_suggest",
+            "x": 256,
+            "y": 172,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 128,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "ab_link",
+            "x": 32,
+            "y": 160,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 192,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "go_result",
+            "x": 256,
+            "y": 288,
+            "w": 640,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "go_ads",
+            "x": 256,
+            "y": 408,
+            "w": 640,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "gov_form",
+            "x": 32,
+            "y": 288,
+            "w": 224,
+            "h": 216,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_check",
+            "x": 48,
+            "y": 360,
+            "w": 192,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_submit",
+            "x": 48,
+            "y": 408,
+            "w": 192,
+            "h": 40,
+            "shape": "bevel",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "go_page",
+            "x": 320,
+            "y": 520,
+            "w": 400,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_guestbook",
+            "x": 32,
+            "y": 536,
+            "w": 256,
+            "h": 108,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p17",
+            "type": "gov_pdf",
+            "x": 320,
+            "y": 580,
+            "w": 576,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p18",
+            "type": "ab_counter",
+            "x": 320,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "yt_play",
+            "x": 24,
+            "y": 16,
+            "w": 600,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "yt_progress",
+            "x": 24,
+            "y": 316,
+            "w": 600,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "yt_speed",
+            "x": 24,
+            "y": 338,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "yt_autoplay",
+            "x": 128,
+            "y": 338,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "yt_caption",
+            "x": 304,
+            "y": 338,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "yt_like",
+            "x": 392,
+            "y": 338,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "yt_notify",
+            "x": 504,
+            "y": 338,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "yt_sub",
+            "x": 336,
+            "y": 452,
+            "w": 184,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "yt_like",
+            "x": 520,
+            "y": 452,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "yt_ad",
+            "x": 24,
+            "y": 504,
+            "w": 600,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "yt_play",
+            "x": 648,
+            "y": 56,
+            "w": 288,
+            "h": 162,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "yt_progress",
+            "x": 648,
+            "y": 218,
+            "w": 288,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e12",
+            "type": "yt_ad",
+            "x": 648,
+            "y": 488,
+            "w": 280,
+            "h": 80,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 540,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "sns",
+            "adnet",
+            "sakura",
+            "troll"
+          ]
+        }
+      },
+      "inputHash": "9c08ca571f08045e197793db7a672299605d6fc8b6d92377047192e201350af7",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 20.25,
+          "income": 37.5
+        },
+        "ticks": 405,
+        "playerHp": 124.20000000000005,
+        "enemyHp": 0,
+        "eventsHash": "cd280a72fcf3d83107468ef7fe8c8cbaf0708145252496d75df2b9cb792fe438"
+      }
+    },
+    {
+      "key": "commerce/retro",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 640,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "go_search",
+            "x": 32,
+            "y": 88,
+            "w": 632,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "am_buy",
+            "x": 664,
+            "y": 88,
+            "w": 264,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_product",
+            "x": 32,
+            "y": 164,
+            "w": 504,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "am_rating",
+            "x": 560,
+            "y": 164,
+            "w": 368,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "am_deal",
+            "x": 560,
+            "y": 216,
+            "w": 368,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "am_quantity",
+            "x": 560,
+            "y": 288,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "am_buy",
+            "x": 688,
+            "y": 288,
+            "w": 240,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "am_prime",
+            "x": 560,
+            "y": 328,
+            "w": 168,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "am_wish",
+            "x": 728,
+            "y": 328,
+            "w": 200,
+            "h": 40,
+            "shape": "outline",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "am_coupon",
+            "x": 560,
+            "y": 392,
+            "w": 368,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "am_cart",
+            "x": 560,
+            "y": 456,
+            "w": 368,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "go_ads",
+            "x": 32,
+            "y": 456,
+            "w": 504,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "go_result",
+            "x": 32,
+            "y": 548,
+            "w": 504,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "gov_notice",
+            "x": 560,
+            "y": 580,
+            "w": 368,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_counter",
+            "x": 560,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 24,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_link",
+            "x": 32,
+            "y": 56,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": "最新情報"
+          },
+          {
+            "id": "e2",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 88,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "ab_heading",
+            "x": 272,
+            "y": 20,
+            "w": 624,
+            "h": 56,
+            "shape": "source",
+            "label": "ようこそ！僕のホームページへ"
+          },
+          {
+            "id": "e4",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 84,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "ab_marquee",
+            "x": 272,
+            "y": 108,
+            "w": 624,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "ab_table",
+            "x": 32,
+            "y": 140,
+            "w": 208,
+            "h": 228,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "ab_link",
+            "x": 48,
+            "y": 188,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "写真館"
+          },
+          {
+            "id": "e8",
+            "type": "ab_nav",
+            "x": 48,
+            "y": 220,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "リンク集"
+          },
+          {
+            "id": "e9",
+            "type": "ab_counter",
+            "x": 584,
+            "y": 152,
+            "w": 312,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "ab_guestbook",
+            "x": 272,
+            "y": 300,
+            "w": 624,
+            "h": 150,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "ab_link",
+            "x": 272,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": "サイトマップ"
+          },
+          {
+            "id": "e12",
+            "type": "ab_mail",
+            "x": 584,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 510,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 270,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "moderator",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "876729573317809ee77db79b5c06907ac9a028c0da9e5de1c80eafd8657847e7",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 12.15,
+          "income": 27
+        },
+        "ticks": 243,
+        "playerHp": 198.09999999999997,
+        "enemyHp": 0,
+        "eventsHash": "1ec5eb14300f1a7976e5f4798f59da1edfaa0fcb8544dd5b95c8083e3421b3ca"
+      }
+    },
+    {
+      "key": "commerce/gov",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 640,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "go_search",
+            "x": 32,
+            "y": 88,
+            "w": 632,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "am_buy",
+            "x": 664,
+            "y": 88,
+            "w": 264,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_product",
+            "x": 32,
+            "y": 164,
+            "w": 504,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "am_rating",
+            "x": 560,
+            "y": 164,
+            "w": 368,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "am_deal",
+            "x": 560,
+            "y": 216,
+            "w": 368,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "am_quantity",
+            "x": 560,
+            "y": 288,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "am_buy",
+            "x": 688,
+            "y": 288,
+            "w": 240,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "am_prime",
+            "x": 560,
+            "y": 328,
+            "w": 168,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "am_wish",
+            "x": 728,
+            "y": 328,
+            "w": 200,
+            "h": 40,
+            "shape": "outline",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "am_coupon",
+            "x": 560,
+            "y": 392,
+            "w": 368,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "am_cart",
+            "x": 560,
+            "y": 456,
+            "w": 368,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "go_ads",
+            "x": 32,
+            "y": 456,
+            "w": 504,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "go_result",
+            "x": 32,
+            "y": 548,
+            "w": 504,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "gov_notice",
+            "x": 560,
+            "y": 580,
+            "w": 368,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_counter",
+            "x": 560,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_heading",
+            "x": 256,
+            "y": 44,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": "各種申請・お手続き"
+          },
+          {
+            "id": "e2",
+            "type": "gov_notice",
+            "x": 256,
+            "y": 108,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "gov_form",
+            "x": 256,
+            "y": 180,
+            "w": 416,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "gov_check",
+            "x": 272,
+            "y": 244,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_search",
+            "x": 272,
+            "y": 292,
+            "w": 248,
+            "h": 44,
+            "shape": "square",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "gov_submit",
+            "x": 520,
+            "y": 292,
+            "w": 136,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "gov_pdf",
+            "x": 272,
+            "y": 352,
+            "w": 384,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "gov_accordion",
+            "x": 688,
+            "y": 180,
+            "w": 240,
+            "h": 236,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "ab_link",
+            "x": 700,
+            "y": 228,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "手数料について"
+          },
+          {
+            "id": "e10",
+            "type": "ab_mail",
+            "x": 700,
+            "y": 260,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "担当課へのお問合せ"
+          },
+          {
+            "id": "e11",
+            "type": "gov_pdf",
+            "x": 700,
+            "y": 300,
+            "w": 216,
+            "h": 48,
+            "shape": "source",
+            "label": "様式第1号"
+          },
+          {
+            "id": "e12",
+            "type": "gov_font",
+            "x": 696,
+            "y": 436,
+            "w": 232,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "gov_page",
+            "x": 256,
+            "y": 496,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e14",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 350,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "captcha",
+            "moderator",
+            "server",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "f14dbbe43b73758e26ab69e458d50eb77242f6ba2bb7d559b54001b6595373aa",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 20,
+          "income": 46.5
+        },
+        "ticks": 400,
+        "playerHp": 55,
+        "enemyHp": 0,
+        "eventsHash": "57e80bba7e80179e91f54908bbeccc3a34ad965b6fad2587f7690f0fa2505fe2"
+      }
+    },
+    {
+      "key": "commerce/google",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 640,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "go_search",
+            "x": 32,
+            "y": 88,
+            "w": 632,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "am_buy",
+            "x": 664,
+            "y": 88,
+            "w": 264,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_product",
+            "x": 32,
+            "y": 164,
+            "w": 504,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "am_rating",
+            "x": 560,
+            "y": 164,
+            "w": 368,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "am_deal",
+            "x": 560,
+            "y": 216,
+            "w": 368,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "am_quantity",
+            "x": 560,
+            "y": 288,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "am_buy",
+            "x": 688,
+            "y": 288,
+            "w": 240,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "am_prime",
+            "x": 560,
+            "y": 328,
+            "w": 168,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "am_wish",
+            "x": 728,
+            "y": 328,
+            "w": 200,
+            "h": 40,
+            "shape": "outline",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "am_coupon",
+            "x": 560,
+            "y": 392,
+            "w": 368,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "am_cart",
+            "x": 560,
+            "y": 456,
+            "w": 368,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "go_ads",
+            "x": 32,
+            "y": 456,
+            "w": 504,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "go_result",
+            "x": 32,
+            "y": 548,
+            "w": 504,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "gov_notice",
+            "x": 560,
+            "y": 580,
+            "w": 368,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_counter",
+            "x": 560,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "go_search",
+            "x": 96,
+            "y": 14,
+            "w": 560,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "go_voice",
+            "x": 656,
+            "y": 14,
+            "w": 56,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 14,
+            "w": 184,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "go_tabs",
+            "x": 96,
+            "y": 70,
+            "w": 640,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "go_ads",
+            "x": 96,
+            "y": 148,
+            "w": 600,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_result",
+            "x": 96,
+            "y": 244,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "go_result",
+            "x": 96,
+            "y": 512,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": "UIの寄せ集めで勝つための10の方法"
+          },
+          {
+            "id": "e7",
+            "type": "go_translate",
+            "x": 744,
+            "y": 148,
+            "w": 192,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "go_suggest",
+            "x": 744,
+            "y": 196,
+            "w": 192,
+            "h": 112,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "go_page",
+            "x": 96,
+            "y": 624,
+            "w": 408,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 390,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "cdn",
+            "server",
+            "captcha"
+          ]
+        }
+      },
+      "inputHash": "db2e30481d85cbbbaff85d0238281e7f842b23e161205a623c559fb451a2d9b5",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 15.200000000000001,
+          "income": 36.5
+        },
+        "ticks": 304,
+        "playerHp": 225.50000000000009,
+        "enemyHp": 0,
+        "eventsHash": "4f1b167cce73e794fb289515609518888d96d5f8b407b433a1c09edfa8e42ed0"
+      }
+    },
+    {
+      "key": "commerce/amazon",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 640,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "go_search",
+            "x": 32,
+            "y": 88,
+            "w": 632,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "am_buy",
+            "x": 664,
+            "y": 88,
+            "w": 264,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_product",
+            "x": 32,
+            "y": 164,
+            "w": 504,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "am_rating",
+            "x": 560,
+            "y": 164,
+            "w": 368,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "am_deal",
+            "x": 560,
+            "y": 216,
+            "w": 368,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "am_quantity",
+            "x": 560,
+            "y": 288,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "am_buy",
+            "x": 688,
+            "y": 288,
+            "w": 240,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "am_prime",
+            "x": 560,
+            "y": 328,
+            "w": 168,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "am_wish",
+            "x": 728,
+            "y": 328,
+            "w": 200,
+            "h": 40,
+            "shape": "outline",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "am_coupon",
+            "x": 560,
+            "y": 392,
+            "w": 368,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "am_cart",
+            "x": 560,
+            "y": 456,
+            "w": 368,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "go_ads",
+            "x": 32,
+            "y": 456,
+            "w": 504,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "go_result",
+            "x": 32,
+            "y": 548,
+            "w": 504,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "gov_notice",
+            "x": 560,
+            "y": 580,
+            "w": 368,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_counter",
+            "x": 560,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "am_product",
+            "x": 24,
+            "y": 64,
+            "w": 560,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "am_deal",
+            "x": 608,
+            "y": 64,
+            "w": 328,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "am_rating",
+            "x": 608,
+            "y": 124,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "am_quantity",
+            "x": 608,
+            "y": 168,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "am_buy",
+            "x": 720,
+            "y": 168,
+            "w": 216,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "am_prime",
+            "x": 608,
+            "y": 216,
+            "w": 152,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "am_wish",
+            "x": 760,
+            "y": 216,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "am_coupon",
+            "x": 608,
+            "y": 268,
+            "w": 328,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "am_cart",
+            "x": 608,
+            "y": 316,
+            "w": 328,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "am_buy",
+            "x": 608,
+            "y": 424,
+            "w": 328,
+            "h": 40,
+            "shape": "source",
+            "label": "今すぐ買う"
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 460,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "adnet",
+            "cdn",
+            "server"
+          ]
+        }
+      },
+      "inputHash": "e230f777e37c1108f300520058378d5be36f23e443d01a4ed160be0d4c8401e7",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 17.35,
+          "income": 39
+        },
+        "ticks": 347,
+        "playerHp": 60.799999999999955,
+        "enemyHp": 0,
+        "eventsHash": "b6b422c79a08515149db43d55568a84ad7e0e1708734440b2e37ff1dfedd1097"
+      }
+    },
+    {
+      "key": "commerce/youtube",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 8,
+            "w": 640,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "go_search",
+            "x": 32,
+            "y": 88,
+            "w": 632,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "am_buy",
+            "x": 664,
+            "y": 88,
+            "w": 264,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "am_product",
+            "x": 32,
+            "y": 164,
+            "w": 504,
+            "h": 264,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "am_rating",
+            "x": 560,
+            "y": 164,
+            "w": 368,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "am_deal",
+            "x": 560,
+            "y": 216,
+            "w": 368,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "am_quantity",
+            "x": 560,
+            "y": 288,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "am_buy",
+            "x": 688,
+            "y": 288,
+            "w": 240,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "am_prime",
+            "x": 560,
+            "y": 328,
+            "w": 168,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "am_wish",
+            "x": 728,
+            "y": 328,
+            "w": 200,
+            "h": 40,
+            "shape": "outline",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "am_coupon",
+            "x": 560,
+            "y": 392,
+            "w": 368,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "am_cart",
+            "x": 560,
+            "y": 456,
+            "w": 368,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "go_ads",
+            "x": 32,
+            "y": 456,
+            "w": 504,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "go_result",
+            "x": 32,
+            "y": 548,
+            "w": 504,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "gov_notice",
+            "x": 560,
+            "y": 580,
+            "w": 368,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p16",
+            "type": "ab_counter",
+            "x": 560,
+            "y": 644,
+            "w": 288,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "yt_play",
+            "x": 24,
+            "y": 16,
+            "w": 600,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "yt_progress",
+            "x": 24,
+            "y": 316,
+            "w": 600,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "yt_speed",
+            "x": 24,
+            "y": 338,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "yt_autoplay",
+            "x": 128,
+            "y": 338,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "yt_caption",
+            "x": 304,
+            "y": 338,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "yt_like",
+            "x": 392,
+            "y": 338,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "yt_notify",
+            "x": 504,
+            "y": 338,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "yt_sub",
+            "x": 336,
+            "y": 452,
+            "w": 184,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "yt_like",
+            "x": 520,
+            "y": 452,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "yt_ad",
+            "x": 24,
+            "y": 504,
+            "w": 600,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "yt_play",
+            "x": 648,
+            "y": 56,
+            "w": 288,
+            "h": 162,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "yt_progress",
+            "x": 648,
+            "y": 218,
+            "w": 288,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e12",
+            "type": "yt_ad",
+            "x": 648,
+            "y": 488,
+            "w": 280,
+            "h": 80,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 540,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "sns",
+            "adnet",
+            "sakura",
+            "troll"
+          ]
+        }
+      },
+      "inputHash": "a4dee94ef6a862e81085a6903c5a3ee75b868ef8d45fc3c36f2b68a02757f358",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 15.75,
+          "income": 36.5
+        },
+        "ticks": 315,
+        "playerHp": 147.90000000000003,
+        "enemyHp": 0,
+        "eventsHash": "340276697c36d3bdc00cbd607d5a09102ae4b754e46e6ad064474b1fc9983353"
+      }
+    },
+    {
+      "key": "form/retro",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 52,
+            "w": 720,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "gov_notice",
+            "x": 32,
+            "y": 124,
+            "w": 896,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "gov_form",
+            "x": 32,
+            "y": 208,
+            "w": 560,
+            "h": 352,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "gov_check",
+            "x": 56,
+            "y": 296,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_search",
+            "x": 56,
+            "y": 360,
+            "w": 320,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "gov_submit",
+            "x": 376,
+            "y": 360,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "gov_pdf",
+            "x": 56,
+            "y": 452,
+            "w": 504,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "gov_accordion",
+            "x": 624,
+            "y": 208,
+            "w": 304,
+            "h": 244,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "ab_link",
+            "x": 640,
+            "y": 268,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "ab_mail",
+            "x": 640,
+            "y": 300,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "ab_counter",
+            "x": 640,
+            "y": 368,
+            "w": 256,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_font",
+            "x": 640,
+            "y": 480,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_page",
+            "x": 184,
+            "y": 592,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "ab_nav",
+            "x": 32,
+            "y": 24,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_link",
+            "x": 32,
+            "y": 56,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": "最新情報"
+          },
+          {
+            "id": "e2",
+            "type": "ab_mail",
+            "x": 32,
+            "y": 88,
+            "w": 208,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "ab_heading",
+            "x": 272,
+            "y": 20,
+            "w": 624,
+            "h": 56,
+            "shape": "source",
+            "label": "ようこそ！僕のホームページへ"
+          },
+          {
+            "id": "e4",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 84,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "ab_marquee",
+            "x": 272,
+            "y": 108,
+            "w": 624,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "ab_table",
+            "x": 32,
+            "y": 140,
+            "w": 208,
+            "h": 228,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "ab_link",
+            "x": 48,
+            "y": 188,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "写真館"
+          },
+          {
+            "id": "e8",
+            "type": "ab_nav",
+            "x": 48,
+            "y": 220,
+            "w": 176,
+            "h": 32,
+            "shape": "source",
+            "label": "リンク集"
+          },
+          {
+            "id": "e9",
+            "type": "ab_counter",
+            "x": 584,
+            "y": 152,
+            "w": 312,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "ab_guestbook",
+            "x": 272,
+            "y": 300,
+            "w": 624,
+            "h": 150,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "ab_link",
+            "x": 272,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": "サイトマップ"
+          },
+          {
+            "id": "e12",
+            "type": "ab_mail",
+            "x": 584,
+            "y": 466,
+            "w": 312,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "ab_hr",
+            "x": 272,
+            "y": 510,
+            "w": 624,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 270,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "moderator",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "29bb8cfc1b0025a56cc0ea35882b6dc83a4d8e227222cd81dee77ea7de921c91",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 29.3,
+          "income": 31.5
+        },
+        "ticks": 586,
+        "playerHp": 0,
+        "enemyHp": 50,
+        "eventsHash": "07492cc4577144622641fc61fce76bbc9096cf2db6668192b22c8c88c096ad41"
+      }
+    },
+    {
+      "key": "form/gov",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 52,
+            "w": 720,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "gov_notice",
+            "x": 32,
+            "y": 124,
+            "w": 896,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "gov_form",
+            "x": 32,
+            "y": 208,
+            "w": 560,
+            "h": 352,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "gov_check",
+            "x": 56,
+            "y": 296,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_search",
+            "x": 56,
+            "y": 360,
+            "w": 320,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "gov_submit",
+            "x": 376,
+            "y": 360,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "gov_pdf",
+            "x": 56,
+            "y": 452,
+            "w": 504,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "gov_accordion",
+            "x": 624,
+            "y": 208,
+            "w": 304,
+            "h": 244,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "ab_link",
+            "x": 640,
+            "y": 268,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "ab_mail",
+            "x": 640,
+            "y": 300,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "ab_counter",
+            "x": 640,
+            "y": 368,
+            "w": 256,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_font",
+            "x": 640,
+            "y": 480,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_page",
+            "x": 184,
+            "y": 592,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "ab_heading",
+            "x": 256,
+            "y": 44,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": "各種申請・お手続き"
+          },
+          {
+            "id": "e2",
+            "type": "gov_notice",
+            "x": 256,
+            "y": 108,
+            "w": 672,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "gov_form",
+            "x": 256,
+            "y": 180,
+            "w": 416,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "gov_check",
+            "x": 272,
+            "y": 244,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_search",
+            "x": 272,
+            "y": 292,
+            "w": 248,
+            "h": 44,
+            "shape": "square",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "gov_submit",
+            "x": 520,
+            "y": 292,
+            "w": 136,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "gov_pdf",
+            "x": 272,
+            "y": 352,
+            "w": 384,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "gov_accordion",
+            "x": 688,
+            "y": 180,
+            "w": 240,
+            "h": 236,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "ab_link",
+            "x": 700,
+            "y": 228,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "手数料について"
+          },
+          {
+            "id": "e10",
+            "type": "ab_mail",
+            "x": 700,
+            "y": 260,
+            "w": 216,
+            "h": 32,
+            "shape": "source",
+            "label": "担当課へのお問合せ"
+          },
+          {
+            "id": "e11",
+            "type": "gov_pdf",
+            "x": 700,
+            "y": 300,
+            "w": 216,
+            "h": 48,
+            "shape": "source",
+            "label": "様式第1号"
+          },
+          {
+            "id": "e12",
+            "type": "gov_font",
+            "x": 696,
+            "y": 436,
+            "w": 232,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e13",
+            "type": "gov_page",
+            "x": 256,
+            "y": 496,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e14",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 350,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "captcha",
+            "moderator",
+            "server",
+            "backup"
+          ]
+        }
+      },
+      "inputHash": "74e37e9ea7af9d074259eb29b08db6533cf179f013568d3ba066f6982400ddf3",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 29.35,
+          "income": 31.5
+        },
+        "ticks": 587,
+        "playerHp": 0,
+        "enemyHp": 144,
+        "eventsHash": "18077ad671d7aff80869cee7b7a9d7300f79da92350e09a17972f2f65e224d3e"
+      }
+    },
+    {
+      "key": "form/google",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 52,
+            "w": 720,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "gov_notice",
+            "x": 32,
+            "y": 124,
+            "w": 896,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "gov_form",
+            "x": 32,
+            "y": 208,
+            "w": 560,
+            "h": 352,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "gov_check",
+            "x": 56,
+            "y": 296,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_search",
+            "x": 56,
+            "y": 360,
+            "w": 320,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "gov_submit",
+            "x": 376,
+            "y": 360,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "gov_pdf",
+            "x": 56,
+            "y": 452,
+            "w": 504,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "gov_accordion",
+            "x": 624,
+            "y": 208,
+            "w": 304,
+            "h": 244,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "ab_link",
+            "x": 640,
+            "y": 268,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "ab_mail",
+            "x": 640,
+            "y": 300,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "ab_counter",
+            "x": 640,
+            "y": 368,
+            "w": 256,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_font",
+            "x": 640,
+            "y": 480,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_page",
+            "x": 184,
+            "y": 592,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "go_search",
+            "x": 96,
+            "y": 14,
+            "w": 560,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "go_voice",
+            "x": 656,
+            "y": 14,
+            "w": 56,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "go_lucky",
+            "x": 712,
+            "y": 14,
+            "w": 184,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "go_tabs",
+            "x": 96,
+            "y": 70,
+            "w": 640,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "go_ads",
+            "x": 96,
+            "y": 148,
+            "w": 600,
+            "h": 84,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "go_result",
+            "x": 96,
+            "y": 244,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "go_result",
+            "x": 96,
+            "y": 512,
+            "w": 600,
+            "h": 96,
+            "shape": "source",
+            "label": "UIの寄せ集めで勝つための10の方法"
+          },
+          {
+            "id": "e7",
+            "type": "go_translate",
+            "x": 744,
+            "y": 148,
+            "w": 192,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "go_suggest",
+            "x": 744,
+            "y": 196,
+            "w": 192,
+            "h": 112,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "go_page",
+            "x": 96,
+            "y": 624,
+            "w": 408,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 390,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "cdn",
+            "server",
+            "captcha"
+          ]
+        }
+      },
+      "inputHash": "c998cc0cb4ae3fe9c0d92254e030f935e4a317525664557818ff56bedc60df80",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 30.650000000000002,
+          "income": 34.5
+        },
+        "ticks": 613,
+        "playerHp": 154.9000000000001,
+        "enemyHp": 0,
+        "eventsHash": "10975d8c30d32e0fc3ddc99cedac84888ca1965ca6d315ca4a44c686372cb1ef"
+      }
+    },
+    {
+      "key": "form/amazon",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 52,
+            "w": 720,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "gov_notice",
+            "x": 32,
+            "y": 124,
+            "w": 896,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "gov_form",
+            "x": 32,
+            "y": 208,
+            "w": 560,
+            "h": 352,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "gov_check",
+            "x": 56,
+            "y": 296,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_search",
+            "x": 56,
+            "y": 360,
+            "w": 320,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "gov_submit",
+            "x": 376,
+            "y": 360,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "gov_pdf",
+            "x": 56,
+            "y": 452,
+            "w": 504,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "gov_accordion",
+            "x": 624,
+            "y": 208,
+            "w": 304,
+            "h": 244,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "ab_link",
+            "x": 640,
+            "y": 268,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "ab_mail",
+            "x": 640,
+            "y": 300,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "ab_counter",
+            "x": 640,
+            "y": 368,
+            "w": 256,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_font",
+            "x": 640,
+            "y": 480,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_page",
+            "x": 184,
+            "y": 592,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "am_product",
+            "x": 24,
+            "y": 64,
+            "w": 560,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "am_deal",
+            "x": 608,
+            "y": 64,
+            "w": 328,
+            "h": 52,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "am_rating",
+            "x": 608,
+            "y": 124,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "am_quantity",
+            "x": 608,
+            "y": 168,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "am_buy",
+            "x": 720,
+            "y": 168,
+            "w": 216,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "am_prime",
+            "x": 608,
+            "y": 216,
+            "w": 152,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "am_wish",
+            "x": 760,
+            "y": 216,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "am_coupon",
+            "x": 608,
+            "y": 268,
+            "w": 328,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "am_cart",
+            "x": 608,
+            "y": 316,
+            "w": 328,
+            "h": 100,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "am_buy",
+            "x": 608,
+            "y": 424,
+            "w": 328,
+            "h": 40,
+            "shape": "source",
+            "label": "今すぐ買う"
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 460,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "adnet",
+            "cdn",
+            "server"
+          ]
+        }
+      },
+      "inputHash": "3534cfc4dfeb0a10f466302545a3dee3229f430f8aca38b250af0b9fa8c42d30",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 24.150000000000002,
+          "income": 25.5
+        },
+        "ticks": 483,
+        "playerHp": 0,
+        "enemyHp": 218.40000000000035,
+        "eventsHash": "e626e7ea046649d62d7145598b00049423f962e1a1ed39101080907611d0c03c"
+      }
+    },
+    {
+      "key": "form/youtube",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "p1",
+            "type": "gov_breadcrumb",
+            "x": 32,
+            "y": 8,
+            "w": 896,
+            "h": 28,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p2",
+            "type": "ab_heading",
+            "x": 32,
+            "y": 52,
+            "w": 720,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p3",
+            "type": "gov_notice",
+            "x": 32,
+            "y": 124,
+            "w": 896,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p4",
+            "type": "gov_form",
+            "x": 32,
+            "y": 208,
+            "w": 560,
+            "h": 352,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p5",
+            "type": "gov_check",
+            "x": 56,
+            "y": 296,
+            "w": 328,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p6",
+            "type": "go_search",
+            "x": 56,
+            "y": 360,
+            "w": 320,
+            "h": 44,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p7",
+            "type": "gov_submit",
+            "x": 376,
+            "y": 360,
+            "w": 184,
+            "h": 44,
+            "shape": "glossy",
+            "label": ""
+          },
+          {
+            "id": "p8",
+            "type": "gov_pdf",
+            "x": 56,
+            "y": 452,
+            "w": 504,
+            "h": 48,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p9",
+            "type": "gov_accordion",
+            "x": 624,
+            "y": 208,
+            "w": 304,
+            "h": 244,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p10",
+            "type": "ab_link",
+            "x": 640,
+            "y": 268,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p11",
+            "type": "ab_mail",
+            "x": 640,
+            "y": 300,
+            "w": 272,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p12",
+            "type": "ab_counter",
+            "x": 640,
+            "y": 368,
+            "w": 256,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p13",
+            "type": "gov_font",
+            "x": 640,
+            "y": 480,
+            "w": 276,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p14",
+            "type": "gov_page",
+            "x": 184,
+            "y": 592,
+            "w": 280,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "p15",
+            "type": "ab_hr",
+            "x": 32,
+            "y": 652,
+            "w": 896,
+            "h": 16,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "e0",
+            "type": "yt_play",
+            "x": 24,
+            "y": 16,
+            "w": 600,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e1",
+            "type": "yt_progress",
+            "x": 24,
+            "y": 316,
+            "w": 600,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e2",
+            "type": "yt_speed",
+            "x": 24,
+            "y": 338,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e3",
+            "type": "yt_autoplay",
+            "x": 128,
+            "y": 338,
+            "w": 176,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e4",
+            "type": "yt_caption",
+            "x": 304,
+            "y": 338,
+            "w": 88,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e5",
+            "type": "yt_like",
+            "x": 392,
+            "y": 338,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e6",
+            "type": "yt_notify",
+            "x": 504,
+            "y": 338,
+            "w": 72,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e7",
+            "type": "yt_sub",
+            "x": 336,
+            "y": 452,
+            "w": 184,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e8",
+            "type": "yt_like",
+            "x": 520,
+            "y": 452,
+            "w": 104,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e9",
+            "type": "yt_ad",
+            "x": 24,
+            "y": 504,
+            "w": 600,
+            "h": 64,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e10",
+            "type": "yt_play",
+            "x": 648,
+            "y": 56,
+            "w": 288,
+            "h": 162,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e11",
+            "type": "yt_progress",
+            "x": 648,
+            "y": 218,
+            "w": 288,
+            "h": 22,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "e12",
+            "type": "yt_ad",
+            "x": 648,
+            "y": 488,
+            "w": 280,
+            "h": 80,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 540,
+          "playerAdmin": [
+            "adnet",
+            "troll"
+          ],
+          "enemyAdmin": [
+            "sns",
+            "adnet",
+            "sakura",
+            "troll"
+          ]
+        }
+      },
+      "inputHash": "06dea91724cfa76344aa791d81bd02dbf0894cf495581fb513096707b3359e16",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 28.75,
+          "income": 31.5
+        },
+        "ticks": 575,
+        "playerHp": 0,
+        "enemyHp": 83,
+        "eventsHash": "7e2a8aec02e42b7cd83047fe918951d026e51f4f3a106dcf78e3472194ea9db7"
+      }
+    }
+  ]
+}

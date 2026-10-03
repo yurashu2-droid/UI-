@@ -172,6 +172,9 @@ function isControl(p: Item) {
 function isNav(p: Item) {
   return P[p.type].layout === "link";
 }
+function isMediaSource(type?: string) {
+  return !!type && P[type]?.layout === "media" && P[type].tags.includes("video");
+}
 function nearEdge(a: Item, b: Item, gap = 28) {
   const r = numericRect(a),
     s = numericRect(b);
@@ -321,11 +324,11 @@ function analyze(input: Item[]): DocumentAnalysis {
     for (const n of roots) {
       if (attached.has(n.id)) continue;
       const start =
-        n.type === "yt_play" || n.type === "yt_embed"
+        isMediaSource(n.type)
           ? "media-stack"
           : n.type === "am_product"
             ? "commerce-stack"
-            : n.kind === "search-form" || n.type === "go_search"
+            : n.kind === "search-form" || n.type === "go_search" || n.type === "go_instant"
               ? "search-stack"
               : null;
       if (!start) continue;
@@ -528,7 +531,7 @@ function snap(
       }
     // Video → seek bar → control row.
     if (
-      q.type === "yt_play" &&
+      isMediaSource(q.type) &&
       (item.type === "yt_progress" || isControl(item))
     ) {
       const hasSeek = others.some(
@@ -562,7 +565,7 @@ function snap(
         });
     }
     // Search box / form → suggestion dropdown.
-    if (item.type === "go_suggest" && q.type === "go_search") {
+    if (item.type === "go_suggest" && (q.type === "go_search" || q.type === "go_instant")) {
       const nx = s.x,
         ny = s.y + s.h,
         w = rowRight(others, q) - s.x,

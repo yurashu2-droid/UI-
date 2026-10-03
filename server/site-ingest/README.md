@@ -1,0 +1,50 @@
+# Static public acquisition boundary
+
+By default, this development service fetches only these complete, fixed HTTPS URLs:
+
+- `https://books.toscrape.com/` (a public no-JavaScript scraping practice site; https://toscrape.com/)
+- `https://example.com/`
+
+It is not an arbitrary URL proxy. User-supplied paths, queries, credentials, ports and redirects are not accepted. It fetches one HTML document (512 KiB decoded limit) and, for code reconstruction only, at most one specifically allowlisted stylesheet (256 KiB decoded limit). HTML and CSS each have a 15-second deadline, the combined acquisition has a 30-second deadline, and the browser client gives the operation 35 seconds. It parses inertly with parse5, excludes scripts/hidden content/form values, and exposes only bounded metadata or a validated safe blueprint. Raw HTML, arbitrary CSS, URLs and source scripts never reach the game DOM. Only one fetch per service instance runs concurrently.
+
+## Current status
+
+`GET /api/raid-captures/capabilities` explicitly reports `publicStaticCapture: false`, `publicCodeReconstruction: true`, `publicStaticProbe: true`, `sourceJavascript: false`, and `networkIsolation: false`. Code reconstruction does not need a browser renderer and does not claim browser isolation or measured source pixels.
+
+`POST /api/raid-captures/probe` with `{"url":"https://books.toscrape.com/"}` can verify real source acquisition. A successful fetch returns HTTP 503 with `code: "renderer-unavailable"` and verified byte count/content hash. This is deliberately **not** a playable blueprint or a completed visual capture.
+
+`POST /api/raid-captures/code` with the same URL body performs that fixed-source fetch, then creates a playable **code approximation**. It uses actual heading/link/product/purchase text, tag names, bounded class hints, source order and product grouping. Long category lists cannot consume the product quota. Supported CSS consists of safe colors, generic font families, bounded pixel font sizes/padding, normal/bold weight, text alignment, solid borders, corner radii and hidden flags. Simple tag/class/id and bounded descendant selectors are interpreted as data; stylesheet text is never injected into the page. Hiding is conservative: a supported rule that hides an element is not undone by a later unsupported display reset. This is not a complete cascade: media/support queries, pseudo-selectors, custom properties, relative units, external fonts, images, scripts and CSS resource functions are ignored. Font sizes and padding can be reduced to keep the canonical control readable.
+
+The only linked asset allowed is `https://books.toscrape.com/static/oscar/css/styles.css`, and only when the fetched Books HTML declares that exact stylesheet. Alternate, disabled and non-screen stylesheets are skipped. Imports and URLs inside CSS never trigger requests. Redirects, response URL mismatches, non-CSS MIME, oversized bodies and asset timeouts cause an explicit HTML-only fallback. Source HTML and acquired stylesheet hashes are kept separately in the snapshot. Parsing is capped at 256 KiB of combined stylesheet text, 4,096 top-level blocks, 1,024 accepted selector rules, four descendant selector parts and 64 declarations per rule. Budget truncation is recorded in `analysis.css.limited`.
+
+The resulting `code-v1` / `code-approximation` blueprint includes a SHA-256 of the HTML actually analyzed, low-confidence inferred-layout metadata, and `sourceRect: null` on every component. `combatRect` is a synthesized legal game layout. The UI must keep “コード解析による近似配置” visible through selection, battle, loot and collection. A win grants the frozen **approximate enemy element**, not a claim of original website pixels. Empty JavaScript shells produce an explicit no-playable-elements error. Hash verification, canonical balance/geometry validation and source-origin matching are required before play. Existing authored fixtures remain distinct.
+
+The development plugin `raidCapturePlugin()` registers this middleware; a static production build does not provide a capture server. No public host, account, credential or deployment is configured.
+
+## Verified runtime blocker
+
+In this runtime, a user/network namespace can be created and public HTTPS fetches succeed. Chromium launched on `about:blank` inside the network namespace, without disabling its sandbox, aborts with process-singleton `socket() failed: Operation not permitted` (exit 134). No page data was rendered in that probe. `bwrap` also fails while attempting a NETLINK_ROUTE socket. Direct `dns.lookup` fails with EAI_AGAIN, whereas the runtime-brokered fetch works, so application-level DNS pinning has **not** been demonstrated.
+
+Do not use `--no-sandbox`, single-process mode, browser-extension disabling, a localhost-navigation workaround or user-computer switching to hide these restrictions.
+
+## Renderer attachment contract
+
+`FetchedStaticSource` and `OfflineStaticRenderer` are defined in `service.ts`. A future renderer must receive already fetched source bytes, never a fresh URL; work in a disposable unprivileged environment without credentials or host mounts; prohibit source JavaScript, frames, form actions, service workers and network; consume only validated job-local assets; produce actual layout, allowlisted computed appearance and a 960×680 reference raster; and exit within a resource budget.
+
+Only after that isolation and reference-image validation pass should orchestration map measured controls into a validated `RaidBlueprint`, verify its hashes, and advertise `publicStaticCapture: true`. Raster asset validation/storage and original-vs-reconstruction visual comparison are additional required work. The current fixture blueprint must never substitute for a successful real capture.
+
+## Reviewed source configuration and local verification
+
+`config.ts` owns `DEFAULT_PUBLIC_SOURCES`. Each entry explicitly names an HTTPS origin, its exact root `pageUrl`, and optionally one exact same-origin `.css` resource URL. `definePublicSources` validates and freezes a detached snapshot, rejects credentials, queries, fragments, custom ports, private-looking names/IPs, wildcards, duplicate origins, source subpaths and cross-origin resources, and caps the policy at eight entries. `createStaticIngestService({ sources })` accepts this trusted startup configuration for an embedding host or tests. The HTTP API never accepts source-policy configuration, and the game URL field cannot extend it. The compatibility constants in `service.ts` and advertised capabilities are derived from the policy; the client reports the configured URLs rather than assuming every site is supported.
+
+To add another supported page, review its public HTML origin and, separately, any exact stylesheet asset; edit `DEFAULT_PUBLIC_SOURCES` in source, then add allowlist, redirect, MIME, body-budget, cancellation and reconstruction regressions. Do not read this policy from user request bodies, query parameters or a public settings form. Existing pending snapshots and trophies keep their old hashes and appearance. The old `inline-and-embedded-subset` manifest remains readable; new captures record `safe-css-subset-v1` with bounded CSS metadata.
+
+`npm run dev` and `npm run preview` mount the ingestion service through the actual Vite configuration. URL acquisition is handled by that same-origin middleware, while `/api/arena` uses a separate configured local proxy. A static `dist` file host alone cannot perform URL acquisition.
+
+`node --import tsx --test tests/raid-host.test.mjs tests/raid-policy.test.mjs` boots the actual Vite development host and verifies its page/API routing, panel submission, source parsing, real engine battle, durable pending-win reload and exact appearance claim. Its upstream HTML response is controlled and its panel uses a DOM event adapter: this is transport/behavior coverage, not proof of public network availability or browser pixels. It also checks failed acquisition preserves the selected opponent, cached mode never fetches, pending wins take precedence, and acquisition-save failure cannot select an uncommitted opponent.
+
+A separate live check on 2026-10-02 passed through the actual Vite HTTP endpoint with Books HTML and its allowed stylesheet, produced eight legal approximate parts, completed a real engine victory and saved the matching appearance in the transactional collection. The observed HTML SHA-256 was `9fdd63da34161ebd13408d7a85105f83ec3c9f351c5d77cd0aa578790e121c1e`; stylesheet SHA-256 was `d497d4a0d52686ccd30f5941b02867075870372cdfe37adbcb0be74fdeed94cf`. This point-in-time public-network check does not establish continuous availability or source-pixel fidelity.
+
+For a story integration, the optional fourth `mountRaidPanel` argument is `{ url, kind: 'new'|'cached'|'reanalyze', cachedBlueprint? }`. The app resolves cached snapshots before mounting. The optional `onCaptured(blueprint, kind)` callback must durably persist any acquisition/energy receipt before resolving; rejection keeps the previous selection. Saving temporarily locks submission/cancel to prevent duplicate receipts. Cache mode verifies the saved source identity without fetching or calling `onCaptured`. A pending reward resume always takes precedence over a new request.
+
+Broadening beyond the two fixed pages additionally requires independently verified destination DNS/connection checks on every request/redirect/asset and enforceable public-only egress. Merely copying `normalizePublicPageUrl` or setting a capability boolean is not sufficient.

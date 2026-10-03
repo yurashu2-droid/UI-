@@ -1,0 +1,54 @@
+{
+  "note": "Paid first-stage regression fixtures for combat-candidate comparison. recordedOutcome is an observation of combat-v2, not the desired balance specification. Every scenario uses player HP180 and capacity12. No boss budget is changed here.",
+  "scenarios": [
+    {
+      "id": "starter",
+      "budget": 10,
+      "encounterIndex": 0,
+      "recordedOutcome": "player",
+      "layout": [
+        ["ab_heading", 32, 24, 576, 56],
+        ["ab_link", 32, 100, 192, 32]
+      ]
+    },
+    {
+      "id": "defensive-links",
+      "budget": 20,
+      "encounterIndex": 1,
+      "recordedOutcome": "enemy",
+      "layout": [
+        ["ab_table", 32, 32, 500, 230],
+        ["ab_link", 48, 100, 192, 32],
+        ["ab_nav", 240, 100, 176, 32],
+        ["ab_guestbook", 32, 296, 320, 132],
+        ["ab_counter", 32, 440, 288, 26]
+      ]
+    },
+    {
+      "id": "defensive-heading",
+      "budget": 20,
+      "encounterIndex": 1,
+      "recordedOutcome": "enemy",
+      "layout": [
+        ["ab_table", 32, 32, 620, 230],
+        ["ab_heading", 48, 85, 576, 56],
+        ["ab_link", 48, 162, 192, 32],
+        ["ab_guestbook", 32, 296, 320, 132],
+        ["ab_hr", 32, 448, 560, 16]
+      ]
+    },
+    {
+      "id": "repeat-links",
+      "budget": 20,
+      "encounterIndex": 1,
+      "recordedOutcome": "player",
+      "layout": [
+        ["ab_link", 32, 40, 192, 32],
+        ["ab_nav", 224, 40, 176, 32],
+        ["ab_link", 400, 40, 192, 32],
+        ["ab_link", 32, 96, 192, 32],
+        ["ab_guestbook", 32, 160, 320, 132]
+      ]
+    }
+  ]
+}

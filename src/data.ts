@@ -5,6 +5,12 @@ import type {
   PartDefinition,
 } from "./types.js";
 import { FUSED_PARTS } from "./fusion.js";
+import { BALANCE_PARTS } from "./catalog/balance-parts.js";
+import { SOCIAL_PARTS } from "./catalog/social-parts.js";
+import { KNOWLEDGE_PARTS } from "./catalog/knowledge-parts.js";
+import { COMMUNITY_PARTS } from "./catalog/community-parts.js";
+import { AUDIO_PARTS } from "./catalog/audio-parts.js";
+import { SITE_TEMPLATES } from "./catalog/index.js";
 
 /* Hand-authored, fictional UI motifs. No website code/assets or network requests. */
 
@@ -24,7 +30,7 @@ const FACTIONS: Record<
     short: "a",
     color: "#e29a18",
     era: "COMMERCE",
-    set: "1秒に1回、収益 +1",
+    set: "収益発生時に+1（1秒間隔）",
   },
   google: {
     name: "Google",
@@ -46,6 +52,82 @@ const FACTIONS: Record<
     color: "#25777a",
     era: "PUBLIC SERVICE",
     set: "開始シールド +12",
+  },
+  twitter: {
+    name: "旧Twitter風", short: "140", color: "#2495c6", era: "TIMELINE / 2010s",
+    set: "実験中：系統セット追加補正なし",
+  },
+  x: {
+    name: "X風", short: "POST", color: "#292b30", era: "SOCIAL / 2020s",
+    set: "実験中：系統セット追加補正なし",
+  },
+  wiki: {
+    name: "Wikipedia風", short: "百科", color: "#576d88", era: "KNOWLEDGE / WEB",
+    set: "実験中：系統セット追加補正なし",
+  },
+  forge: {
+    name: "GitHub風", short: "git", color: "#586f81", era: "CODE / COLLABORATION",
+    set: "実験中：系統セット追加補正なし",
+  },
+  nico: {
+    name: "ニコニコ風", short: "コメント", color: "#596571", era: "VIDEO COMMENTS / WEB",
+    set: "実験中：系統セット追加補正なし",
+  },
+  audio: {
+    name: "SoundCloud風", short: "AUDIO", color: "#c86831", era: "WAVEFORM AUDIO",
+    set: "実験中：系統セット追加補正なし",
+  },
+  musicshop: {
+    name: "Bandcamp風", short: "ALBUM", color: "#477b79", era: "DIRECT MUSIC SHOP",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  personalweb: {
+    name: "GeoCities風", short: "HOME", color: "#85709c", era: "PERSONAL HOMEPAGE",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  mapsearch: {
+    name: "Google Maps風", short: "MAP", color: "#638678", era: "LOCAL SEARCH MAP",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  rankednews: {
+    name: "Hacker News風", short: "RANK", color: "#b46b30", era: "RANKED STORIES",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  marketplace: {
+    name: "楽天市場風", short: "MALL", color: "#b65355", era: "SHOPPING MALL",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  feedreader: {
+    name: "Google Reader風", short: "FEEDS", color: "#688aa7", era: "EXPANDED FEEDS",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  qanda: {
+    name: "Stack Overflow風", short: "Q&A", color: "#bd7946", era: "QUESTION AND ANSWER",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  documents: {
+    name: "Google Docs風", short: "DOCS", color: "#6391c5", era: "DOCUMENT EDITOR",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  webarchive: {
+    name: "Wayback Machine風", short: "ARCHIVE", color: "#696759", era: "SAVED WEB",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  livechannel: {
+    name: "Twitch風", short: "LIVE", color: "#8863c7", era: "LIVE CHANNEL",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  portal: {
+    name: "Yahoo! JAPAN風", short: "PORTAL", color: "#c63848", era: "DAILY PORTAL",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  storefront: {
+    name: "Steam風", short: "STORE", color: "#447a9d", era: "GAME STOREFRONT",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
+  reddit: {
+    name: "Reddit風", short: "THREAD", color: "#d96b35", era: "THREADED WEB",
+    set: "実験中：系統セット追加補正なし",
   },
 };
 const PARTS: Record<string, PartDefinition> = {};
@@ -135,7 +217,7 @@ define("youtube", [
     0,
     3,
     8,
-    "近接する時間発動UIを2倍速にする。動画の操作列に入れると、動画本体にも届く。上限2倍。",
+    "同じ認識済み動画プレイヤー構造の動画本体を2倍速にする。文字・購入・再発動UIは加速しない。上限2倍。",
     { minW: 72, minH: 32 },
   ],
   [
@@ -150,7 +232,7 @@ define("youtube", [
     1,
     2,
     5,
-    "つながる動画が再生されるたび$1。広告の収益で近くのカートを動かせる。",
+    "つながる動画が通常再生されるたび$1。再発動では収益を生まない。広告収益を近くの変換先1つへ流せる。",
     { minW: 160, minH: 48 },
   ],
   [
@@ -165,7 +247,7 @@ define("youtube", [
     2,
     2,
     6,
-    "近くの動画が3回再生されるたび$2。ボタングループの一員にもなる。",
+    "近くの動画が通常再生を3回行うたび$2。再発動は数えない。ボタングループの一員にもなる。",
     { minW: 144, minH: 32 },
   ],
   [
@@ -225,7 +307,7 @@ define("youtube", [
     0.45,
     2,
     6,
-    "6秒ごとに、つながる動画を45%威力で再生。再発動から再発動は発生しない。",
+    "6秒ごとに、つながる動画の最後の通常攻撃を45%威力で再生。原本の発動前は待機。再発動は収益や成長を連鎖させない。",
     { added: true, minW: 128, minH: 32 },
   ],
   [
@@ -272,7 +354,7 @@ define("amazon", [
     15,
     3,
     7,
-    "近くの収益を蓄積し、$3ごとに15ダメージ。残高は消費しない。商品ページの購入欄になる。",
+    "選択された近接収益のチャージを$3消費して15ダメージ。他の変換先と同じ収益を複製しない。累計収益やラン資金は減らない。",
     { minW: 200, minH: 76 },
   ],
   [
@@ -394,7 +476,7 @@ define("google", [
     8,
     3,
     6,
-    "3.6秒ごとに8ダメージ。近くの別サイト系統ごとに威力+2。ボタンと連結すると検索フォームになり威力+30%。",
+    "3.6秒ごとに8ダメージ。近くの別サイト系統ごとに威力+2（4系統・最大+8）。ボタンと連結すると検索フォームになり威力+30%。",
     { minW: 192, minH: 36 },
   ],
   [
@@ -439,7 +521,7 @@ define("google", [
     1,
     2,
     5,
-    "近くのtext UIが時間発動するたび$1。通常の検索結果と一緒にページに並べられる。",
+    "近くの文字UIが通常の時間発動を行うたび$1。再発動と再発動コントローラからは収益を生まない。検索結果として並べられる。",
     { minW: 240, minH: 72 },
   ],
   [
@@ -514,7 +596,7 @@ define("google", [
     0.5,
     2,
     6,
-    "6秒ごとに近くのtext攻撃を50%威力で再発動。ページ番号が順番に進む。",
+    "6秒ごとに近くの文字攻撃の最後の通常発動を50%で再現。原本の発動前は待機。通常発動回数や収益は増やさない。",
     { added: true, minW: 192, minH: 30 },
   ],
 ]);
@@ -531,7 +613,7 @@ define("retro", [
     4,
     1,
     3,
-    "1.8秒ごとに4ダメージ。ページの余白率により最大+3。縦横のリンクとナビを作れる。",
+    "1.8秒ごとに4ダメージ。余白率による最大+3は、ページ全体の見た目順で先頭2本だけ。攻撃ナビが6個を超えると、超過1個につき全攻撃ナビの発動間隔+5%。縦横につなぐ速さと導線は維持。",
     { minW: 96, minH: 24 },
   ],
   [
@@ -561,7 +643,7 @@ define("retro", [
     1,
     1,
     4,
-    "近くの時間発動を4回数えるたび$1。ページのフッターにも置ける細長いカウンター。",
+    "近くの通常の時間発動を4回数えるたび$1。再発動と再発動コントローラは数えない。フッターにも置ける細長いカウンター。",
     { minW: 224, minH: 24 },
   ],
   [
@@ -576,7 +658,7 @@ define("retro", [
     0.55,
     2,
     7,
-    "5.5秒ごとに右側または直下の攻撃UIを55%威力で再発動。流れる文字が進行方向を示す。",
+    "5.5秒ごとに右側または直下の攻撃UIの最後の通常発動を55%で再現。原本の発動前は待機。流れる文字が進行方向を示す。",
     { minW: 200, minH: 24 },
   ],
   [
@@ -606,7 +688,7 @@ define("retro", [
     5,
     1,
     3,
-    "5秒ごとにシールド5。上下に文字UIがあると+2。ページを実際に区切る細い罫線。",
+    "5秒ごとにシールド5。近くに文字UIがあると+2。ページを実際に区切る細い罫線。",
     { added: true, minW: 160, minH: 8, maxH: 32 },
   ],
   [
@@ -779,7 +861,7 @@ define("gov", [
     0.45,
     2,
     5,
-    "6秒ごとに近くのdocument攻撃を45%威力で再発動。事務的な角形のページ送り。",
+    "6秒ごとに近くの書類攻撃の最後の通常発動を45%で再現。原本の発動前は待機。通常発動回数や収益は増やさない。",
     { added: true, minW: 216, minH: 32 },
   ],
   [
@@ -799,9 +881,10 @@ define("gov", [
   ],
 ]);
 // Fusion-only UIs (src/fusion.ts) join the catalogue before it is frozen.
-Object.assign(PARTS, FUSED_PARTS);
+Object.assign(PARTS, BALANCE_PARTS, SOCIAL_PARTS, KNOWLEDGE_PARTS, COMMUNITY_PARTS, AUDIO_PARTS, FUSED_PARTS);
 for (const p of Object.values(PARTS)) {
   Object.freeze(p.tags);
+  if (p.replayTags) Object.freeze(p.replayTags);
   Object.freeze(p);
 }
 Object.freeze(PARTS);
@@ -910,6 +993,9 @@ const PRESETS: Record<
     desc: "フォームの中に、別サイトの入力欄を入れる。",
     layout: form,
   },
+  ...Object.fromEntries(SITE_TEMPLATES.map((site) => [site.id, {
+    name: `${site.name}［実験］`, desc: site.tip, layout: site.layout,
+  }])),
 };
 const ENEMIES: EnemyDefinition[] = [
   {
@@ -1113,7 +1199,7 @@ const ADMIN: Record<string, { name: string; tag: string; desc: string }> = {
   server: {
     name: "サーバー増強",
     tag: "インフラ",
-    desc: "負荷の上限 +25%。バズや誘導を受けても落ちにくい。",
+    desc: "最大・開始時の閲覧者HP +25%（端数は四捨五入）。CPU上限は変わらない。",
   },
   cdn: {
     name: "CDN",
@@ -1139,7 +1225,7 @@ const ADMIN: Record<string, { name: string; tag: string; desc: string }> = {
   sns: {
     name: "SNS運用",
     tag: "話題性",
-    desc: "開始時の閲覧者 +10。5秒ごとにSNSから新規流入（回復）。",
+    desc: "初回3秒、以後5秒ごとに閲覧者HPを6回復。開始時のHP加算はない。",
   },
   sakura: {
     name: "AIサクラ",

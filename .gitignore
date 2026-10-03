@@ -7,3 +7,7 @@ _backup/
 .env
 .env.*
 !.env.example
+.local/
+
+# Isolated verification dependency links
+/node_modules

@@ -1,7 +1,23 @@
+import { musicShopHeader, musicShopDecor } from "./catalog/music-shop-render.js";
+import { personalWebHeader, personalWebDecor } from "./catalog/personal-web-render.js";
+import { mapSearchHeader, mapSearchDecor } from "./catalog/map-search-render.js";
+import { rankedNewsHeader, rankedNewsDecor } from "./catalog/ranked-news-render.js";
+import { releasesDecor } from "./catalog/releases-render.js";
+import { marketplaceHeader, marketplaceDecor } from "./catalog/marketplace-render.js";
+import { feedreaderHeader, feedreaderDecor } from "./catalog/feedreader-render.js";
+import { qandaHeader, qandaDecor } from "./catalog/qanda-render.js";
+import { audioPlayerMarkup, audioHeader, audioDecor } from "./catalog/audio-render.js";
+import { documentsHeader, documentsDecor } from "./catalog/documents-render.js";
+import { historyPartMarkup } from "./catalog/history-render.js";
+import { timeMediaHeader, timeMediaDecor } from "./catalog/time-media-render.js";
+import { discoveryHeader, discoveryDecor } from "./catalog/discovery-render.js";
 import D from "./data.js";
 import C from "./document.js";
 import E from "./engine.js";
 import type { Item } from "./types.js";
+import { socialPartMarkup, socialHeader, socialDecor } from "./catalog/social-render.js";
+import { knowledgePartMarkup, knowledgeHeader, knowledgeDecor } from "./catalog/knowledge-render.js";
+import { communityPartMarkup, communityHeader, communityDecor } from "./catalog/community-render.js";
 
 /* Native HTML motifs and recursive document rendering. No fetched content. */
 
@@ -186,11 +202,25 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
       return `<aside class="native-ad fused-retarget"><span class="ad-kicker">あなたへのおすすめ</span><div><b>${text(p, "さっき見ていた、あのUI。")}</b><small>まだ迷っていますか？ いまなら期間限定。</small></div><span class="retarget-eye">${icon("eye")}</span><span class="ad-money">$<span class="state-income">0</span></span></aside>`;
     case "am_newsletter":
       return `<form class="fused-newsletter" data-ui="press"><b>✉ メルマガ登録で ¥200 OFF</b><span class="nl-field">you@example.com</span><span class="nl-btn">登録</span></form>`;
+    case "ad_popup":
+      return `<aside class="native-popup-ad"><span class="popup-kicker">スポンサー · $3で出稿</span><strong>${text(p, "ちょっと、こちらも見ていきませんか？")}</strong><div class="popup-ad-footer"><span class="popup-state">出稿待ち</span><span class="popup-charge">$<span class="state-charge">0</span> / 6</span><button type="button" data-ui="press" aria-label="ポップアップ広告をプレビュー">詳しく見る ↗</button></div></aside>`;
+    case "go_cache":
+      return `<div class="native-cache"><a href="#" data-ui="cache">${text(p, "キャッシュを表示")}</a><span class="cache-copy-icon" aria-hidden="true">▤</span><small><span class="cache-state" role="status">準備完了</span> · 前回の表示を保持</small></div>`;
+    case "yt_tip":
+      return `<button type="button" class="native-button native-support" data-ui="support">${icon("heart")}<span>${text(p, "このページを応援する")}</span><small class="support-state">$<span class="state-charge">0</span> / 6</small></button>`;
+    case "sc_track":
+      return audioPlayerMarkup(p.label || "夜のインターネット");
+    case "go_history":
+      return historyPartMarkup(p.label || "変更履歴・版を復元");
+    case "gov_rate_limit":
+      return `<aside class="native-rate-limit"><header><code>429</code><strong>${text(p, "アクセスを整理しています")}</strong></header><p>少し間をあけて、もう一度お試しください。</p><footer><span>制限枠 <b class="rate-budget">24</b> / 24</span><span>軽減 <b class="rate-total">0</b></span></footer></aside>`;
     default:
-      return "";
+      return socialPartMarkup(p) || knowledgePartMarkup(p) || communityPartMarkup(p);
   }
 }
 const TAGS: Record<string, string> = {
+  sc_track: "audio.waveform",
+  go_history: "history.restore",
   yt_play: "<video>",
   yt_speed: "button.ytp-speed",
   yt_ad: "<aside> ad",
@@ -245,6 +275,31 @@ const TAGS: Record<string, string> = {
   go_recaptcha: "div.g-recaptcha",
   ad_retarget: "<ins> retargeting",
   am_newsletter: "<form> newsletter",
+  ad_popup: "<aside> display-ad",
+  go_cache: "<a> cached-copy",
+  yt_tip: "<button> support",
+  gov_rate_limit: "<aside> 429-too-many-requests",
+  tw_post: "<article> status-140",
+  tw_retweet: "<button> retweet",
+  tw_favorite: "<button> favorite",
+  tw_follow: "<button> follow",
+  x_post: "<article> post",
+  x_quote: "<blockquote> quote-post",
+  x_note: "<aside> community-context",
+  x_bookmark: "<button> bookmark",
+  wk_article: "<article> encyclopedia",
+  wk_reference: "<ol> references",
+  wk_infobox: "<section> infobox",
+  gh_diff: "<section> diff",
+  gh_transfer: "<progress> file-transfer",
+  gh_commit: "<div> commit-history",
+  gh_checks: "<section> check-runs",
+  nc_player: "<section> comment-video",
+  nc_comment: "<form> timed-comment",
+  nc_tag: "<nav> video-tags",
+  rd_post: "<article> community-post",
+  rd_vote: "<div> vote-column",
+  rd_thread: "<section> reply-thread",
 };
 const thumbs = [
   "linear-gradient(135deg,#1f3b4d,#c77b52)",
@@ -313,13 +368,20 @@ function decorMarkup(kind: string) {
     case "gov-contact":
       return `<div class="d-gov-contact"><b>このページに関するお問い合わせ</b><p>総務部 デジタル推進課　電話：000-000-0000（平日 8:30〜17:15）</p><small>ページ番号 1024-0098　更新日 2026年9月1日</small></div>`;
     default:
-      return "";
+      return socialDecor(kind) || knowledgeDecor(kind) || communityDecor(kind) || discoveryDecor(kind) || timeMediaDecor(kind) || documentsDecor(kind) || audioDecor(kind) || qandaDecor(kind) || feedreaderDecor(kind) || marketplaceDecor(kind) || releasesDecor(kind) || rankedNewsDecor(kind) || mapSearchDecor(kind) || personalWebDecor(kind) || musicShopDecor(kind);
   }
 }
 export interface CreateOptions {
   side?: string;
   theme?: string;
   preview?: boolean;
+}
+
+type AppearanceRenderer = (host: HTMLElement, item: Item) => void;
+let appearanceRenderer: AppearanceRenderer | null = null;
+/** The app supplies a verified, local-only appearance renderer; native DOM remains underneath. */
+export function setAppearanceRenderer(renderer: AppearanceRenderer | null): void {
+  appearanceRenderer = renderer;
 }
 
 function create(
@@ -344,10 +406,25 @@ function create(
     el.tabIndex = 0;
     el.setAttribute("role", "group");
   }
+  if (p.appearanceId) appearanceRenderer?.(el, p);
   return el;
 }
 function header(theme: string, name?: string) {
+  if (theme === "portal" || theme === "storefront") return discoveryHeader(theme);
+  if (theme === "webarchive" || theme === "livechannel") return timeMediaHeader(theme);
+  if (theme === "documents") return documentsHeader();
+  if (theme === "audio") return audioHeader();
+  if (theme === "qanda") return qandaHeader();
+  if (theme === "feedreader") return feedreaderHeader();
+  if (theme === "marketplace") return marketplaceHeader();
+  if (theme === "rankednews") return rankedNewsHeader();
+  if (theme === "mapsearch") return mapSearchHeader();
+  if (theme === "personalweb") return personalWebHeader();
+  if (theme === "musicshop") return musicShopHeader();
   const avatar = '<span class="site-avatar">u</span>';
+  if (theme === "twitter" || theme === "x") return socialHeader(theme);
+  if (theme === "wiki" || theme === "forge") return knowledgeHeader(theme);
+  if (theme === "nico" || theme === "reddit") return communityHeader(theme);
   if (theme === "youtube")
     return `<div class="site-word yt-word"><span>▶</span>YouTube<sup>UI</sup></div><div class="header-search">検索 ${icon("search")}</div><div class="site-header-end">${icon("bell")}${avatar}</div>`;
   if (theme === "amazon")
@@ -474,6 +551,8 @@ function palettePreview(type: string) {
 export default {
   esc,
   icon,
+  markup,
+  setAppearanceRenderer,
   create,
   header,
   render,

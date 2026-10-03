@@ -1,0 +1,29 @@
+/* Release-record layout uses the existing forge page theme; donor parts are untouched. */
+.repo-release-nav{box-sizing:border-box;height:100%;display:flex;align-items:center;gap:0;border-bottom:1px solid #dce3e9;font:11px Arial,sans-serif;color:#536b7e}
+.repo-release-nav>b,.repo-release-nav>span{height:100%;display:flex;align-items:center;padding:0 18px;box-sizing:border-box}
+.repo-release-nav>b{border-bottom:2px solid #c38b67;font-weight:500;color:#3f5c75}
+.repo-release-nav>div{display:flex;align-items:center;gap:18px;box-sizing:border-box;width:244px;height:28px;margin-left:auto;padding:0 10px;border:1px solid #ced9e2;border-radius:4px;background:#f8fafc;font-size:10px;color:#6b8192}
+.repo-release-nav small{margin-left:auto;font-size:7px;color:#718293}.repo-release-nav i{font-style:normal;font-size:14px;color:#70889a}
+.repo-release-tag{box-sizing:border-box;height:100%;padding:6px 10px 0 4px;border-right:1px solid #e0e6ec;color:#5e7789;font:10px Arial,sans-serif}
+.repo-release-tag>strong{display:block;font:12px/16px ui-monospace,monospace;color:#4e718c}
+.repo-release-tag>time{display:block;margin:14px 0 18px;font-size:9px;color:#6b8191}
+.repo-release-tag>div{display:flex;align-items:center;gap:7px;margin-bottom:20px}
+.repo-release-tag i{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#cbded5;color:#547765;font:12px Georgia,serif}
+.repo-release-tag div>b{font-size:10px;font-weight:500;color:#52748d}
+.repo-release-tag>span{display:block;font-size:9px;color:#5c7890}.repo-release-tag span>small{font-size:7px;margin-left:8px;color:#728291}
+.repo-release-tag>p{font-size:8px;margin-top:20px;color:#728291}
+.repo-release-title{display:flex;align-items:center;gap:16px;height:100%;color:#385970;font-family:Arial,sans-serif}
+.repo-release-title h1{margin:0;font-size:25px;line-height:32px;font-weight:500;letter-spacing:-.3px}
+.repo-release-title>span{padding:3px 9px;border:1px solid #9cbdab;border-radius:11px;color:#4d7b60;background:#f0f7f2;font-size:9px}
+.repo-release-notes{font-family:Arial,sans-serif;color:#5c7485}
+.repo-release-notes>b{font-size:11px;line-height:15px;font-weight:500}.repo-release-notes>p{font-size:10px;line-height:14px;margin:7px 0 0;color:#687f91}
+.repo-release-assets{display:flex;align-items:center;gap:7px;height:100%;color:#506e85;font:10px/16px Arial,sans-serif}
+.repo-release-assets>b{font-weight:500}.repo-release-assets>span{font-size:8px;line-height:13px;min-width:15px;text-align:center;border-radius:7px;background:#e8eef3;color:#677e90}
+.repo-release-cache{box-sizing:border-box;height:100%;padding:6px 8px;background:#f3f6f9;border-left:2px solid #a7bece;color:#56738b;font:9px Arial,sans-serif}
+.repo-release-cache>b{display:block;font-size:9px;font-weight:500;line-height:12px}.repo-release-cache>p{font-size:8px;line-height:13px;margin:4px 0 0;color:#62798c}
+.repo-release-pdf-heading{margin:0;height:100%;font:10px/24px Arial,sans-serif;color:#617b90}
+.repo-release-pdf-meta{display:flex;flex-direction:column;justify-content:center;height:100%;font-family:Arial,sans-serif;color:#5d778d}
+.repo-release-pdf-meta>b{font-size:10px;font-weight:500;line-height:14px}.repo-release-pdf-meta>small{font-size:8px;line-height:11px;margin-top:5px;color:#697f90}
+.repo-release-disclaimer{box-sizing:border-box;height:100%;padding:10px 12px;background:#f6f8fa;border-top:1px solid #e2e8ed;font:9px/16px Arial,sans-serif;color:#677e90}
+.repo-release-previous{display:flex;align-items:center;gap:20px;height:100%;border-top:1px solid #dfe6ec;font:10px Arial,sans-serif;color:#6f8494}
+.repo-release-previous>b{font:11px ui-monospace,monospace;color:#5d7b91}.repo-release-previous>span{font-size:9px}.repo-release-previous>time{margin-left:auto;font-size:9px}

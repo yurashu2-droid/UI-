@@ -1,5 +1,6 @@
 import D from "./data.js";
 import { BUILDS } from "./builds.js";
+import { SITE_TEMPLATES } from "./catalog/index.js";
 import { RECIPES, type Recipe } from "./fusion.js";
 import C from "./document.js";
 import E from "./engine.js";
@@ -89,7 +90,9 @@ function market(run: Run): Run["shop"] {
   const out = shuffle(
     Object.keys(D.PARTS).filter(
       (t) =>
-        !D.PARTS[t].fused && D.PARTS[t].price <= cap && f.has(D.PARTS[t].faction),
+        !D.PARTS[t].fused &&
+        (run.mode === "lab" || D.PARTS[t].status !== "experimental") &&
+        D.PARTS[t].price <= cap && f.has(D.PARTS[t].faction),
     ),
     rand,
   )
@@ -132,7 +135,10 @@ const BUILD_ENEMIES: EnemyDefinition[] = BUILDS.map((b) => ({
   decor: [],
 }));
 function labEnemies(): EnemyDefinition[] {
-  return [...D.ENEMIES, ...BUILD_ENEMIES];
+  return [...D.ENEMIES, ...BUILD_ENEMIES, ...SITE_TEMPLATES];
+}
+function pageDecor(run: Run) {
+  return SITE_TEMPLATES.find(template => template.id === run.page.templateId)?.decor ?? [];
 }
 type Opponent = EnemyDefinition & {
   index: number;
@@ -257,6 +263,11 @@ function newRun(
       label ? { label } : {},
     ),
   );
+  const template = mode === "lab" ? SITE_TEMPLATES.find(site => site.id === preset) : undefined;
+  if (template) {
+    r.page = { name: template.pageName, theme: template.faction, templateId: template.id };
+    r.admin = [...template.admin];
+  }
   r.shop = market(r);
   return r;
 }
@@ -311,6 +322,7 @@ function sell(
   if (run.owned.length <= 1) return fail("最後のUIは残してください。");
   const value = sellValue(run, p.type);
   run.owned = run.owned.filter((q) => q.id !== id);
+  for (const q of run.owned) if (q.routeTo === id) delete q.routeTo;
   run.cash += value;
   return { ok: true, value };
 }
@@ -351,6 +363,7 @@ function reroll(run: Run): TransactionFailure | { ok: true } {
 }
 function startBattle(
   run: Run,
+  options: { audienceExperiment?: boolean } = {},
 ): TransactionFailure | { ok: true; battle: InstanceType<typeof E.Battle> } {
   if (run.phase !== "build") return fail("今は対戦できません。");
   if (!run.owned.some((q) => C.placed(q) && D.PARTS[q.type].kind === "attack"))
@@ -364,6 +377,7 @@ function startBattle(
     playerAdmin: run.admin || [],
     enemyAdmin: o.admin,
     playerCapacity: run.mode === "lab" ? Infinity : capacity(run),
+    experimentalRules: run.mode === "lab" && options.audienceExperiment === true ? "audience-v1" : null,
   });
   run.phase = "battle";
   return { ok: true, battle };
@@ -376,7 +390,8 @@ function lootFor(run: Run) {
     pool = shuffle(
       Object.keys(D.PARTS).filter(
         (t) =>
-          !D.PARTS[t].fused && D.PARTS[t].faction === o.faction && D.PARTS[t].price <= cap,
+          !D.PARTS[t].fused && D.PARTS[t].status !== "experimental" &&
+          D.PARTS[t].faction === o.faction && D.PARTS[t].price <= cap,
       ),
       rand,
     ),
@@ -393,7 +408,8 @@ function lootFor(run: Run) {
     out.push(
       ...shuffle(
         Object.keys(D.PARTS).filter(
-          (t) => !out.includes(t) && !D.PARTS[t].fused && D.PARTS[t].price <= cap,
+          (t) => !out.includes(t) && !D.PARTS[t].fused &&
+            D.PARTS[t].status !== "experimental" && D.PARTS[t].price <= cap,
         ),
         rand,
       ).slice(0, 3 - out.length),
@@ -406,17 +422,19 @@ export interface FusionPair {
   a: Item;
   b: Item;
 }
-function fusionPairs(board: Item[]): FusionPair[] {
-  const placedItems = board.filter(C.placed);
+export interface FusionSelection { pair: readonly [string, string] }
+function fusionPairs(board: Item[], selection?: FusionSelection): FusionPair[] {
+  const placedItems = board.filter(C.placed).filter(item => !item.fusionLocked);
   if (placedItems.length < 2) return [];
   const near = E.analyze(placedItems).near,
     used = new Set<string>(),
     out: FusionPair[] = [];
   for (const recipe of RECIPES)
     for (const a of placedItems) {
+      if (selection && !selection.pair.includes(a.id)) continue;
       if (used.has(a.id) || a.type !== recipe.a) continue;
       const b = placedItems.find(
-        (q) => q.id !== a.id && !used.has(q.id) && q.type === recipe.b && (near[a.id] || []).includes(q.id),
+        (q) => q.id !== a.id && (!selection || selection.pair.includes(q.id)) && !used.has(q.id) && q.type === recipe.b && (near[a.id] || []).includes(q.id),
       );
       if (!b) continue;
       used.add(a.id);
@@ -430,18 +448,35 @@ export interface Fusion {
   item: Item;
   from: [string, string];
 }
-function fuse(run: Run): Fusion[] {
+function fuse(run: Run, selection?: FusionSelection): Fusion[] {
   const done: Fusion[] = [];
-  for (const { recipe, a, b } of fusionPairs(run.owned)) {
+  for (const { recipe, a, b } of fusionPairs(run.owned, selection)) {
     const d = D.PARTS[recipe.into];
+    if (run.mode === "campaign" && d.status === "experimental") continue;
+    const lineage = [...new Map([a, b].flatMap(q => [
+      ...(q.lineage ?? []),
+      ...(q.appearanceId && q.provenanceId ? [{ appearanceId: q.appearanceId, provenanceId: q.provenanceId }] : []),
+    ]).map(ref => [`${ref.appearanceId}/${ref.provenanceId}`, ref])).values()];
+    if (lineage.length > 16) continue;
     run.owned = run.owned.filter((q) => q.id !== a.id && q.id !== b.id);
+    for (const q of run.owned)
+      if (q.routeTo === a.id || q.routeTo === b.id) delete q.routeTo;
     const item = nextItem(run, recipe.into);
+    if (lineage.length) item.lineage = lineage;
     // Keep the new UI where the pair stood: prefer the parent it grew out of (same layout), else the bigger one.
     const same = (q: Item) => D.PARTS[q.type].layout === d.layout;
     const [big, small] =
       same(a) !== same(b) ? (same(a) ? [a, b] : [b, a]) : C.area(a) >= C.area(b) ? [a, b] : [b, a];
     const fits = (w: number, h: number) => w >= d.minW && h >= d.minH && w <= d.maxW && h <= d.maxH;
     const tries: [number | null, number | null, number, number][] = [];
+    // The embedded player's seek bar is still physically part of the module.
+    // Consume its strip, preserving the bottom edge where the controls attach.
+    if (recipe.into === "yt_embed" && big.x !== null && big.y !== null &&
+      small.x !== null && small.y !== null &&
+      Math.abs(small.x - big.x) <= 8 && Math.abs(small.y - (big.y + big.h)) <= 8) {
+      const height = small.y + small.h - big.y;
+      if (fits(big.w, height)) tries.push([big.x, big.y, big.w, height]);
+    }
     if (fits(big.w, big.h) && d.layout === D.PARTS[big.type].layout) tries.push([big.x, big.y, big.w, big.h]);
     for (const p of [big, small]) tries.push([p.x, p.y, Math.min(d.w, D.WIDTH - (p.x ?? 0)), d.h]);
     let spot = tries.find(([x, y, w, h]) => fits(w, h) && C.canPlace(run.owned, item, x, y, w, h));
@@ -531,23 +566,37 @@ function settleBattle(
 function claimLoot(
   run: Run,
   choice: string | null,
-): TransactionFailure | { ok: true; item: Item | null; admin: string | null } {
+): TransactionFailure | { ok: true; item: Item | null; admin: string | null; pending?: true } {
   if (run.phase !== "reward" || !run.pending)
     return fail("回収できるものがありません。");
   if (choice !== null && !run.pending.loot.includes(choice))
     return fail("回収候補にありません。");
   let item: Item | null = null,
-    admin: string | null = null;
+    admin: string | null = null,
+    pending = false;
   if (choice?.startsWith("admin:")) {
     admin = choice.slice(6);
     run.admin = [...(run.admin || []), admin];
   } else if (choice !== null) {
-    if (run.owned.length >= D.MAX_ITEMS) return fail("所持上限です。");
+    if (run.owned.length >= D.MAX_ITEMS && (run.pendingInventory?.length ?? 0) >= ROUNDS)
+      return fail("受取箱がいっぱいです。元の報酬はそのまま残っています。");
     item = nextItem(run, choice);
-    run.owned.push(item);
+    if (run.owned.length >= D.MAX_ITEMS) {
+      (run.pendingInventory ??= []).push(item);
+      pending = true;
+    } else run.owned.push(item);
   }
   advance(run);
-  return { ok: true, item, admin };
+  return { ok: true, item, admin, ...(pending ? { pending: true as const } : {}) };
+}
+function collectOverflow(run: Run, id: string): TransactionFailure | { ok: true; item: Item } {
+  if (run.phase !== "build") return fail("編集画面で受け取ってください。");
+  if (run.owned.length >= D.MAX_ITEMS) return fail("手持ちに空きを作ってから受け取ってください。");
+  const item = run.pendingInventory?.find(p => p.id === id);
+  if (!item) return fail("このUIは受取箱にありません。");
+  run.pendingInventory = run.pendingInventory!.filter(p => p.id !== id);
+  run.owned.push(item);
+  return { ok: true, item };
 }
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -633,11 +682,10 @@ function hasRunShape(value: unknown): value is Run {
     !isRecord(value.page) ||
     typeof value.page.name !== "string" ||
     typeof value.page.theme !== "string" ||
-    !["mixed", "youtube", "amazon", "google", "retro", "gov"].includes(
-      value.page.theme,
-    ) ||
+    !(value.page.theme === "mixed" || Object.hasOwn(D.FACTIONS, value.page.theme)) ||
     !Array.isArray(value.owned) ||
     !value.owned.every(isItem) ||
+    (value.pendingInventory !== undefined && (!Array.isArray(value.pendingInventory) || !value.pendingInventory.every(isItem))) ||
     !Array.isArray(value.shop) ||
     !value.shop.every(
       (entry: unknown) =>
@@ -673,7 +721,7 @@ function validateRun(value: unknown): value is Run {
     return false;
   for (const [k, max] of [
     ["cash", 1000000],
-    ["stage", ROUNDS],
+    ["stage", r.mode === "lab" ? Math.max(ROUNDS, labEnemies().length - 1) : ROUNDS],
     ["lives", 3],
     ["wins", ROUNDS],
     ["nextId", 1000000],
@@ -685,9 +733,9 @@ function validateRun(value: unknown): value is Run {
     !r.page ||
     typeof r.page.name !== "string" ||
     r.page.name.length > 40 ||
-    !["mixed", "youtube", "amazon", "google", "retro", "gov"].includes(
-      r.page.theme,
-    )
+    (r.page.templateId !== undefined &&
+      (typeof r.page.templateId !== "string" || !/^[a-z0-9_-]{1,80}$/.test(r.page.templateId))) ||
+    !(r.page.theme === "mixed" || Object.hasOwn(D.FACTIONS, r.page.theme))
   )
     return false;
   if (
@@ -698,6 +746,8 @@ function validateRun(value: unknown): value is Run {
   if (
     !Array.isArray(r.owned) ||
     r.owned.length > D.MAX_ITEMS ||
+    (r.pendingInventory !== undefined &&
+      (r.pendingInventory.length > ROUNDS || r.pendingInventory.some(p => p.x !== null || p.y !== null))) ||
     !Array.isArray(r.shop) ||
     r.shop.length > 7 ||
     !Array.isArray(r.history) ||
@@ -705,7 +755,9 @@ function validateRun(value: unknown): value is Run {
   )
     return false;
   const ids = new Set();
-  for (const p of r.owned) {
+  const localReference = (v: unknown, prefix: string) =>
+    v === undefined || (typeof v === "string" && new RegExp(`^${prefix}_[a-f0-9]{64}$`).test(v));
+  for (const p of [...r.owned, ...(r.pendingInventory ?? [])]) {
     if (
       !p ||
       !Object.hasOwn(D.PARTS, p.type) ||
@@ -715,6 +767,16 @@ function validateRun(value: unknown): value is Run {
       +p.id.slice(1) >= r.nextId ||
       typeof p.label !== "string" ||
       p.label.length > 80 ||
+      (p.fusionLocked !== undefined && typeof p.fusionLocked !== "boolean") ||
+      !localReference(p.appearanceId, "appearance") ||
+      !localReference(p.provenanceId, "capture") ||
+      (p.lineage !== undefined && (!Array.isArray(p.lineage) || p.lineage.length > 16 ||
+        p.lineage.some(ref => !ref || typeof ref !== "object" ||
+          typeof ref.appearanceId !== "string" || typeof ref.provenanceId !== "string" ||
+          !localReference(ref.appearanceId, "appearance") || !localReference(ref.provenanceId, "capture")))) ||
+      (p.routeTo !== undefined &&
+        (typeof p.routeTo !== "string" || p.routeTo === p.id ||
+          !r.owned.some((target) => target.id === p.routeTo))) ||
       !Object.hasOwn(D.SKINS, p.shape)
     )
       return false;
@@ -786,6 +848,7 @@ function validateRun(value: unknown): value is Run {
 }
 const api = {
   labEnemies,
+  pageDecor,
   market,
   fusionPairs,
   fuse,
@@ -812,6 +875,7 @@ const api = {
   startBattle,
   settleBattle,
   claimLoot,
+  collectOverflow,
   validateRun,
   nextItem,
 };

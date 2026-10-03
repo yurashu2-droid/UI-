@@ -1,0 +1,41 @@
+/* Q&A template chrome only: embedded article, patch and votes keep their source UI. */
+.site-theme-qanda .site-header{padding:0 24px;gap:26px;border-top:3px solid #c37a41;border-bottom:1px solid #d7dce0;background:#f7f8f8;color:#56616a}
+.qanda-word{display:flex;align-items:center;gap:10px;font:22px/1 Arial,sans-serif;white-space:nowrap;color:#4f5961}
+.qanda-word>i{display:flex;flex-direction:column;gap:3px;width:22px;transform:rotate(-12deg)}
+.qanda-word i>b{display:block;height:4px;width:22px;background:#ba7543}
+.qanda-word i>b:first-child{width:16px;margin-left:6px;transform:rotate(15deg)}
+.qanda-word small{display:block;margin-top:5px;font:8px/1.2 Arial,sans-serif;color:#68767f}
+.site-theme-qanda .site-header nav{display:flex;gap:22px;font:10px Arial,sans-serif;color:#64727b}
+.qanda-search{display:flex;align-items:center;box-sizing:border-box;flex:1;min-width:100px;height:31px;padding:0 11px;border:1px solid #cbd2d7;border-radius:3px;background:#fff;color:#667780;font:10px Arial,sans-serif}
+.qanda-local{color:#64717a;font:8px Arial,sans-serif;white-space:nowrap}
+.site-theme-qanda .page-body{background:#fff}
+.site-theme-qanda .site-footer{background:#eef1f3;color:#66757f}
+.qanda-rail{box-sizing:border-box;display:flex;flex-direction:column;gap:0;height:100%;border-right:1px solid #dfe4e7;padding-right:12px;font:10px/1.5 Arial,sans-serif;color:#626f79}
+.qanda-rail>span,.qanda-rail>b{display:block;padding:10px 9px;white-space:nowrap}
+.qanda-rail>b{background:#edf0f2;border-right:3px solid #c67e46;color:#465662;font-weight:500}
+.qanda-rail>hr{width:100%;border:0;border-top:1px solid #e2e7eb;margin:20px 0}
+.qanda-rail>small{font-size:8px;color:#78848c;padding-left:9px}
+.qanda-rail>p{margin:12px 9px;font-size:9px}
+.qanda-rail>aside{padding:12px 9px;margin-top:25px;line-height:1.8;background:#f6f7f8;color:#6c7a83;font-size:9px}
+.qanda-title{box-sizing:border-box;display:flex;justify-content:space-between;gap:16px;height:100%;padding:12px 0 16px;border-bottom:1px solid #dfe4e8;font-family:Arial,sans-serif;color:#46555f}
+.qanda-title>div{min-width:0;flex:1}
+.qanda-title h1{margin:0 0 16px;font:21px/1.3 Arial,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qanda-title span{font-size:9px;color:#6a7882}
+.qanda-title span>b{font-weight:400;color:#495c68}
+.qanda-title>em{align-self:flex-start;flex-shrink:0;padding:10px 13px;border:1px solid #779eb7;border-radius:3px;background:#91b9d0;color:#253f4e;font:10px Arial,sans-serif}
+.qanda-answer-title{display:flex;align-items:center;justify-content:space-between;height:100%;color:#4c5c66;font:10px Arial,sans-serif}
+.qanda-answer-title>b{font-weight:500}.qanda-answer-title>span{font-size:8px;color:#677a85}
+.qanda-accepted{display:flex;flex-direction:column;align-items:center;height:100%;color:#46816b;font-family:Arial,sans-serif}
+.qanda-accepted>b{font-size:36px;line-height:40px;font-weight:400}
+.qanda-accepted>small{text-align:center;font-size:8px;line-height:1.5;color:#516e63}
+.qanda-related-title{margin:0;font:14px/24px Arial,sans-serif;color:#566772}
+.qanda-blog{box-sizing:border-box;height:100%;overflow:hidden;padding:11px 12px;background:#fbf5e8;border:1px solid #e3d7bc;color:#6b634f;font:9px/1.6 Arial,sans-serif}
+.qanda-blog h3{margin:0 0 8px;font-size:10px;font-weight:500;color:#6b5a3b}
+.qanda-blog p{margin:0 0 12px;font-size:9px}
+.qanda-author{box-sizing:border-box;height:100%;padding:9px 11px;background:#edf4f8;color:#577281;font:9px Arial,sans-serif;overflow:hidden}
+.qanda-author>small{display:block;margin-bottom:7px;font-size:8px}
+.qanda-author>div{display:flex;align-items:center;gap:8px}
+.qanda-author i{display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;background:#b8d0cf;color:#496a68;font:16px Georgia,serif}
+.qanda-author b{display:block;font-size:9px;font-weight:500}.qanda-author span>small{display:block;font-size:8px;margin-top:5px}
+.qanda-author p{font-size:8px;line-height:1.5;margin:8px 0 0;color:#637985}
+.qanda-note{display:block;font:8px/1.6 Arial,sans-serif;color:#62737d}

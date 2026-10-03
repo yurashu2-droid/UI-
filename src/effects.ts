@@ -1,3 +1,4 @@
+import {applyTransferFeedback,transferFeedback} from "./catalog/transfer-render.js";
 import D from "./data.js";
 import V from "./components.js";
 import type Traffic from "./traffic.js";
@@ -8,6 +9,9 @@ import type {
   SideName,
 } from "./types.js";
 import type { Battle } from "./engine.js";
+import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
+import { applyAudienceFeedback } from "./catalog/audience-feedback.js";
+import { applyHistoryFeedback, historyFeedback } from "./catalog/history-render.js";
 
 /* Native UI state animation plus cross-page UI packets. Motion is the component's own affordance. */
 const esc = V.esc,
@@ -52,6 +56,8 @@ class Effects {
   notes = 0;
   dirty = false;
   lastLag = 0;
+  lastRateLog: Record<SideName, number> = { player: -1, enemy: -1 };
+  commentCount = 0;
   traffic?: Traffic;
   private timers = new WeakMap<
     HTMLElement,
@@ -119,7 +125,15 @@ class Effects {
     let h;
     switch (type) {
       case "yt_play":
+      case "yt_embed":
+      case "nc_player":
         h = '<span class="pk-video"><b>▶</b><i></i></span>';
+        break;
+      case "gh_transfer":
+        h = '<span class="pk-transfer"><b>ZIP</b><i></i><i></i></span>';
+        break;
+      case "sc_track":
+        h = '<span class="pk-audio"><b>▶</b><i></i><i></i><i></i><i></i><i></i></span>';
         break;
       case "yt_like":
         h = `<span class="pk-pill pk-yt">${icon("like")}+1</span>`;
@@ -134,6 +148,7 @@ class Effects {
         h = '<span class="pk-product"><i>UI</i>¥1,980</span>';
         break;
       case "go_search":
+      case "go_instant":
         h = `<span class="pk-pill pk-search">${icon("search")}${esc(QUERIES[this.q % QUERIES.length])}</span>`;
         break;
       case "go_lucky":
@@ -291,12 +306,22 @@ class Effects {
       i.checked = true;
     }, 200);
   }
-  act(el: HTMLElement | null | undefined, type: string) {
+  act(el: HTMLElement | null | undefined, type: string, echo = false) {
     if (!el) return;
     const q = (s: string) => el.querySelector<HTMLElement>(s);
     switch (type) {
       case "yt_play":
+      case "yt_embed":
+      case "nc_player":
         this.flag(el, "is-playing", 1500);
+        break;
+      case "gh_transfer":
+        el.classList.remove(echo ? "is-transfer-complete" : "is-transfer-reused");
+        this.flag(el, echo ? "is-transfer-reused" : "is-transfer-complete", 600);
+        break;
+      case "sc_track":
+        q(".native-audio-play")?.setAttribute("aria-pressed", "true");
+        this.flag(el, "is-audio-playing", 900);
         break;
       case "yt_autoplay":
         this.recheck(el);
@@ -338,6 +363,7 @@ class Effects {
         this.flag(el, "is-tick", 500);
         break;
       case "go_search":
+      case "go_instant":
         this.typeQuery(el);
         break;
       case "go_suggest": {
@@ -400,7 +426,66 @@ class Effects {
       case "gov_notice":
         this.flag(el, "is-new", 1200);
         break;
+      case "tw_post":
+      case "x_post": {
+        const status = q(".social-post-state");
+        if (status) status.textContent = "たった今 · 投稿済み";
+        break;
+      }
+      case "tw_favorite": {
+        const star = q(".favorite-action > b");
+        if (star) star.textContent = "★";
+        q("button")?.setAttribute("aria-pressed", "true");
+        break;
+      }
+      case "tw_follow":
+        q("button")?.setAttribute("aria-pressed", "true");
+        q("button")?.setAttribute("title", "フォロー中・常連を呼び戻しました");
+        break;
+      case "x_bookmark":
+        q("button")?.setAttribute("aria-pressed", "true");
+        q("button")?.setAttribute("title", "保存済み・閲覧者が戻りました");
+        break;
+      case "go_history":
+        this.flag(el, "is-history-restoring", 360);
+        break;
+      case "yt_tip":
+        q(".native-support")?.setAttribute("data-supported", "true");
+        break;
+      case "gh_checks": {
+        const status = q(".checks-state");
+        if (status) status.textContent = "検証済み · ローカル模擬チェック";
+        break;
+      }
+      case "rd_post": {
+        const state = q(".forum-post-state");
+        if (state) state.textContent = "▱ 新しい反応があります";
+        break;
+      }
+      case "rd_thread": {
+        const state = q(".thread-state");
+        if (state) state.textContent = "返信で常連が戻りました";
+        break;
+      }
+      case "rd_vote":
+        q('[data-ui="vote-up"]')?.setAttribute("aria-pressed", "true");
+        break;
     }
+  }
+  /** A successful replay writes into its video: quiet player, text enters right, exits left. */
+  comment(player: HTMLElement | null | undefined, message: string) {
+    const surface = player?.querySelector<HTMLElement>(".nico-comments") ?? player?.querySelector<HTMLElement>(".native-video");
+    if (!surface) return;
+    const current = surface.querySelectorAll(":scope > .nico-live-comment");
+    if (current.length >= 4) current[0].remove();
+    const line = surface.ownerDocument.createElement("span");
+    line.className = "nico-live-comment";
+    line.textContent = message.slice(0, 80);
+    line.style.top = `${14 + (this.commentCount++ % 3) * 19}%`;
+    surface.append(line);
+    if (this.reduced) line.classList.add("is-static-comment");
+    else line.style.setProperty("--comment-travel", `${-(surface.clientWidth + line.scrollWidth + 12)}px`);
+    setTimeout(() => line.remove(), this.reduced ? 700 : 1450);
   }
   // A damaged page does not lose "HP": its components visibly lose their stylesheet.
   degrade(el: HTMLElement | null | undefined, side: BattleSide) {
@@ -480,15 +565,85 @@ class Effects {
       this.lastTone = performance.now();
     } catch {}
   }
+  syncTransfer(el: HTMLElement, period: number, remaining: number) {
+    const panel=el.querySelector<HTMLElement>(".native-transfer");
+    if(panel)applyTransferFeedback(panel,transferFeedback(period,remaining));
+  }
+  syncAudio(el: HTMLElement, elapsed: number, speed = 1) {
+    const position = Math.max(0, elapsed * speed) % 192;
+    const seconds = Math.floor(position);
+    const time = el.querySelector(".audio-time");
+    if (time) time.textContent = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+    const wave = el.querySelector<HTMLElement>(".audio-waveform");
+    if (wave) wave.style.setProperty("--audio-position", String(position / 192));
+  }
+  syncHistory(el: HTMLElement | null | undefined, battle: Battle, side: SideName) {
+    const panel = el?.querySelector<HTMLElement>(".native-version-history");
+    if (panel) applyHistoryFeedback(panel, historyFeedback(battle.historyView(side), battle.ticks));
+  }
   emit(event: BattleEvent, battle: Battle) {
     const side = "side" in event ? event.side : undefined;
     const id = "id" in event ? event.id : undefined;
     const el = side && id ? this.part(side, id) : null,
       src = side && id ? battle[side].parts.find((p) => p.id === id) : null,
       t = battle.elapsed;
+    if (event.kind === "history") {
+      this.syncHistory(el, battle, event.side);
+      // Normal fire/heal events own the button press and recovery log, once.
+      return;
+    }
+    if (event.kind === "audience") {
+      if (!battle.audience) return;
+      const amount = Math.round(event.value * 100) / 100;
+      const descriptions = {
+        churn: `広告で離脱 ${amount} 閲覧者HP`,
+        "loyalty-earned": `会員枠 +${amount}（ページ共有 ${Math.round(event.remaining * 100) / 100}/8）`,
+        "loyalty-retained": `会員が留まった ${amount} 閲覧者HP`,
+        "loyalty-expired": `会員枠 ${amount} が期限切れ`,
+      };
+      const cls = event.action === "churn" ? "is-ad-churn" : event.action === "loyalty-retained" ? "is-loyalty-retained" : "is-loyalty-updated";
+      this.pulse(el, cls, 500);
+      this.log(event.side, `${this.name(src?.type)} <em class="${event.action === "churn" ? "dmg" : "shd"}">${descriptions[event.action]}</em>`, t);
+      return;
+    }
+    if (event.kind === "rate-limit") {
+      this.pulse(el, "is-rate-limited", 360);
+      if (t - this.lastRateLog[event.side] >= 0.75) {
+        this.lastRateLog[event.side] = t;
+        this.log(event.side, `${this.name(src?.type)} <em class="shd">連続アクセスを${Math.round(event.value * 10) / 10}軽減</em>`, t);
+      }
+      return;
+    }
+    if (event.kind === "control") {
+      const targetPart = battle[event.target].parts.find((p) => p.id === event.to);
+      const to = this.part(event.target, event.to);
+      if (event.action === "blocked") {
+        this.pulse(to, "cache-protected", 500);
+        this.log(event.target, `${this.name(targetPart?.type)} はキャッシュから表示 <em class="shd">広告を回避</em>`, t);
+      } else if (event.action === "cover") {
+        this.log(event.side, `${this.name(src?.type)} <span class="arrow">⇢</span> ${this.name(targetPart?.type)} を一時停止`, t);
+      } else if (event.action === "release") {
+        this.log(event.target, `${this.name(targetPart?.type)} <em class="heal">表示再開</em>`, t);
+      } else if (event.action === "cache-ready") {
+        this.pulse(el, "cache-protected", 420);
+      }
+      return;
+    }
+    if (event.kind === "conversion") {
+      const to = this.part(event.side, event.to);
+      const targetPart = battle[event.side].parts.find((p) => p.id === event.to);
+      if (event.action === "route") {
+        this.coin(el, to);
+        this.pulse(to, "is-funded", 420);
+        this.log(event.side, `${this.name(src?.type)} <span class="arrow">→</span> ${this.name(targetPart?.type)} <em class="inc">$${event.value}を配分</em>`, t);
+      } else {
+        this.log(event.side, `${this.name(src?.type)} <em class="inc">$${event.value}を変換</em>`, t);
+      }
+      return;
+    }
     if (event.kind === "fire") {
       this.pulse(el);
-      this.act(el, event.type);
+      this.act(el, event.type, event.echo === true);
       if (event.echo) this.pulse(el, "is-echoed", 700);
       if (event.type === "gov_submit")
         this.pulse(el?.closest(".node-gov_form"));
@@ -606,6 +761,17 @@ class Effects {
     if (event.kind === "echo") {
       const to = this.part(event.side, event.to),
         tp = battle[event.side].parts.find((p) => p.id === event.to);
+      if (src?.type === "nc_comment") {
+        this.comment(to, src.label || ["ここ好き", "88888888", "つながった！"][this.commentCount % 3]);
+        const input = el?.querySelector<HTMLInputElement>("input");
+        if (input) input.value = src.label || "コメントを再生しました";
+      }
+      const quoteState = el?.querySelector(".quote-state");
+      if (quoteState) quoteState.textContent = `${parts[tp?.type ?? ""]?.name ?? "原本"} を引用しました`;
+      const referenceState = el?.querySelector(".reference-state");
+      if (referenceState) referenceState.textContent = `${parts[tp?.type ?? ""]?.name ?? "原本"} を参照`;
+      const commitState = el?.querySelector(".commit-state");
+      if (commitState) commitState.textContent = "最後の通常発動を再適用";
       if (el && to && !this.reduced) {
         const a = this.center(el),
           b = this.center(to),
@@ -635,7 +801,7 @@ class Effects {
       const tag = '<span class="log-admin">管理画面</span> ';
       const txt = {
         moderator: `モデレーター <em class="shd">荒らしを削除 ◇+${event.value}</em>`,
-        sns: `SNS運用 <em class="heal">SNSから新規流入</em>`,
+        sns: `SNS運用 <em class="heal">${Math.round((event.value ?? 0) * 100) / 100} 閲覧者HP回復</em>`,
         troll: `AI荒らし👾 <em class="shd">相手のCAPTCHAに遮断された</em>`,
         sakura: `<em class="dmg">ステマ発覚</em> AIサクラ👾が炎上`,
         backup: `バックアップから復旧 <em class="heal">閲覧者30%</em>`,
@@ -683,6 +849,7 @@ class Effects {
         "#" + side.name + "-frame",
       );
       if (!frame) continue;
+      applyAudienceFeedback(frame, battle.audience?.[side.name].snapshot(), battle.elapsed);
       if (!this.traffic?.active) {
         const hp = Math.ceil(side.hp);
         const meta = frame.querySelector<HTMLElement>(".health-meta");
@@ -697,6 +864,13 @@ class Effects {
       for (const p of side.parts) {
         const el = this.part(side.name, p.id);
         if (!el) continue;
+        if (p.type === "go_history") this.syncHistory(el, battle, side.name);
+        if (p.type === "gh_transfer") this.syncTransfer(el, p.period, p.remaining);
+        if (p.type === "sc_track") this.syncAudio(el, battle.elapsed, p.period ? parts[p.type].cd / p.period : 1);
+        const runtime = battle.states[side.name].get(p.id);
+        const targetSide = p.type === "ad_popup" ? battle[side.name === "player" ? "enemy" : "player"] : side;
+        const boundTarget = targetSide.parts.find((q) => q.id === runtime?.target);
+        applyCombatFeedback(el, combatFeedback(p.type, p.charge, battle.ticks, runtime, boundTarget ? parts[boundTarget.type].name : "", side.shield, { budget: battle.rateBudget[side.name], limited: battle.metrics[side.name].rateLimited }));
         el.style.setProperty(
           "--progress",
           String(p.period ? Math.max(0, 1 - p.remaining / p.period) : 0),
@@ -724,6 +898,8 @@ class Effects {
         }
         const like = el.querySelector(".like-value");
         if (like) like.textContent = String(128 + p.fires);
+        const votes = el.querySelector(".vote-score");
+        if (votes) votes.textContent = String(128 + p.fires);
         const income = el.querySelector(".state-income");
         if (income)
           income.textContent = String(
@@ -732,7 +908,7 @@ class Effects {
         const sent = el.querySelector(".cart-state");
         if (sent) sent.textContent = String(p.fires);
         const cart = el.querySelector(".state-charge");
-        if (cart) cart.textContent = String(p.charge);
+        if (cart) cart.textContent = String(Math.round(p.charge * 100) / 100);
         const prog = el.querySelector<HTMLElement>(".cart-charge");
         if (prog) prog.style.setProperty("--charge", String(p.charge / 3));
         const counter = el.querySelector(".counter-number");
@@ -754,6 +930,8 @@ class Effects {
     this.lines = { player: [], enemy: [] };
     this.dirty = true;
     this.flying = 0;
+    this.lastRateLog = { player: -1, enemy: -1 };
+    this.commentCount = 0;
   }
   // Revenue visibly flows from the UI that earned it into the site's wallet.
   coin(from: Element | null | undefined, to: HTMLElement | null | undefined) {

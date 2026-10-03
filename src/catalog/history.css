@@ -1,0 +1,22 @@
+/* Native version-history panel; experimental combat state is supplied by the engine. */
+.native-version-history{box-sizing:border-box;height:100%;display:grid;grid-template-rows:24px minmax(0,1fr)30px;overflow:hidden;border:1px solid #d7dce1;background:#fff;color:#51606c;font:10px Arial,sans-serif}
+.native-version-history>header{display:flex;align-items:center;gap:7px;padding:0 8px;border-bottom:1px solid #edf0f3;background:#f8fafb;min-width:0}
+.native-version-history>header>b{font:17px Georgia,serif;color:#7b8d9c}
+.native-version-history>header>strong{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:10px;font-weight:500}
+.native-version-history>header>small{flex-shrink:0;font-size:7px;color:#616f7b}
+.history-entry{display:flex;align-items:center;gap:9px;min-height:0;overflow:hidden;padding:2px 10px}
+.history-entry>i{position:relative;width:7px;height:7px;flex-shrink:0;border:2px solid #7c9fb6;border-radius:50%;box-sizing:border-box}
+.history-entry>i:after{position:absolute;content:'';width:1px;top:7px;left:1px;height:28px;background:#d8e2e9}
+.history-entry>div{min-width:0;display:flex;flex-direction:column;gap:1px}
+.history-time{font-size:7px;line-height:9px;color:#616f7b}
+.history-source{font-size:9px;line-height:12px;font-weight:500;color:#516777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-recovery{font-size:8px;line-height:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#3e7256}
+.native-version-history>footer{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:3px 7px;box-sizing:border-box;border-top:1px solid #edf0f3}
+.history-expiry{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px;color:#616f7b}
+.native-version-history>footer>button{box-sizing:border-box;height:22px;padding:0 9px;flex-shrink:0;border:1px solid #c4d7e5;border-radius:3px;background:#edf5fa;color:#355d79;font:9px Arial,sans-serif}
+.native-version-history.is-history-used .history-entry{color:#616f7b;background:#fafbfc}
+.native-version-history.is-history-used .history-entry>i{border-color:#bdc8d0}
+.native-version-history.is-history-used .history-recovery{color:#616f7b}
+.native-version-history>footer>button:disabled{border-color:#e1e5e8;background:#f7f8f9;color:#aeb7bd;cursor:default}
+.web-node.is-history-restoring .native-version-history>footer>button{transform:translateY(1px);background:#dcecf7;border-color:#94b8d2}
+.kind-restore{background:#e8f1f6;color:#467287}

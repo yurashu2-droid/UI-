@@ -2,7 +2,7 @@ export type Mode = "lab" | "campaign";
 export type Phase = "build" | "battle" | "reward" | "complete" | "gameover";
 export type SideName = "player" | "enemy";
 export type Winner = SideName | "draw";
-export type Theme = "mixed" | "youtube" | "amazon" | "google" | "retro" | "gov";
+export type Theme = "mixed" | "youtube" | "amazon" | "google" | "retro" | "gov" | "twitter" | "x" | "wiki" | "forge" | "nico" | "reddit" | "portal" | "storefront" | "webarchive" | "livechannel" | "documents" | "audio" | "qanda" | "feedreader" | "marketplace" | "rankednews" | "mapsearch" | "personalweb" | "musicshop";
 export type Faction = Exclude<Theme, "mixed">;
 
 export interface Item {
@@ -14,6 +14,14 @@ export interface Item {
   h: number;
   shape: string;
   label: string;
+  /** Safe local references only; never raw source markup or URLs. */
+  appearanceId?: string;
+  provenanceId?: string;
+  /** Explicit producer-to-consumer route; absent uses the engine's deterministic default. */
+  routeTo?: string;
+  fusionLocked?: boolean;
+  /** Acquired originals remain in the private collection after a canonical fusion. */
+  lineage?: { appearanceId: string; provenanceId: string }[];
 }
 export type PlacedItem = Item & { x: number; y: number };
 
@@ -40,6 +48,10 @@ export interface PartDefinition {
   padding?: [number, number, number, number];
   /** Only obtainable by fusing two UIs (src/fusion.ts); never in shops or loot. */
   fused?: boolean;
+  /** Optional generic replay target filter. */
+  replayTags?: string[];
+  /** Experimental additions stay in the laboratory until balance review. */
+  status?: "experimental" | "balance-approved";
 }
 
 export type LayoutEntry = [
@@ -166,6 +178,7 @@ export interface BattleResult {
   income: number;
 }
 export type BattleEvent =
+  | import("./combat-rules.js").CombatEvent
   | {
       kind: "fire";
       time: number;
@@ -263,10 +276,12 @@ export interface Run {
   rerolls: number;
   phase: Phase;
   owned: Item[];
+  /** Earned items that could not yet fit in the campaign inventory. */
+  pendingInventory?: Item[];
   shop: { type: string; sold: boolean }[];
   pending: { loot: string[]; summary: BattleSummary } | null;
   history: BattleSummary[];
-  page: { name: string; theme: Theme };
+  page: { name: string; theme: Theme; templateId?: string };
   admin: string[];
   tutorial?: number;
   tutorialAck?: boolean;

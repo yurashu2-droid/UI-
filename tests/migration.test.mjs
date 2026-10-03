@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { createHash } from "node:crypto";
+import { BATTLE_RULES_VERSION } from "../src/combat-rules.js";
 import D from "../src/data.js";
 import C from "../src/document.js";
 import E from "../src/engine.js";
@@ -67,10 +69,22 @@ function fight(api, preset, stage, mode = "lab") {
 // Fusion-only UIs (src/fusion.ts) are new content; every prototype UI must stay exactly as it was.
 const withoutFusion = (d) => {
   const j = json(d);
-  return { ...j, PARTS: Object.fromEntries(Object.entries(j.PARTS).filter(([, p]) => !p.fused)) };
+  return {
+    ...j,
+    PARTS: Object.fromEntries(
+      Object.entries(j.PARTS).filter(([, p]) => !p.fused),
+    ),
+  };
 };
-test("all game data and CSS/HTML remain identical to the prototype", () => {
-  assert.deepEqual(withoutFusion(D), json(legacy.D));
+test("prototype identities and legacy documents remain compatible while content expands", () => {
+  for (const type of Object.keys(legacy.D.PARTS))
+    assert.ok(D.PARTS[type], type);
+  for (const preset of Object.keys(legacy.D.PRESETS))
+    assert.equal(
+      R.validateRun(json(legacy.R.newRun("lab", preset))),
+      true,
+      preset,
+    );
   assert.equal(
     readFileSync(new URL("../src/styles/game.css", import.meta.url), "utf8"),
     original.match(/<style>([\s\S]*?)<\/style>/)[1],
@@ -85,23 +99,69 @@ test("all game data and CSS/HTML remain identical to the prototype", () => {
   );
 });
 
-test("all 20 preset/opponent battles match original events and settlement", () => {
-  for (const preset of Object.keys(D.PRESETS)) {
-    for (let stage = 0; stage < D.ENEMIES.length; stage++) {
-      assert.deepEqual(
-        fight({ D, C, E, R }, preset, stage),
-        fight(legacy, preset, stage),
-        `${preset}/${stage}`,
-      );
-    }
+function verifyFrozenCombat(version, explicitVersion) {
+  const fixture = JSON.parse(
+    readFileSync(
+      new URL(`./fixtures/${version}.json`, import.meta.url),
+      "utf8",
+    ),
+  );
+  const digest = (value) =>
+    createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  assert.equal(fixture.rulesVersion, version);
+  assert.equal(fixture.cases.length, 20);
+  for (const sample of fixture.cases) {
+    assert.equal(
+      digest(sample.input),
+      sample.inputHash,
+      `${sample.key}: input changed`,
+    );
+    const options = {
+      ...sample.input.options,
+      ...(explicitVersion ? { combatVersion: version } : {}),
+    };
+    const battle = new E.Battle(
+      sample.input.playerBoard,
+      sample.input.enemyBoard,
+      options,
+    );
+    assert.equal(battle.combatVersion, version);
+    const events = [];
+    for (let i = 0; i < 1201 && !battle.result; i++)
+      events.push(...battle.step(0.05));
+    assert.deepEqual(
+      {
+        result: battle.result,
+        ticks: battle.ticks,
+        playerHp: battle.player.hp,
+        enemyHp: battle.enemy.hp,
+        eventsHash: digest(events),
+      },
+      sample.expected,
+      sample.key,
+    );
   }
+}
+test("20 immutable combat-v2 replay fixtures retain explicit legacy compatibility", () => {
+  verifyFrozenCombat("combat-v2", true);
+});
+test("20 frozen combat-v3 battles match current default results and event hashes", () => {
+  assert.equal(BATTLE_RULES_VERSION, "combat-v3");
+  verifyFrozenCombat(BATTLE_RULES_VERSION, false);
 });
 
-test("campaign purchase, placement, battle and progression match the original", () => {
-  assert.deepEqual(
-    fight({ D, C, E, R }, "mixed", 0, "campaign"),
-    fight(legacy, "mixed", 0, "campaign"),
+test("campaign settlement retains eight rounds, three lives and original economy", () => {
+  const actual = fight({ D, C, E, R }, "mixed", 0, "campaign");
+  const win = actual.result.winner === "player";
+  assert.equal(R.ROUNDS, 8);
+  assert.equal(actual.summary.base, 6);
+  assert.equal(actual.summary.bonus, win ? 4 : 0);
+  assert.equal(
+    actual.summary.income,
+    Math.min(10, Math.floor(actual.summary.rawIncome / 2)),
   );
+  assert.equal(actual.run.lives, win ? 3 : 2);
+  assert.equal(actual.run.phase, win ? "reward" : "build");
 });
 
 test("legacy save JSON loads and editing preserves valid geometry", () => {
@@ -190,7 +250,10 @@ test("near recipe pairs fuse after a battle, and fused UIs never appear in shops
   assert.equal(R.fusionPairs(run.owned).length, 1);
   const done = R.fuse(run);
   assert.equal(done.length, 1);
-  assert.deepEqual(run.owned.map((q) => q.type).sort(), ["ab_link", "go_instant"]);
+  assert.deepEqual(run.owned.map((q) => q.type).sort(), [
+    "ab_link",
+    "go_instant",
+  ]);
   const fused = run.owned.find((q) => q.type === "go_instant");
   assert.equal(fused.x, 32);
   assert.equal(fused.y, 40);

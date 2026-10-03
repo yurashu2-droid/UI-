@@ -14,6 +14,7 @@ import * as Title from "./title.js";
 import { initModernUI } from "./modern.js";
 import { BUILDS } from "./builds.js";
 import * as Lab from "./buildlab.js";
+import { createLabBattleController, mountAudienceLabControl } from "./lab-audience-control.js";
 import { mountCrawler, type Mood } from "./crawler.js";
 import { mountBasket } from "./basket.js";
 import { createWindowManager } from "./wm.js";
@@ -21,6 +22,18 @@ import { defaultWindowLayout } from "./window-layout.js";
 import { renderHackSites, layoutHackSites, inspectCard, type ItemInfo } from "./hacksite.js";
 import { beginExtract } from "./extract.js";
 import { RECIPES } from "./fusion.js";
+import { createRunPersistence, selectRecoveredRun } from "./persistence.js";
+import { createProfileStore } from "./profile-store.js";
+import { prepareRaidChallenge } from "./raid-challenge.js";
+import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
+import { previewCatalogueAction } from "./catalog/preview.js";
+import { VIDEO_SPEED_HELP, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
+import { mountOnlinePanel } from "./online/index.js";
+import { mountRaidPanel, createRaidEnemy, registerRaidBlueprint, applyRaidAppearance, renderRaidAppearance } from "./raid/index.js";
+import type { RaidBlueprint, RaidInitialRequest } from "./raid/types.js";
+import * as Story from "./story/index.js";
+import * as StorySession from "./story/session.js";
+import type { StoryCommand, StoryEncounter, StoryTransition } from "./story/types.js";
 
 import type {
   Run,
@@ -70,36 +83,112 @@ let run: Run,
   lastTime = 0,
   settling = false,
   saveOK = true,
+  saveProblem = "",
+  profileProblem = "",
   toastTimer: ReturnType<typeof setTimeout> | undefined,
   fitRAF = 0,
   coachHidden = false;
 const memory: Partial<Record<Mode, Run>> = {};
+const labBattleController = createLabBattleController();
+let storyActive = false;
+let storySession: StorySession.StorySession | null = null;
+let storyMatchId: string | null = null;
+let storyBattleEncounter: StoryEncounter | null = null;
+let pendingStorySettlement: StorySession.StorySession | null = null;
+const storyPersistence = StorySession.createStorySessionPersistence({
+  getItem: key => localStorage.getItem(key), setItem: (key, value) => localStorage.setItem(key, value),
+});
+function appOpponent() {
+  if (!storyActive || !storySession) return R.opponent(run);
+  const encounter = storyBattleEncounter ?? Story.currentStoryEncounter(storySession.story) ?? Story.currentStoryStage(storySession.story).encounters.at(-1)!;
+  return { ...encounter.enemy, index: -1, round: null, size: encounter.enemy.layout.length, full: true };
+}
+function appEnemyBoard() {
+  if (!storyActive || !storySession) return R.enemyBoard(run);
+  return appOpponent().layout.map(([type,x,y,w,h,shape,label],i) => Object.assign(C.makeItem(type,"e"+i,x,y,w,h),shape?{shape}:{},label?{label}:{}));
+}
+let profileStore: ReturnType<typeof createProfileStore> | null = null;
+let profileWrites: Promise<void> = Promise.resolve();
+V.setAppearanceRenderer(applyRaidAppearance);
 const fx = new UIRaidEffects(),
   traffic = new UIRaidTraffic(fx);
 fx.traffic = traffic;
 document.body.classList.toggle("reduced-motion", fx.reduced);
 const KEY = "ui-raid-studio-v3-";
+const runPersistence = createRunPersistence({
+  getItem: (key) => localStorage.getItem(key),
+  setItem: (key, value) => localStorage.setItem(key, value),
+}, KEY);
 function load(mode: Mode): Run {
-  try {
-    const raw = localStorage.getItem(KEY + mode);
-    if (raw) {
-      const v: unknown = JSON.parse(raw);
-      if (R.validateRun(v) && v.mode === mode) return v;
-    }
-  } catch {
+  if (memory[mode]) return clone(memory[mode]!);
+  const result = runPersistence.load(mode);
+  if (result.status === "loaded") return result.run;
+  if (result.status === "corrupt" || result.status === "unavailable") {
     saveOK = false;
+    saveProblem = result.error;
   }
   return memory[mode] ? clone(memory[mode]) : R.newRun(mode);
 }
 function save() {
   if (run.phase === "battle") return;
-  memory[run.mode] = clone(run);
-  try {
-    localStorage.setItem(KEY + run.mode, JSON.stringify(run));
-    localStorage.setItem(KEY + "mode", run.mode);
-  } catch {
-    saveOK = false;
+  if (storyActive && storySession) {
+    const updated = storySession.story.phase === "naming" ? { ok: true as const, session: storySession } : StorySession.updateStoryBuild(storySession, run);
+    if (!updated.ok) { run = clone(storySession.run); toast(updated.error); render(); return; }
+    storySession = updated.session;
+    const stored = storyPersistence.save(storySession);
+    saveOK = stored.ok; saveProblem = stored.ok ? "" : stored.error;
+    renderStorageNotice(); return;
   }
+  memory[run.mode] = clone(run);
+  const result = runPersistence.save(run);
+  saveOK = result.ok;
+  saveProblem = result.ok ? "" : result.error;
+  if (profileStore) {
+    const snapshot = clone(run), store = profileStore;
+    profileWrites = profileWrites.then(() => store.saveRun(snapshot)).then(() => {
+      profileProblem = ""; renderStorageNotice();
+    }).catch((error: unknown) => {
+      profileProblem = error instanceof Error ? error.message : "コレクションの保存に失敗しました。";
+      renderStorageNotice();
+    });
+  }
+  renderStorageNotice();
+}
+function renderStorageNotice() {
+  let notice = document.querySelector<HTMLElement>("#storage-notice");
+  if (saveOK && !profileProblem) { notice?.remove(); return; }
+  if (!notice) {
+    notice = document.createElement("aside");
+    notice.id = "storage-notice";
+    notice.setAttribute("role", "alert");
+    Object.assign(notice.style, { position: "fixed", left: "12px", right: "12px", bottom: "12px", zIndex: "30000", padding: "12px", background: "#fff3cf", color: "#34280b", border: "2px solid #ab7616", display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" });
+    document.body.append(notice);
+  }
+  notice.replaceChildren();
+  const label = document.createElement("span");
+  label.textContent = [saveProblem, profileProblem].filter(Boolean).join(" ");
+  notice.append(label);
+  const backup = document.createElement("button");
+  backup.textContent = "データを書き出す";
+  backup.onclick = () => {
+    if (storyActive) { exportFile(); return; }
+    const state = runPersistence.status(run.mode);
+    if (state?.status !== "corrupt") { exportFile(); return; }
+    const url = URL.createObjectURL(new Blob([state.raw], { type: "application/json" }));
+    const a = document.createElement("a"); a.href = url; a.download = `ui-raid-${run.mode}-recovery.json`; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  notice.append(backup);
+  const recover = document.createElement("button");
+  recover.textContent = "この構成で保存を再開";
+  recover.onclick = () => {
+    if (storyActive) { save(); return; }
+    if (!window.confirm("元データをバックアップして、現在の構成で保存を再開しますか？")) return;
+    const result = runPersistence.recover(run);
+    saveOK = result.ok; saveProblem = result.ok ? "" : result.error;
+    renderStorageNotice();
+  };
+  notice.append(recover);
 }
 function toast(message: string) {
   clearTimeout(toastTimer);
@@ -112,6 +201,24 @@ try {
   startMode = localStorage.getItem(KEY + "mode") || "campaign";
 } catch {}
 run = load(startMode === "lab" ? "lab" : "campaign");
+try {
+  profileStore = createProfileStore(indexedDB);
+  for (const mode of ["lab", "campaign"] as const) {
+    const legacy = runPersistence.load(mode);
+    if (legacy.status === "loaded") await profileStore.migrateLegacy(legacy.run);
+    const saved = await profileStore.loadRun(mode);
+    const recovered = selectRecoveredRun(legacy, saved);
+    if (recovered) memory[mode] = recovered;
+  }
+  run = memory[run.mode] ? clone(memory[run.mode]!) : run;
+  for (const trophy of await profileStore.listTrophies()) {
+    const capture = await profileStore.getBlueprint(trophy.captureId);
+    if (capture) await registerRaidBlueprint(capture);
+  }
+} catch (error) {
+  profileProblem = error instanceof Error ? error.message : "個人コレクションを開けません。";
+  profileStore = null;
+}
 const editor = new UIRaidEditor.Editor({
   getRun: () => run,
   getHost: () => $("#player-body"),
@@ -140,6 +247,7 @@ const editor = new UIRaidEditor.Editor({
       theme: run.page.theme,
       selected: lifted.length ? [] : [...editor.selection],
       lifted,
+      decor: R.pageDecor(run),
     }),
 });
 
@@ -152,6 +260,9 @@ const KIND: Record<string, string> = {
   reactive: "連動",
   passive: "補助",
   echo: "再発動",
+  interference: "妨害",
+  cache: "保護",
+  restore: "復元",
 };
 const GROUP_BONUS: Record<string, string> = {
   "button-group": "速度 +12%",
@@ -168,8 +279,8 @@ const has = (q: Item, tag: string) => P[q.type].tags.includes(tag),
 // Support UIs only work next to the right kind of partner; these rules mirror the engine.
 const NEEDS: Record<string, { t: (item: Item) => boolean; x: string }> = {
   yt_speed: {
-    t: (q) => P[q.type].cd > 0,
-    x: "動画など「時間で発動するUI」の隣に置くと2倍速",
+    t: isVideoSource,
+    x: VIDEO_SPEED_HELP,
   },
   am_prime: {
     t: (q) => P[q.type].cd > 0 && has(q, "commerce"),
@@ -269,12 +380,13 @@ function connectText(t: string) {
       link: "リンク同士を横か縦に並べるとナビゲーション（速度 +15%）",
       heading: "文字攻撃。文字サイズ変更と組むと強い",
       marquee: "右側か真下にある攻撃UIをもう一度発動",
-      rule: "上下に文字UIがあると防御 +2",
+      rule: "近くに文字UIがあると防御 +2",
       document: "PDF・申請UIと並べると強い",
     }[d.layout] || "近く（隣接・同じまとまり）のUIと連携する"
   );
 }
 function working(p: Item, info: EngineInfo) {
+  if (p.type === "yt_speed") return videoSpeedWorking(p, info);
   const n = NEEDS[p.type];
   if (!n) return true;
   if (p.type === "yt_progress")
@@ -289,6 +401,7 @@ function shortDesc(d: PartDefinition) {
   return s + "。";
 }
 function matchHint(t: string, info: EngineInfo) {
+  if (t === "yt_speed") return videoSpeedHint(info);
   const d = P[t],
     b = info.board,
     hasAny = (f: (item: Item) => boolean) => b.some(f),
@@ -318,7 +431,8 @@ function matchHint(t: string, info: EngineInfo) {
     return "商品情報とつながる";
   if (t === "am_product" && hasAny((q) => P[q.type].tags.includes("commerce")))
     return "購入UIとつながる";
-  if (c === 2) return `${D.FACTIONS[d.faction].name}セットまであと1`;
+  const setHint = factionSetView(d.faction, c).nextHint;
+  if (setHint) return setHint;
   if (NEEDS[t] && hasAny((q) => NEEDS[t].t(q))) return "今のページで効く";
   if (isCtrl(t) && hasAny((q) => isCtrl(q.type))) return "ボタンと連結できる";
   if (d.layout === "link" && hasAny((q) => P[q.type].layout === "link"))
@@ -365,7 +479,7 @@ function hints(info: EngineInfo) {
   if (links.length >= 2)
     out.push("リンク同士を横か縦に並べると「ナビゲーション」（速度 +15%）");
   for (const [f, n] of Object.entries(info.counts))
-    if (n === 2 && isFaction(f))
+    if (factionSetView(f, n).nextHint && isFaction(f))
       out.push(
         `${D.FACTIONS[f].name}のUIをあと1つ置くとセット効果：${D.FACTIONS[f].set}`,
       );
@@ -379,7 +493,7 @@ function frameMarkup(
   name: string,
   address: string,
 ) {
-  const o = R.opponent(run);
+  const o = appOpponent();
   return `<div class="frame-caption ${side === "enemy" ? "enemy" : ""}"><div class="frame-name"><i style="background:${side === "enemy" ? "#e5484d" : "#2fb47c"}"></i><b>${esc(name)}</b><small>${side === "enemy" ? (o.round ? `ROUND ${o.round} の相手` : "相手のサイト") : "あなたのサイト"}</small></div><div class="frame-health"><div class="health-meta"><span>HP</span></div><div class="health-track"><b style="width:100%"></b><i style="width:100%"></i></div></div></div><div class="frame-viewport"><div class="browser-paper site-theme-${theme}"><div class="browser-tabs"><span class="traffic-lights"><i></i><i></i><i></i></span><div class="browser-tab"><i style="background:${(theme === "mixed" ? undefined : D.FACTIONS[theme].color) || "#8baa94"}"></i>${esc(name)} <span>×</span></div><span class="browser-plus">＋</span></div><div class="address-bar"><span class="address-controls">‹　›　↻</span><div class="address-field"><span>▧</span> ${esc(address)} <i>☆</i></div><span class="address-menu">⋮</span></div><header class="site-header">${V.header(theme, name)}</header><div class="page-wrap"><div class="page-body" id="${side}-body"></div>${side === "player" ? '<div class="editor-overlay" id="editor-overlay"></div><div class="tut-layer" id="tut-layer"></div>' : ""}</div><footer class="site-footer"><span>${esc(name)}　/　UI MASHUP</span><span>ローカル試作 · 実際のサービスには接続しません</span></footer>${adminDock(side, name)}</div></div>`;
 }
 const INVADER = [
@@ -421,7 +535,7 @@ function adminViz(id: string, side: SideName) {
   }
 }
 function adminDock(side: SideName, name: string) {
-  const o = R.opponent(run),
+  const o = appOpponent(),
     list = side === "player" ? run.admin || [] : o.admin,
     editable = side === "player" && !battle,
     open = side === "player" ? R.adminSlots(run) : D.ADMIN_SLOTS;
@@ -455,7 +569,7 @@ function adminPicker() {
   );
 }
 function renderFrames() {
-  const o = R.opponent(run);
+  const o = appOpponent();
   $("#enemy-frame").className = "site-frame era-" + (ENEMY_ERA[o.faction] ?? "98");
   $("#player-frame").innerHTML = frameMarkup(
     "player",
@@ -474,8 +588,9 @@ function renderFrames() {
     theme: run.page.theme,
     interactive: preview && !battle,
     selected: [...editor.selection],
+    decor: R.pageDecor(run),
   });
-  V.render($("#enemy-body"), R.enemyBoard(run), {
+  V.render($("#enemy-body"), appEnemyBoard(), {
     side: "enemy",
     theme: o.faction,
     interactive: preview && !battle,
@@ -585,7 +700,11 @@ function loadMeter(info: DocumentInfo) {
 function renderTopbar() {
   const info = C.analyze(run.owned);
   wm.setTitle("page", run.page.name);
-  if (run.mode === "campaign") {
+  if (storyActive && storySession) {
+    const stage = Story.currentStoryStage(storySession.story);
+    $("#tb-run").innerHTML = `<div class="tb-round"><small>STAGE</small><b>${stage.number}</b><span>/ 8</span></div><div class="tb-mode"><b>${esc(stage.title)}</b></div><div class="tb-lives">${"♥".repeat(run.lives)}</div><button id="story-hub-button" class="side-btn">ジャンクの作業場</button>`;
+    $("#tb-stats").innerHTML = `<div class="tb-money"><small>資金</small>$<b>${run.cash}</b></div>${loadMeter(info)}`;
+  } else if (run.mode === "campaign") {
     const results: Record<number, string> = {};
     for (const h of run.history)
       if (h.round)
@@ -596,7 +715,7 @@ function renderTopbar() {
       `<div class="tb-money" title="資金：巡回先サイトからのUI移植と、サーバー契約に使う。対戦中の収益で増える。"><small>資金</small>$<b>${run.cash}</b></div>${loadMeter(info)}`;
   } else {
     $("#tb-run").innerHTML =
-      '<div class="tb-mode"><b>実験室</b><small>すべてのUIを無料で試せます</small></div>';
+      `<div class="tb-mode"><b>実験室</b><small>${labBattleController.value === "audience-v1" ? "実験：広告の離脱・登録の定着" : "すべてのUIを無料で試せます"}</small></div>`;
     $("#tb-stats").innerHTML = loadMeter(info);
   }
   const b = $<HTMLButtonElement>("#battle-button");
@@ -608,6 +727,7 @@ function renderTopbar() {
       run.owned.some((p) => C.placed(p) && P[p.type].kind === "attack"),
   );
   b.textContent =
+    storyActive ? (storySession?.reward ? "回収品を選ぶ" : "▶ 機械へ接続") :
     run.mode === "lab"
       ? "▶ テスト対戦"
       : run.phase === "reward"
@@ -632,7 +752,7 @@ function shopCard(t: string, info: EngineInfo) {
     poor = run.mode === "campaign" && run.cash < d.price,
     m = matchHint(t, info),
     pend = editor.pending?.type === t;
-  return `<div class="shop-card ${poor ? "poor" : ""} ${pend ? "pending" : ""}" data-palette-type="${t}" tabindex="0" role="button" aria-label="${esc(d.name)}を自分のページへ移植"><div class="sc-top"><span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span><span class="sc-weight">重さ ${d.load}</span><span class="sc-price">${run.mode === "lab" ? "" : "$" + d.price}</span></div><div class="sc-visual"></div><b class="sc-name">${esc(d.name)}</b><p class="sc-desc">${esc(shortDesc(d))}</p><div class="sc-foot">${m ? `<span class="sc-match">◎ ${esc(m)}</span>` : ""}<button class="sc-buy" data-add-type="${t}">${run.mode === "lab" ? "置く" : "⧉ 移植"}</button></div></div>`;
+  return `<div class="shop-card ${poor ? "poor" : ""} ${pend ? "pending" : ""}" data-palette-type="${t}" tabindex="0" role="button" aria-label="${esc(d.name)}を自分のページへ移植"><div class="sc-top"><span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span><span class="sc-weight">重さ ${d.load}</span><span class="sc-price">${run.mode === "lab" ? "" : "$" + d.price}</span></div><div class="sc-visual"></div><b class="sc-name">${esc(d.name)}${d.status === "experimental" ? " ［実験］" : ""}</b><p class="sc-desc">${esc(shortDesc(d))}</p><div class="sc-foot">${m ? `<span class="sc-match">◎ ${esc(m)}</span>` : ""}<button class="sc-buy" data-add-type="${t}">${run.mode === "lab" ? "置く" : "⧉ 移植"}</button></div></div>`;
 }
 function planCard(key: string, sold: boolean) {
   const pl = R.PLANS[key],
@@ -731,7 +851,7 @@ function renderShop() {
 function itemInfo(t: string, info = E.analyze(run.owned)): ItemInfo {
   const d = P[t];
   return {
-    name: d.name,
+    name: d.name + (d.status === "experimental" ? " ［実験・バランス調整中］" : ""),
     price: d.price,
     kind: d.kind,
     kindLabel: KIND[d.kind],
@@ -915,7 +1035,7 @@ function crawlerPitch(): [string, Mood] {
 function crawlerTip(): [string, Mood] {
   const info = E.analyze(run.owned),
     cap = R.capacity(run),
-    o = R.opponent(run),
+    o = appOpponent(),
     fusions = R.fusionPairs(run.owned),
     afford = run.shop.filter((q) => !q.sold && !q.type.startsWith("plan:") && P[q.type].price <= run.cash).length;
   const tips: [string, Mood][] = [
@@ -1008,7 +1128,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
     notes.unshift(
       `${P[info.board.find((q) => q.id === parent)!.type].name}の内側`,
     );
-  return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2><p class="sel-desc">${esc(d.desc)}</p>
+  return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2>${d.status === "experimental" ? '<p class="sel-warn">実験用UI · バランス調整中。本編・オンラインの入手候補には入りません。</p>' : ""}<p class="sel-desc">${esc(d.desc)}</p>
  <div class="sel-stats"><div><small>発動</small><b>${d.cd ? (d.cd / (m.speed || 1)).toFixed(1) + "秒ごと" : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
  ${
    notes.length || groups.length
@@ -1019,24 +1139,31 @@ function selectionCard(sel: Item[], info: EngineInfo) {
      : ""
  }
  ${ok ? "" : `<p class="sel-warn">⚠ 今は働いていません</p>`}<div class="sel-connect"><b>つなぎ方</b>${esc(connectText(p.type))}</div>
+ <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>
+ ${p.appearanceId ? '<p class="muted">取得元の外観を使用中。合成後は標準表示になりますが、元の外観と由来はコレクションに残ります。</p>' : ""}
  <details class="sel-more"><summary>見た目（時代）・表示テキストを変える</summary>${skinPicker(p)}<label class="field-label">表示テキスト<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="元のテキストを使用"></label></details>
  <div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : `売る +$${R.sellValue(run, p.type)}`}</button></div></section>`;
 }
 // Each site culture gets a tiny favicon so it is recognisable at a glance, not only by colour.
-const FAVICON: Record<string, string> = { youtube: "▶", amazon: "a", google: "G", retro: "HP", gov: "公" };
+const FAVICON: Record<string, string> = { youtube: "▶", amazon: "a", google: "G", retro: "HP", gov: "公", twitter: "t", x: "X", wiki: "文", forge: "git", nico: "TV", reddit: "r", audio: "≈" };
 function favicon(f: string) {
   return `<span class="fav fav-${f}" aria-hidden="true">${FAVICON[f] ?? "?"}</span>`;
 }
 function synergyPanel(info: EngineInfo) {
   const counts = info.counts,
     order = Object.keys(D.FACTIONS)
+      .filter(id => Object.values(P).some(part => part.faction === id))
       .filter(isFaction)
       .sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
   const traits = order
     .map((k) => {
       const n = counts[k] || 0,
-        f = D.FACTIONS[k];
-      return `<div class="trait ${n >= 3 ? "on" : ""} ${n ? "" : "zero"}" style="--c:${f.color}">${favicon(k)}<b>${esc(f.name)}</b><span class="pips">${[0, 1, 2].map((i) => `<em class="${i < n ? "f" : ""}"></em>`).join("")}${n > 3 ? `<small>+${n - 3}</small>` : ""}</span><small>${n >= 3 ? "発動中：" : "3つで："}${esc(f.set)}</small></div>`;
+        f = D.FACTIONS[k],
+        setView = factionSetView(k, n);
+      const progress = setView.threshold === null
+        ? `<span class="trait-count">${n}個</span>`
+        : `<span class="pips">${[0, 1, 2].map((i) => `<em class="${i < n ? "f" : ""}"></em>`).join("")}${n > 3 ? `<small>+${n - 3}</small>` : ""}</span>`;
+      return `<div class="trait ${setView.active ? "on" : ""} ${n ? "" : "zero"}" style="--c:${f.color}">${favicon(k)}<b>${esc(f.name)}</b>${progress}<small>${esc(setView.status)}</small></div>`;
     })
     .join("");
   const links =
@@ -1064,9 +1191,9 @@ function synergyPanel(info: EngineInfo) {
   return `<section class="side-sec synergy"><h3>シナジー<small>効いている効果</small></h3><div class="traits">${traits}</div><h4>連結・内包</h4>${links || '<p class="muted">まだありません。UI同士をくっつけてみよう。</p>'}${tips ? `<h4>強くするヒント</h4>${tips}` : ""}</section>`;
 }
 function opponentCard() {
-  const o = R.opponent(run),
+  const o = appOpponent(),
     adm = o.admin.map((a) => D.ADMIN[a].name);
-  return `<section class="side-sec opp"><h3>${o.round ? `次の相手 <small>ROUND ${o.round}</small>` : "対戦相手"}</h3><div id="enemy-thumbnail" class="enemy-thumbnail" role="button" tabindex="0" aria-label="相手のサイトを大きく見る"></div><b class="opp-name">${esc(o.pageName)}</b><div class="opp-meta"><span>UI ${o.size}個</span><span>閲覧者の粘り ${o.hp}</span>${adm.length ? `<span>管理画面：${esc(adm.join("・"))}</span>` : ""}</div><p class="opp-tip">${esc(o.tip)}</p>${run.mode === "lab" ? `<select id="enemy-select" class="select-input">${enemyOptions(o.index)}</select><button id="open-builds" class="side-btn">理想形ビルド図鑑・相性表</button>` : ""}<button id="view-enemy" class="side-btn">相手のサイトをよく見る</button></section>`;
+  return `<section class="side-sec opp"><h3>${o.round ? `次の相手 <small>ROUND ${o.round}</small>` : "対戦相手"}</h3><div id="enemy-thumbnail" class="enemy-thumbnail" role="button" tabindex="0" aria-label="相手のサイトを大きく見る"></div><b class="opp-name">${esc(o.pageName)}</b><div class="opp-meta"><span>UI ${o.size}個</span><span>閲覧者の粘り ${o.hp}</span>${adm.length ? `<span>管理画面：${esc(adm.join("・"))}</span>` : ""}</div><p class="opp-tip">${esc(o.tip)}</p>${run.mode === "lab" ? `<select id="enemy-select" class="select-input">${enemyOptions(o.index)}</select><button id="open-builds" class="side-btn">構成例図鑑・相性表</button>` : ""}<button id="view-enemy" class="side-btn">相手のサイトをよく見る</button></section>`;
 }
 function renderSide() {
   const host = $("#inspector"),
@@ -1083,10 +1210,17 @@ function renderSide() {
     selectionCard(sel, info) +
     synergyPanel(info) +
     opponentCard();
-  const o = R.opponent(run),
+  if (run.mode === "lab" && !storyActive) {
+    const controlHost = document.createElement("section");
+    controlHost.className = "side-sec lab-experiment-control";
+    mountAudienceLabControl(controlHost, labBattleController,
+      () => ({ mode: run.mode, storyActive, battleActive: !!battle }), renderTopbar);
+    host.append(controlHost);
+  }
+  const o = appOpponent(),
     thumb = $("#enemy-thumbnail");
   thumb.innerHTML = `<div class="thumb-paper site-theme-${o.faction}"><header class="site-header">${V.header(o.faction, o.pageName)}</header><div class="page-body"></div></div>`;
-  V.render(thumb.querySelector<HTMLElement>(".page-body")!, R.enemyBoard(run), {
+  V.render(thumb.querySelector<HTMLElement>(".page-body")!, appEnemyBoard(), {
     side: "thumb",
     theme: o.faction,
     decor: o.decor || [],
@@ -1307,6 +1441,8 @@ function render() {
   back.hidden = !!battle || !(view === "enemy" || preview);
   back.textContent = preview ? "✎ 編集に戻る" : "← 自分のサイトに戻る";
   renderTopbar();
+  const labControl = document.querySelector<HTMLSelectElement>("#lab-audience-experiment");
+  if (labControl) labControl.disabled = !!battle || storyActive || run.mode !== "lab";
   renderFrames();
   if (!battle) {
     renderShop();
@@ -1335,7 +1471,8 @@ function markFusions() {
         const badge = document.createElement("span");
         badge.className = "fuse-badge";
         badge.textContent = `⚗ 次の公開後に統合 → ${into}`;
-        badge.title = `${P[a.type].name} ＋ ${P[b.type].name} → ${into}\n${recipe.story}`;
+        badge.title = `${P[a.type].name} ＋ ${P[b.type].name} → ${into}\n${recipe.story}${a.appearanceId || b.appearanceId ? "\n取得した外観は合成先の標準表示になります。元の外観と由来はコレクションに残ります。" : ""}`;
+        if (a.appearanceId || b.appearanceId) badge.textContent += " · 外観は標準表示へ";
         node.append(badge);
       }
     });
@@ -1364,13 +1501,277 @@ function celebrateFusions() {
 }
 
 /* ---------- Modals ---------- */
+let modalFeatureDispose: (() => void) | undefined;
 function openModal(html: string) {
+  modalFeatureDispose?.(); modalFeatureDispose = undefined;
+  $("#modal").classList.remove("feature-modal");
   $("#modal-content").innerHTML = html;
   if (!$<HTMLDialogElement>("#modal").open)
     $<HTMLDialogElement>("#modal").showModal();
 }
 function closeModal() {
+  if (pendingStorySettlement) return;
+  modalFeatureDispose?.(); modalFeatureDispose = undefined;
   $<HTMLDialogElement>("#modal").close();
+}
+$("#modal").addEventListener("close", () => { modalFeatureDispose?.(); modalFeatureDispose = undefined; });
+/* ---------- Isolated story profile and actual editor/battle bridge ---------- */
+function commitStorySession(next: StorySession.StorySession) {
+  const stored=storyPersistence.save(next);
+  if(!stored.ok)throw new Error(stored.error);
+  storySession=clone(next);run=clone(next.run);saveOK=true;saveProblem="";renderStorageNotice();
+}
+function enterStory(fresh=false) {
+  if(battle)return;
+  save();
+  const read=storyPersistence.load();
+  if(read.status==="unavailable"||(read.status==="corrupt"&&!fresh)){toast(read.error+" 新しく始める場合はメニューの「新しい物語」から元データを保全できます。");return;}
+  const selected=fresh||read.status==="empty"||read.status==="corrupt"?StorySession.createStorySession():read.session;
+  if(fresh&&read.status!=="empty"){const recovered=storyPersistence.recover(selected);if(!recovered.ok){toast(recovered.error);return;}}
+  try{commitStorySession(selected);}catch(error){toast(error instanceof Error?error.message:"物語を保存できません。");return;}
+  labBattleController.reset();
+  storyActive=true;storyMatchId=null;storyBattleEncounter=null;
+  editor.reset();preview=false;view="self";eraInstant=true;render();resetBuildSnap();audio.setMusic("build");openStoryHub();
+}
+function storyCommand(command:StoryCommand):StoryTransition {
+  if(!storySession)throw new Error("物語が開いていません。");
+  const result=StorySession.commandStorySession(storySession,command);
+  if(!result.ok)return {ok:false,state:storySession.story,effects:[],error:result.error};
+  try{commitStorySession(result.session);render();return {ok:true,state:result.session.story,effects:result.effects};}
+  catch(error){return {ok:false,state:storySession.story,effects:[],error:error instanceof Error?error.message:"保存できません。"};}
+}
+function openStoryHub() {
+  if(!storyActive||!storySession||battle)return;
+  if(storySession.reward){storyRewardPanel();return;}
+  if(run.lives<=0){
+    openModal(`<div class="modal-inner">${modalHead("THE LAST BROWSER","接続が途切れた")}<p>この旅のライフが尽きました。作ったページと回収記録は保存されています。</p><button id="story-restart" class="primary">白紙のページから新しい旅へ</button><button data-close-modal>最後のページを見る</button></div>`);
+    $("#story-restart").onclick=()=>enterStory(true);return;
+  }
+  openModal('<div class="story-host-controls"><button id="story-open-inbox" class="side-btn"></button></div><div id="story-feature-host"></div>');
+  $("#modal").classList.add("feature-modal");
+  const inbox=$("#story-open-inbox");inbox.textContent=`物語の受取箱 (${storySession.inbox.length})`;inbox.onclick=storyInboxPanel;
+  const panel=Story.mountStoryHub($("#story-feature-host"),{
+    getState:()=>storySession!.story,
+    onCommand:storyCommand,
+    onClose:closeModal,
+    renderOwnPage:host=>V.render(host,run.owned,{side:"story-ending",theme:run.page.theme,decor:R.pageDecor(run)}),
+    onEdit:target=>{closeModal();view="self";preview=false;render();if(target==="server")toast("左の巡回先にあるサーバープランで処理能力を増やせます。");},
+    onBattle:()=>{
+      if(!run.owned.some(item=>C.placed(item)&&P[item.type].kind==="attack"))throw new Error("まず作業台で、攻撃するUIを最低1つページに置いてください。");
+      return start();
+    },
+    onPracticeFusion:()=>{
+      if(!storySession)return;
+      const result=StorySession.rehearseStoryFusion(storySession);
+      if(!result.ok)throw new Error(result.error);
+      commitStorySession(result.session);pendingFusions="fusions" in result?result.fusions:[];render();
+      if(result.effects.some(e=>e.type==="fusion-reaction"))toast(Story.STORY_WORLD.fusion.join(" "));
+      else toast("配置した部品を統合しました。");
+    },
+    onOptionalRaid:async(url,kind)=>{
+      await raidPanel({url,kind,...(kind==="cached"&&storySession?{cachedBlueprint:StorySession.findStoryCapture(storySession,url)}:{})});
+    },
+  });
+  modalFeatureDispose=panel.dispose;
+}
+function storyRewardPanel() {
+  const reward=storySession?.reward;if(!reward)return;
+  openModal(`<div class="modal-inner">${modalHead("SALVAGE","サイトからUIを1つ持ち帰る")}<p>物語の重要な記録は、この選択とは別に保存されています。</p><div id="story-reward-choices" class="reward-grid"></div><button id="story-skip-loot">回収を見送る</button></div>`);
+  const host=$("#story-reward-choices");
+  const claim=(type:string|null)=>{
+    if(!storySession)return;
+    const result=StorySession.claimStoryReward(storySession,type);if(!result.ok){toast(result.error);return;}
+    try{commitStorySession(result.session);render();openStoryHub();}catch(error){toast(error instanceof Error?error.message:"回収を保存できません。");}
+  };
+  for(const type of reward.choices){const card=document.createElement("article");card.className="reward-card";const visual=document.createElement("div");visual.inert=true;visual.setAttribute("aria-hidden","true");visual.append(V.palettePreview(type));const button=document.createElement("button");button.type="button";button.textContent=P[type].name+" を持ち帰る";button.onclick=()=>claim(type);card.append(visual,button);host.append(card);}
+  $("#story-skip-loot").onclick=()=>claim(null);
+}
+function storyInboxPanel() {
+  if(!storySession)return;
+  openModal(`<div class="modal-inner">${modalHead("STORY INBOX","物語の回収品と支給品")}<p>手持ちが満杯でも、ここに残ります。初回合成の支給品は合成まで売却できません。</p><div id="story-inbox-list"></div><button id="story-inbox-back">作業場へ戻る</button></div>`);
+  const list=$("#story-inbox-list");
+  if(!storySession.inbox.length)list.textContent="未受取のUIはありません。支給品は編集画面の手持ちを確認してください。";
+  for(const delivery of storySession.inbox){const button=document.createElement("button");button.type="button";button.className="side-btn";button.textContent=`${P[delivery.type].name} を受け取る`;button.onclick=()=>{
+    if(!storySession)return;const result=StorySession.collectStoryDelivery(storySession,delivery.id);if(!result.ok){toast(result.error);return;}
+    try{commitStorySession(result.session);render();storyInboxPanel();}catch(error){toast(error instanceof Error?error.message:"受け取りを保存できません。");}
+  };list.append(button);}
+  $("#story-inbox-back").onclick=openStoryHub;
+}
+async function finishStoryBattle() {
+  if(!battle||!storySession||!storyMatchId)return;
+  const current=battle,settled=StorySession.settleStoryBattle(storySession,storyMatchId,current);
+  if(!settled.ok){toast(settled.error);return;}
+  if(!("summary" in settled)||!settled.summary)return;
+  try{commitStorySession(settled.session);pendingStorySettlement=null;}catch(error){
+    pendingStorySettlement=settled.session;
+    openModal(`<div class="modal-inner"><h2>対戦結果を保存できません</h2><p>${esc(error instanceof Error?error.message:"保存できません。")}</p><p>この結果はまだ画面内に保全されています。保存を再試行するか、完成した結果をJSONへ書き出してください。</p><button id="story-retry-save" class="primary">同じ結果の保存を再試行</button><button id="story-export-pending">この結果をバックアップ</button><button id="story-use-saved">保存済みの記録に戻る</button></div>`);return;
+  }
+  const summary=settled.summary;
+  pendingFusions="fusions" in settled?settled.fusions:[];
+  editor.history=[];editor.future=[];fx.update(current);document.body.classList.remove("battling");
+  audio.setMusic(summary.winner==="player"?"victory":"defeat");
+  const visitors=traffic.active?traffic.final():{player:0,enemy:0};
+  await Cer.showOutcome({win:summary.winner==="player",draw:summary.winner==="draw",round:null,you:visitors.player,foe:visitors.enemy,headline:summary.winner==="player"?"接続先から回収しました":"ページを組み直そう"});
+  if(battle!==current)return;
+  const reaction=settled.effects.some(e=>e.type==="fusion-reaction");
+  openModal(`<div class="modal-inner">${modalHead("STORY / アクセス解析",summary.winner==="player"?"回収成功":"接続から帰還")}<p>相手：${esc(summary.enemy)}</p><p>基本収入 $${summary.base} ＋ 勝利 $${summary.bonus} ＋ 収益 $${summary.income} = $${summary.total}</p>${reaction?`<p>${esc(Story.STORY_WORLD.fusion.join(" "))}</p>`:""}<p>${summary.winner==="player"?"次に持ち帰るUIを選びます。重要な記録は確実に保存されます。":"同じ段階で、配置と部品を見直せます。"}</p><button id="story-result-hub" class="primary">ジャンクの作業場へ</button><button id="story-result-editor">ページを編集する</button></div>`);
+  $("#story-result-hub").onclick=()=>{leaveBattle();openStoryHub();};
+  $("#story-result-editor").onclick=()=>leaveBattle();
+}
+
+function onlinePanel() {
+  openModal('<div id="online-feature-host"></div>');
+  $("#modal").classList.add("feature-modal");
+  const panel = mountOnlinePanel($("#online-feature-host"), { baseUrl: "/api/arena", onClose: closeModal });
+  modalFeatureDispose = panel.dispose;
+}
+async function playRaidChallenge(host: HTMLElement, blueprint: RaidBlueprint, signal: AbortSignal) {
+  const prepared = prepareRaidChallenge(run, blueprint), challenge = prepared.battle;
+  blueprint = prepared.blueprint;
+  await registerRaidBlueprint(blueprint);
+  const live = document.createElement("section"); live.className = "raid-live-battle";
+  live.innerHTML = '<h3>ページ同士の対戦</h3><p class="raid-approximation">コード解析による近似配置で対戦します</p><p class="raid-live-status" role="status"></p><div class="raid-live-pages"><div><b>あなたのページ</b><div class="raid-live-viewport"><div class="raid-live-paper" data-raid-live="player"></div></div></div><div><b>取得したページ</b><div class="raid-live-viewport"><div class="raid-live-paper" data-raid-live="enemy"></div></div></div></div>';
+  live.querySelector<HTMLElement>(".raid-approximation")!.textContent = blueprint.fidelity === "code-approximation" ? "コード解析による近似配置で対戦します" : "保存された検証用の配置で対戦します";
+  host.prepend(live);
+  const you = live.querySelector<HTMLElement>('[data-raid-live="player"]')!, foe = live.querySelector<HTMLElement>('[data-raid-live="enemy"]')!;
+  V.render(you, prepared.snapshot.owned, { side: "raid-player", theme: prepared.snapshot.page.theme, decor: R.pageDecor(prepared.snapshot) });
+  V.render(foe, createRaidEnemy(blueprint), { side: "raid-enemy", theme: "mixed" });
+  const sourceDecor = document.createElement("div");
+  renderRaidAppearance(sourceDecor, { width: 960, height: 680, background: blueprint.background, primitives: blueprint.decor });
+  Object.assign(sourceDecor.style, { position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" });
+  foe.prepend(sourceDecor);
+  const fitRaid = () => { for (const paper of [you, foe]) paper.style.setProperty("--raid-scale", String((paper.parentElement?.clientWidth ?? 400) / D.WIDTH)); };
+  const raidResize = new ResizeObserver(fitRaid); raidResize.observe(live); fitRaid();
+  const status = live.querySelector<HTMLElement>(".raid-live-status")!;
+  return new Promise<{ battleId: string; winner: import("./types.js").Winner }>((resolve, reject) => {
+    let raf = 0, last = performance.now(), accumulator = 0, finished = false;
+    const cleanup = () => { cancelAnimationFrame(raf); raidResize.disconnect(); signal.removeEventListener("abort", aborted); live.remove(); };
+    const aborted = () => { if (!finished) { finished = true; cleanup(); reject(new Error("対戦表示を閉じました。")); } };
+    signal.addEventListener("abort", aborted, { once: true });
+    if (signal.aborted) { aborted(); return; }
+    const tick = (now: number) => {
+      if (finished) return;
+      accumulator += Math.min(.1, Math.max(0, (now-last)/1000))*2; last = now;
+      while (accumulator >= .05 && !challenge.result) {
+        accumulator -= .05;
+        for (const event of challenge.step(.05)) if (event.kind === "fire") {
+          const board = event.side === "player" ? you : foe;
+          const item = board.querySelector<HTMLElement>(`[data-id="${event.id}"]`);
+          if (item) { item.classList.add("is-firing"); setTimeout(() => item.classList.remove("is-firing"), 180); }
+        }
+      }
+      status.textContent = `${challenge.elapsed.toFixed(1)}秒　あなた ${Math.ceil(challenge.player.hp)} ／ 相手 ${Math.ceil(challenge.enemy.hp)}`;
+      for (const side of [challenge.player, challenge.enemy]) for (const part of side.parts) {
+        const board = side.name === "player" ? you : foe;
+        const node = board.querySelector<HTMLElement>(`[data-id="${part.id}"]`);
+        if (!node) continue;
+        const state = challenge.states[side.name].get(part.id);
+        const targetSide = part.type === "ad_popup" ? (side.name === "player" ? challenge.enemy : challenge.player) : side;
+        const target = targetSide.parts.find(p => p.id === state?.target);
+        applyCombatFeedback(node, combatFeedback(part.type, part.charge, challenge.ticks, state, target ? P[target.type].name : "", side.shield));
+      }
+      if (!challenge.result) { raf = requestAnimationFrame(tick); return; }
+      finished = true;
+      const winner = challenge.result.winner;
+      void (winner === "player" && profileStore ? profileStore.recordRaidVictory(blueprint, prepared.battleId) : Promise.resolve())
+        .then(() => { cleanup(); resolve({ battleId: prepared.battleId, winner }); })
+        .catch((error: unknown) => { cleanup(); reject(error); });
+    };
+    raf = requestAnimationFrame(tick);
+  });
+}
+async function raidPanel(initialRequest?: RaidInitialRequest) {
+  if (!profileStore) { toast("個人コレクションの保存領域を開けないため、回収を開始できません。"); return; }
+  const store = profileStore;
+  openModal(`<div class="modal-inner">${modalHead("URL RAID", "ページを巡回する")}<div id="raid-feature-host">保存された報酬を確認しています…</div></div>`);
+  $("#modal").classList.add("feature-modal");
+  const host = $("#raid-feature-host"), controller = new AbortController();
+  modalFeatureDispose = () => controller.abort();
+  try {
+    const pending = await store.listPendingRaids();
+    if (controller.signal.aborted) return;
+    const panel = mountRaidPanel(host, {
+      onCaptured: async (blueprint,kind) => {
+        if(!storyActive||!storySession)return;
+        const sourceSession=storySession;
+        const result=await StorySession.cacheStoryAnalysis(sourceSession,blueprint,kind);
+        if(storySession!==sourceSession)throw new Error("解析中に物語の構成が変わりました。最新の構成からもう一度解析してください。");
+        if(!result.ok)throw new Error(result.error);
+        if(controller.signal.aborted)throw new Error("解析画面を閉じました。エネルギーは消費していません。");
+        commitStorySession(result.session);render();
+      },
+      onChallenge: blueprint => playRaidChallenge(host, blueprint, controller.signal),
+      onClaim: async (reward, blueprint) => {
+        try {
+          const claimRun=clone(run),writeRunProfile=!storyActive;
+          await profileWrites;
+          const result = await store.claimRaidReward(claimRun, reward, blueprint, {writeRunProfile});
+          await registerRaidBlueprint(blueprint);
+          return { ok: true as const, message: result.created ? "個人コレクションへ保存しました。メニューのコレクションから使えます。" : "このUIはコレクションへ保存済みです。" };
+        } catch (error) { return { ok: false as const, error: error instanceof Error ? error.message : "保存できませんでした。" }; }
+      },
+      onDiscard: async battleId => { try { await store.discardRaidVictory(battleId); return { ok: true as const }; } catch { return { ok: false as const, error: "報酬の状態を保存できません。" }; } },
+    }, pending[0], initialRequest);
+    modalFeatureDispose = () => { controller.abort(); panel.dispose(); };
+  } catch (error) { if (!controller.signal.aborted) host.textContent = error instanceof Error ? error.message : "保存領域を読み込めません。"; }
+}
+async function collectionPanel() {
+  if (!profileStore) { toast("コレクションを読み込めません。"); return; }
+  openModal(`<div class="modal-inner">${modalHead("COLLECTION", "持ち帰ったUI")}<p>実験室では手持ちへ追加。本編では所持済みの同じUIに外観を適用できます。</p><div id="collection-feature-host">読み込んでいます…</div></div>`);
+  const host = $("#collection-feature-host"), store = profileStore;
+  try {
+    const trophies = await store.listTrophies();
+    if (!host.isConnected) return;
+    host.replaceChildren();
+    if (!trophies.length) { host.textContent = "まだ持ち帰ったUIはありません。URLレイドで勝利すると、そのページのUIを選んで回収できます。"; return; }
+    for (const trophy of trophies) {
+      const capture = await store.getBlueprint(trophy.captureId), component = capture?.components.find(c => c.componentId === trophy.componentId);
+      if (capture) await registerRaidBlueprint(capture);
+      const section = document.createElement("section"); section.className = "collection-acquisition";
+      const title = document.createElement("h3"); title.textContent = `${P[trophy.item.type].name} · ${capture?.source.name ?? "保存されたページ"}${capture?.fidelity === "code-approximation" ? " · コード解析による近似配置" : ""}`;
+      const previewHost = document.createElement("div"); previewHost.className = "collection-preview";
+      if (component) renderRaidAppearance(previewHost, component.appearance);
+      else previewHost.textContent = "外観データがないため標準表示を使います。";
+      const action = document.createElement("button"); action.textContent = run.mode === "lab" ? "手持ちに追加" : "所持中の同じUIへ外観を適用";
+      action.onclick = () => {
+        if (battle || run.phase !== "build") { toast("編集画面に戻ってから使ってください。"); return; }
+        if (run.mode === "lab") {
+          if (run.owned.length >= D.MAX_ITEMS) { toast("手持ちがいっぱいです。コレクションのUIは失われません。空きを作ってから追加してください。"); return; }
+          closeModal();
+          if (!editor.commit(() => { const item = R.nextItem(run, trophy.item.type, null, null, trophy.item.w, trophy.item.h); Object.assign(item, { appearanceId: trophy.item.appearanceId, provenanceId: trophy.item.provenanceId }); run.owned.push(item); return true; })) { toast("編集可能な画面で追加してください。"); return; }
+        } else {
+          const matches = run.owned.filter(p => p.type === trophy.item.type);
+          const target = editor.selected().find(p => p.type === trophy.item.type) ?? (matches.length === 1 ? matches[0] : undefined);
+          if (!target && matches.length > 1) { toast("同じUIが複数あります。適用したいUIをページで選んでから、もう一度コレクションを開いてください。"); return; }
+          if (!target) { toast("本編では同じ標準UIを入手してから外観を適用できます。"); return; }
+          closeModal();
+          if (!editor.commit(() => { Object.assign(target, { appearanceId: trophy.item.appearanceId, provenanceId: trophy.item.provenanceId }); return true; })) { toast("編集可能な画面で適用してください。"); return; }
+        }
+        save(); render(); closeModal(); toast("取得したUIの外観を使えるようにしました。");
+      };
+      section.append(title, previewHost, action); host.append(section);
+    }
+  } catch (error) { host.textContent = error instanceof Error ? error.message : "コレクションを読み込めません。"; }
+}
+function overflowPanel() {
+  openModal(`<div class="modal-inner">${modalHead("REWARD INBOX", "報酬の受取箱")}<p>手持ちが満杯でも報酬はここに残ります。編集画面で空きを作ってから受け取れます。</p><div id="overflow-feature-host"></div></div>`);
+  const host = $("#overflow-feature-host"), pending = run.pendingInventory ?? [];
+  if (!pending.length) { host.textContent = "未受取の通常報酬はありません。"; return; }
+  for (const item of pending) {
+    const row = document.createElement("section"); row.className = "collection-acquisition";
+    const name = document.createElement("h3"); name.textContent = P[item.type].name;
+    const button = document.createElement("button"); button.textContent = "手持ちへ受け取る";
+    button.disabled = run.phase !== "build" || run.owned.length >= D.MAX_ITEMS;
+    button.onclick = () => {
+      closeModal();
+      if (!editor.commit(() => R.collectOverflow(run, item.id))) { toast("編集画面で手持ちに空きを作ってください。"); return; }
+      save(); render(); toast("受取箱のUIを手持ちへ追加しました。");
+    };
+    row.append(name, button); host.append(row);
+  }
+  if (run.phase !== "build") {
+    const note = document.createElement("p"); note.textContent = "本編の終了後も、未受取報酬はこの構成の書き出しに含まれます。"; host.append(note);
+  }
 }
 function modalHead(kicker: string, title: string) {
   return `<div class="modal-head"><div><div class="modal-kicker">${esc(kicker)}</div><h2>${esc(title)}</h2></div><button data-close-modal aria-label="閉じる">×</button></div>`;
@@ -1389,10 +1790,16 @@ function menu() {
     }
   })();
   openModal(`<div class="modal-inner">${modalHead("MENU", "メニュー")}<div class="menu-grid">
- <button id="m-campaign" class="${run.mode === "campaign" ? "on" : ""}"><b>▶ ラン${hasCamp ? "を続ける" : "を始める"}</b><small>8つのサイトに挑む本編</small></button>
+ <button id="m-story"><b>THE LAST BROWSER</b><small>物語とジャンクの作業場</small></button>
+ <button id="m-new-story"><b>新しい物語</b><small>旧ラン・オンラインとは別保存</small></button>
+ <button id="m-campaign" class="${run.mode === "campaign" ? "on" : ""}"><b>▶ ラン${hasCamp ? "を続ける" : "を始める"}</b><small>旧8ラウンドの遠征</small></button>
  <button id="m-new-campaign"><b>↺ 新しいラン</b><small>真っ白なページから</small></button>
  <button id="m-tutorial"><b>チュートリアル</b><small>最初から手順つきで</small></button>
  <button id="m-lab" class="${run.mode === "lab" ? "on" : ""}"><b>実験室</b><small>全UIを無料で試す</small></button>
+ <button id="m-online"><b>非同期オンライン</b><small>保存された他のプレイヤーと対戦</small></button>
+ <button id="m-raid"><b>URLレイド</b><small>ページを巡回してUIを回収</small></button>
+ <button id="m-collection"><b>個人コレクション</b><small>持ち帰ったUIを使う</small></button>
+ <button id="m-overflow"><b>報酬の受取箱</b><small>未受取 ${(run.pendingInventory ?? []).length} 個</small></button>
  <button id="m-preview"><b>◉ サイトを触ってみる</b><small>検索窓やボタンを操作</small></button>
  <button id="m-help"><b>？ 遊び方</b><small>ルールと操作</small></button>
  <button id="m-settings"><b>✎ サイト名とヘッダー</b><small>${esc(run.page.name)}</small></button></div>
@@ -1400,9 +1807,10 @@ function menu() {
    run.mode === "lab"
      ? `<div class="menu-row"><label>ページのお手本<select id="preset-select" class="select-input"><option value="">選んで読み込む</option><optgroup label="お手本">${Object.entries(D.PRESETS)
          .map(([id, p]) => `<option value="${id}">${esc(p.name)}</option>`)
-         .join("")}</optgroup><optgroup label="理想形ビルド">${BUILDS.map((b) => `<option value="${b.id}">${esc(b.name)}</option>`).join("")}</optgroup></select></label><button id="m-builds" class="side-btn">理想形ビルド図鑑・相性表</button><button id="export-button" class="side-btn">構成を書き出す</button><button id="import-button" class="side-btn">読み込む</button></div>`
+         .join("")}</optgroup><optgroup label="完成構成例">${BUILDS.map((b) => `<option value="${b.id}">${esc(b.name)}</option>`).join("")}</optgroup></select></label><button id="m-builds" class="side-btn">構成例図鑑・相性表</button></div>`
      : ""
  }
+ <div class="menu-row"><button id="export-button" class="side-btn">構成を書き出す</button><button id="import-button" class="side-btn">読み込む</button></div>
  <div class="menu-row"><label><input id="motion-setting" type="checkbox" ${fx.reduced ? "checked" : ""}> モーションを抑える</label><button id="m-sound" class="side-btn">サウンド...</button><button id="m-wm-reset" class="side-btn">ウィンドウの配置を初期化</button><button id="m-title" class="side-btn">タイトルへ戻る</button></div></div>`);
 }
 /* ---------- Lab: archetype build book + live matchup table ---------- */
@@ -1412,7 +1820,7 @@ function enemyOptions(selected: number) {
   const all = R.labEnemies().map((e, i) => [e, i] as const);
   const sites = all.filter(([e]) => !e.id.startsWith("b_"));
   const builds = all.filter(([e]) => e.id.startsWith("b_"));
-  return `<optgroup label="サイト">${sites.map(([e, i]) => opt(e, i)).join("")}</optgroup><optgroup label="理想形ビルド">${builds.map(([e, i]) => opt(e, i)).join("")}</optgroup>`;
+  return `<optgroup label="サイト">${sites.map(([e, i]) => opt(e, i)).join("")}</optgroup><optgroup label="完成構成例">${builds.map(([e, i]) => opt(e, i)).join("")}</optgroup>`;
 }
 function loadBuild(asPage?: string, asFoe?: string) {
   if (battle) return;
@@ -1453,8 +1861,8 @@ function buildBook() {
       <div class="bd-actions"><button data-build-load="${b.id}" class="side-btn bd-primary">自分のページに読み込む</button><button data-build-foe="${b.id}" class="side-btn">対戦相手にする</button></div>
     </article>`;
   }).join("");
-  openModal(`<div class="modal-inner bd">${modalHead("BUILD BOOK", "理想形ビルド図鑑")}
-    <p class="muted">各ビルドは、エンジンが知っているシナジーが<strong>全部つながる</strong>ように手で組んだ“完成形”です。読み込んで中身を触る・相手にして戦う、の両方ができます。</p>
+  openModal(`<div class="modal-inner bd">${modalHead("BUILD BOOK", "構成例図鑑")}
+    <p class="muted">配置と相性を調べるための完成構成例です。入手費用・必要な処理能力・弱点を確認して使ってください。実験室では読み込んで中身を触ることも、相手にして戦うこともできます。</p>
     <div class="bd-grid">${cards}</div>
     <h3 class="bd-h">相性表 <small>行が自分・列が相手。両者 閲覧者${Lab.MATCH_HP}・各自の管理画面つき。実際のエンジンで計算</small></h3>
     <div id="bd-matrix" class="bd-matrix"><p class="muted">計算中…</p></div>
@@ -1483,7 +1891,7 @@ function buildBook() {
 }
 function settings() {
   openModal(
-    `<div class="modal-inner">${modalHead("SITE", "サイト名とヘッダー")}<label class="field-label">サイト名<input class="text-input" id="page-name" maxlength="40" value="${esc(run.page.name)}"></label><label class="field-label">ヘッダーのデザイン<select id="page-theme" class="select-input">${[["mixed", "ごちゃ混ぜ"], ...Object.entries(D.FACTIONS).map(([k, v]) => [k, v.name + "風"])].map(([v, t]) => `<option value="${v}" ${v === run.page.theme ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label><div class="modal-footer"><button data-close-modal class="primary">閉じる</button></div></div>`,
+    `<div class="modal-inner">${modalHead("SITE", "サイト名とヘッダー")}<label class="field-label">サイト名<input class="text-input" id="page-name" maxlength="40" value="${esc(run.page.name)}"></label><label class="field-label">ヘッダーのデザイン<select id="page-theme" class="select-input">${[["mixed", "ごちゃ混ぜ"], ...Object.entries(D.FACTIONS).map(([k, v]) => [k, v.name.endsWith("風") ? v.name : v.name + "風"])].map(([v, t]) => `<option value="${v}" ${v === run.page.theme ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label><div class="modal-footer"><button data-close-modal class="primary">閉じる</button></div></div>`,
   );
 }
 function resultModal(s: BattleSummary) {
@@ -1543,6 +1951,7 @@ function finishModal() {
 /* ---------- Battle ---------- */
 async function start() {
   if (battle) return;
+  if (storyActive && storySession && (storySession.reward || storySession.story.phase !== "hub" || !Story.currentStoryEncounter(storySession.story) || run.lives <= 0)) { openStoryHub(); return; }
   if (run.phase === "reward") {
     rewardModal();
     return;
@@ -1553,11 +1962,17 @@ async function start() {
   }
   preBattle = clone(run);
   save();
-  const result = R.startBattle(run);
+  const matchId = storyActive ? crypto.randomUUID() : null;
+  const storyPrepared = storyActive && storySession && matchId ? StorySession.prepareStoryBattle(storySession, matchId) : null;
+  const result = storyPrepared ?? labBattleController.start(run, storyActive);
   if (!result.ok) {
     toast(result.error);
     preBattle = null;
     return;
+  }
+  if (storyPrepared?.ok) {
+    try { commitStorySession(storyPrepared.session); } catch (error) { toast(error instanceof Error ? error.message : "保存できません。"); preBattle=null; return; }
+    storyMatchId=matchId; storyBattleEncounter=storyPrepared.encounter; run.phase="battle"; closeModal();
   }
   battle = result.battle;
   settling = false;
@@ -1582,13 +1997,13 @@ async function start() {
   audio.setIntensity(0.2);
   await Cer.showPublish(publishLog());
   if (battle !== current) return;
-  await Cer.showVersus({
-    round: R.opponent(run).round,
+  if (!storyActive) await Cer.showVersus({
+    round: appOpponent().round,
     totalRounds: R.ROUNDS,
     you: siteCardYou(),
     foe: siteCardFoe(),
-    foeTip: R.opponent(run).tip,
-    isBoss: R.opponent(run).round === R.ROUNDS,
+    foeTip: appOpponent().tip,
+    isBoss: appOpponent().round === R.ROUNDS,
   });
   if (battle !== current) return;
   audio.sfx("versus");
@@ -1624,6 +2039,12 @@ function tick(now: number) {
 }
 function abort() {
   if (!battle || battle.result) return;
+  if (storyActive && storySession && storyMatchId) {
+    const cancelled=StorySession.commandStorySession(storySession,{type:"cancel-encounter",matchId:storyMatchId});
+    if (!cancelled.ok) { toast(cancelled.error); return; }
+    try { commitStorySession(cancelled.session); } catch(error) { toast(error instanceof Error ? error.message : "保存できません。"); return; }
+    preBattle=clone(run); storyMatchId=null; storyBattleEncounter=null;
+  }
   battle = null;
   settling = false;
   fx.clear();
@@ -1639,6 +2060,7 @@ function abort() {
 }
 async function finishBattle() {
   if (!battle) return;
+  if (storyActive && storySession && storyMatchId) { await finishStoryBattle(); return; }
   const visitors = traffic.active
     ? { ...traffic.final(), base: traffic.base.enemy, max: battle.enemy.maxHp }
     : null;
@@ -1670,11 +2092,13 @@ async function finishBattle() {
   resultModal(s);
 }
 function leaveBattle() {
+  if (pendingStorySettlement) return;
   const advanced =
-    !!battle && run.mode === "campaign" && run.stage !== battleStage;
+    !!battle && !storyActive && run.mode === "campaign" && run.stage !== battleStage;
   battle = null;
   settling = false;
   preBattle = null;
+  storyMatchId = null; storyBattleEncounter = null;
   fx.clear();
   traffic.stop();
   particles.clear();
@@ -1689,33 +2113,38 @@ function leaveBattle() {
   else celebrateFusions();
 }
 function exportFile() {
-  const copy = clone(run);
+  const copy = pendingStorySettlement ? clone(pendingStorySettlement) : storyActive && storySession ? clone(storySession) : clone(run);
   const blob = new Blob([JSON.stringify(copy, null, 2)], {
       type: "application/json",
     }),
     url = URL.createObjectURL(blob),
     a = document.createElement("a");
   a.href = url;
-  a.download = "ui-raid-page.json";
+  a.download = storyActive ? "the-last-browser-story.json" : "ui-raid-page.json";
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast("構成JSONを書き出しました。");
+  toast("構成JSONを書き出しました。取得元の画像・外観データは含まれず、別の端末では標準表示になる場合があります。");
 }
 async function importFile(file: File | undefined) {
   if (!file) return;
   try {
     if (file.size > 300000) throw new Error("構成ファイルが大きすぎます。");
     const parsed: unknown = JSON.parse(await file.text());
+    if (storyActive) {
+      if (!StorySession.validateStorySession(parsed)) throw new Error("物語専用の保存JSONを選んでください。旧ランの構成は旧ランから読み込めます。");
+      commitStorySession(parsed); editor.reset(); preview=false; view="self"; render(); openStoryHub(); return;
+    }
     if (!R.validateRun(parsed))
       throw new Error("このバージョンの有効な構成JSONではありません。");
     save();
     run = parsed;
+    labBattleController.reset();
     editor.reset();
     preview = false;
     view = "self";
     save();
     render();
-    toast("構成を読み込みました。");
+    toast("構成を読み込みました。取得外観がこの端末にないUIは標準表示になります。");
   } catch (e) {
     toast(e instanceof Error ? e.message : "読み込めませんでした。");
   }
@@ -1724,6 +2153,8 @@ async function importFile(file: File | undefined) {
 function switchMode(mode: Mode, fresh = false, tutorial = !tutorialDone()) {
   if (battle) return;
   save();
+  storyActive=false; storyMatchId=null; storyBattleEncounter=null;
+  labBattleController.reset();
   run = fresh
     ? R.newRun(mode, "mixed", { tutorial: mode === "campaign" && tutorial })
     : load(mode);
@@ -1755,11 +2186,7 @@ function buildSnap(): BuildSnap {
   const info = E.analyze(run.owned);
   return {
     groups: new Set(info.groups.map((g) => g.id)),
-    sets: new Set(
-      Object.entries(info.counts)
-        .filter(([, n]) => n >= 3)
-        .map(([f]) => f),
-    ),
+    sets: new Set(activeFactionSets(info).map(set => set.faction)),
     nested: new Set(Object.keys(info.parents)),
     cash: run.cash,
     owned: run.owned.length,
@@ -1892,12 +2319,12 @@ function audioSettings() {
 function publishLog(): Cer.PublishLine[] {
   const info = E.analyze(run.owned),
     cap = R.capacity(run),
-    o = R.opponent(run),
+    o = appOpponent(),
     lab = run.mode === "lab",
     groups = [...new Set(info.groups.map((g) => E.groupNames[g.kind]))],
-    sets = info.sets.map((x) => `${D.FACTIONS[x.faction as Faction].name}×${x.count}`),
+    sets = activeFactionSets(info).map((x) => `${D.FACTIONS[x.faction as Faction].name}×${x.count}`),
     fusions = R.fusionPairs(run.owned),
-    score = Math.min(99, 38 + info.groups.length * 9 + info.sets.length * 14 + info.relations.length * 2),
+    score = Math.min(99, 38 + info.groups.length * 9 + sets.length * 14 + info.relations.length * 2),
     slug = run.page.name.replace(/\s/g, "-");
   const lines: Cer.PublishLine[] = [
     { kind: "cmd", text: `raid publish ./${slug} --target ${o.address}` },
@@ -1924,9 +2351,8 @@ function publishLog(): Cer.PublishLine[] {
 function siteCardYou(): Cer.SiteCard {
   const info = E.analyze(run.owned),
     cap = R.capacity(run),
-    sets = Object.entries(info.counts)
-      .filter(([, n]) => n >= 3)
-      .map(([f]) => D.FACTIONS[f as Faction].name + " セット");
+    sets = activeFactionSets(info)
+      .map(({ faction }) => D.FACTIONS[faction as Faction].name + " セット");
   return {
     name: run.page.name,
     url: "local://" + run.page.name.replace(/\s/g, "-"),
@@ -1943,7 +2369,7 @@ function siteCardYou(): Cer.SiteCard {
   };
 }
 function siteCardFoe(): Cer.SiteCard {
-  const o = R.opponent(run);
+  const o = appOpponent();
   return {
     name: o.pageName,
     url: o.address,
@@ -1991,7 +2417,7 @@ async function roundIntro() {
     lives: run.lives,
     cash: run.cash,
     capacity: R.capacity(run),
-    tip: R.opponent(run).tip,
+    tip: appOpponent().tip,
   });
 }
 function battleSfx(ev: { kind: string; [k: string]: unknown }, b: Battle) {
@@ -2073,6 +2499,7 @@ function showTitleScreen() {
       audio.unlock();
       if (!intro) audio.setMusic("title");
     },
+    onStory: () => enter(() => enterStory()),
     onContinue: () => enter(() => switchMode("campaign")),
     onNewRun: () => enter(() => switchMode("campaign", true)),
     onTutorial: () => enter(() => switchMode("campaign", true, true)),
@@ -2083,6 +2510,15 @@ function showTitleScreen() {
     },
   });
 }
+function previewVideoComment(form: HTMLFormElement | null) {
+  if (!form || !preview || battle) return;
+  const source=form.closest<HTMLElement>(".web-node"),id=source?.dataset.id;
+  const info=E.analyze(run.owned);
+  const target=id?run.owned.find(item=>(info.near[id]??[]).includes(item.id)&&P[item.type].tags.includes("video")&&P[item.type].kind==="attack"):undefined;
+  if(!target){toast("近くに動画プレイヤーを置くと、コメントが動画の上を流れます（ページ内の操作デモ）。");return;}
+  const node=document.querySelector<HTMLElement>(`#player-body .web-node[data-id="${target.id}"]`);
+  fx.comment(node,form.querySelector("input")?.value||"ここ好き");
+}
 function previewAction(e: MouseEvent) {
   if (!(e.target instanceof Element)) return;
   const act = e.target.closest<HTMLElement>("[data-ui]"),
@@ -2091,9 +2527,23 @@ function previewAction(e: MouseEvent) {
   if (act.tagName === "A") e.preventDefault();
   if (!preview || battle) return;
   const node = act.closest<HTMLElement>(".web-node");
+  if (storyActive && storySession && node?.dataset.id === storySession.endingLinkId) {
+    const visited=StorySession.commandStorySession(storySession,{type:"visit-restored-page"});
+    if (visited.ok) { try { commitStorySession(visited.session); openStoryHub(); } catch(error) { toast(error instanceof Error ? error.message : "保存できません。"); } }
+    return;
+  }
   if (node) fx.pulse(node);
+  if(previewCatalogueAction(act,node))return;
   const kind = act.dataset.ui ?? "";
-  if (kind === "subscribe") {
+  if (kind === "vote-up" || kind === "vote-down") {
+    const group=act.closest<HTMLElement>(".native-vote-column"),selected=act.getAttribute("aria-pressed")==="true";
+    group?.querySelectorAll("button[data-ui]").forEach(button=>button.setAttribute("aria-pressed","false"));
+    act.setAttribute("aria-pressed",String(!selected));
+    const score=group?.querySelector<HTMLElement>(".vote-score");
+    if(score){const base=Number(score.dataset.previewBase??score.textContent??128);score.dataset.previewBase=String(base);score.textContent=String(base+(selected?0:kind==="vote-up"?1:-1));}
+  } else if (kind === "comment" && act.tagName === "BUTTON") {
+    previewVideoComment(act.closest("form"));
+  } else if (kind === "subscribe") {
     act.textContent =
       act.textContent === "登録済み" ? "メンバーになる" : "登録済み";
     act.classList.toggle("is-on");
@@ -2142,6 +2592,7 @@ document.addEventListener("click", (e) => {
   if (target.dataset.editorAction) {
     const a = target.dataset.editorAction;
     if (a === "horizontal" || a === "vertical") editor.join(a);
+    else if (a === "remove" && storyActive && storySession && editor.selected().some(item=>storySession!.protectedKitIds.includes(item.id) || (storySession!.story.phase!=="complete"&&item.id===storySession!.endingLinkId))) toast("物語で使うこのUIは、合成や最初の訪問が終わるまで残してください。");
     else if (a === "stash" || a === "remove") editor[a]();
     return;
   }
@@ -2218,6 +2669,8 @@ document.addEventListener("click", (e) => {
       toast(
         out.admin
           ? `管理画面に「${D.ADMIN[out.admin].name}」を導入しました。`
+          : out.pending
+            ? "手持ちが満杯のため、報酬を受取箱に保存しました。メニューから受け取れます。"
           : out.item
             ? `「${P[out.item.type].name}」を手持ちに加えました。ページにドラッグして使おう。`
             : `ROUND ${run.stage + 1} へ。`,
@@ -2225,6 +2678,22 @@ document.addEventListener("click", (e) => {
     return;
   }
   switch (target.id) {
+    case "m-story":
+      enterStory(); break;
+    case "m-new-story":
+      if(window.confirm("物語の現在の旅を、新しい白紙のページで始め直しますか？旧ランとオンラインはそのままです。"))enterStory(true); break;
+    case "story-hub-button":
+      if(!battle)openStoryHub(); break;
+    case "story-use-saved": {
+      if(!pendingStorySettlement||!window.confirm("未保存のこの対戦結果を破棄して、保存されている記録に戻りますか？必要なら先に結果をバックアップしてください。"))break;
+      const latest=storyPersistence.load();
+      if(latest.status!=="loaded"){toast("保存済みの記録を確認できないため、この結果を保全しています。");break;}
+      pendingStorySettlement=null;storySession=clone(latest.session);run=clone(latest.session.run);leaveBattle();openStoryHub();break;
+    }
+    case "story-export-pending":
+      exportFile(); break;
+    case "story-retry-save":
+      void finishStoryBattle(); break;
     case "menu-button":
       menu();
       break;
@@ -2273,10 +2742,14 @@ document.addEventListener("click", (e) => {
       renderCoach();
       break;
     case "reroll-button":
-      editor.commit(() => R.reroll(run));
+      if (storyActive && storySession) { const rolled=StorySession.rerollStoryMarket(storySession); if(rolled.ok){try{commitStorySession(rolled.session);render();}catch(error){toast(error instanceof Error?error.message:"保存できません。");}}else toast(rolled.error); }
+      else editor.commit(() => R.reroll(run));
       break;
     case "export-button":
       exportFile();
+      break;
+    case "toggle-fusion-lock":
+      editor.commit(() => { const item = editor.selected()[0]; if (!item) return false; item.fusionLocked = !item.fusionLocked; return true; });
       break;
     case "import-button":
       $<HTMLInputElement>("#import-file").click();
@@ -2321,6 +2794,18 @@ document.addEventListener("click", (e) => {
       break;
     case "m-lab":
       switchMode("lab");
+      break;
+    case "m-online":
+      onlinePanel();
+      break;
+    case "m-raid":
+      void raidPanel();
+      break;
+    case "m-collection":
+      void collectionPanel();
+      break;
+    case "m-overflow":
+      if(storyActive)storyInboxPanel(); else overflowPanel();
       break;
     case "m-builds":
     case "open-builds":
@@ -2395,7 +2880,7 @@ document.addEventListener("change", (e) => {
       const stage = run.stage,
         fresh = R.newRun("lab", id);
       fresh.stage = stage;
-      fresh.admin = run.admin || [];
+      if (!fresh.page.templateId) fresh.admin = run.admin || [];
       const build = BUILDS.find((b) => b.id === id);
       if (build) {
         fresh.admin = [...build.admin];
@@ -2459,6 +2944,7 @@ document.addEventListener("submit", (e) => {
   if (!(e.target instanceof HTMLFormElement)) return;
   if (e.target.closest(".browser-paper")) {
     e.preventDefault();
+    if(e.target.matches(".native-comment-input")){previewVideoComment(e.target);return;}
     if (preview)
       toast(
         "「" +
@@ -2485,7 +2971,8 @@ document.addEventListener("keydown", (e) => {
     $("#pause-button").click();
   }
 });
-$<HTMLDialogElement>("#modal").addEventListener("cancel", () => {
+$<HTMLDialogElement>("#modal").addEventListener("cancel", (event) => {
+  if (pendingStorySettlement) { event.preventDefault(); return; }
   if (battle?.result) setTimeout(leaveBattle, 0);
 });
 new ResizeObserver(scheduleFit).observe($("#canvas-scroll"));
@@ -2494,6 +2981,8 @@ window.addEventListener("beforeunload", save);
 const appInspector = Object.freeze({
   inspect: () => ({
     run: clone(run),
+    story: storyActive && storySession ? clone(storySession.story) : null,
+    storyProfile: storyActive && storySession ? clone(storySession) : null,
     view,
     preview,
     selected: [...editor.selection],
@@ -2522,6 +3011,13 @@ if (
   !run.tutorial
 )
   run = R.newRun("campaign", "mixed", { tutorial: true });
+for (const [id, faction] of Object.entries(D.FACTIONS)) {
+  if (!Object.values(P).some(part => part.faction === id)) continue;
+  const select = $<HTMLSelectElement>("#family-filter");
+  if (![...select.options].some(option => option.value === id)) {
+    const option = document.createElement("option"); option.value = id; option.textContent = faction.name; select.append(option);
+  }
+}
 render();
 save();
 resetBuildSnap();

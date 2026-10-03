@@ -1,0 +1,413 @@
+import D from "../data.js";
+import { createRaidCaptureSession } from "./capture.js";
+import { createRaidEncounterController } from "./encounter.js";
+import { createFixtureRaid, listRaidFixtures } from "./fixtures.js";
+import { renderRaidScene } from "./render.js";
+import { verifyRaidBlueprint } from "./blueprint.js";
+import { normalizePublicPageUrl } from "./url.js";
+import type {
+  RaidBlueprint,
+  RaidPanelCallbacks,
+  RaidResume,
+  RaidInitialRequest,
+} from "./types.js";
+
+const REFERENCES: Record<string, string> = {
+  archive: new URL("../../fixtures/raid/archive.html", import.meta.url).href,
+  commerce: new URL("../../fixtures/raid/commerce.html", import.meta.url).href,
+};
+/** The panel never mutates a run or writes a receipt; integration callbacks own those transactions. */
+export function mountRaidPanel(
+  host: HTMLElement,
+  callbacks: RaidPanelCallbacks,
+  resume?: RaidResume,
+  initialRequest?: RaidInitialRequest,
+): { dispose(): void } {
+  const doc = host.ownerDocument;
+  const make = <K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    className = "",
+    value = "",
+  ): HTMLElementTagNameMap[K] => {
+    const el = doc.createElement(tag);
+    el.className = className;
+    el.textContent = value;
+    return el;
+  };
+  const button = (label: string, className = "") => {
+    const el = make("button", className, label);
+    el.type = "button";
+    return el;
+  };
+  const encounter = createRaidEncounterController(callbacks),
+    capture = createRaidCaptureSession();
+  let disposed = false,
+    loading = false,
+    saving = false,
+    generation = 0,
+    view: "reconstructed" | "reference" = "reconstructed",
+    claimedComponent = "";
+  host.replaceChildren();
+  host.classList.add("raid-panel");
+  const heading = make("div", "raid-heading");
+  heading.append(
+    make("span", "raid-eyebrow", "URL RAID"),
+    make("h2", "", "ページと戦い、そのUIを持ち帰る"),
+  );
+  const description = make(
+    "p",
+    "raid-description",
+    "公開HTMLのタグ・名前・限定したCSSから、対戦できるページを近似再構成します。現在は公開テストページのURLに対応しています。",
+  );
+  const form = make("form", "raid-url-form"),
+    input = make("input");
+  input.type = "url";
+  input.placeholder = "https://example.com/";
+  input.setAttribute("aria-label", "取得する公開ページのURL");
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  const load = button("公開ページを取得", "raid-action"),
+    cancel = button("取得を中止", "raid-subtle");
+  load.type = "submit";
+  cancel.hidden = true;
+  form.append(input, load, cancel);
+  const fixtureBar = make("div", "raid-fixtures");
+  fixtureBar.append(make("span", "", "付属の検証用ページ"));
+  const fixtureButtons: HTMLButtonElement[] = [];
+  const publicTest = button("Booksを近似再構成");
+  publicTest.addEventListener("click", () => {
+    input.value = "https://books.toscrape.com/";
+    void beginCapture();
+  });
+  fixtureButtons.push(publicTest);
+  fixtureBar.append(publicTest);
+  const status = make("p", "raid-status", "付属ページを読み込んでいます。");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  const tabs = make("div", "raid-tabs"),
+    reconstruction = button("戦闘用に再構成", "is-selected"),
+    reference = button("静的ページと比較");
+  tabs.append(reconstruction, reference);
+  const meta = make("p", "raid-meta"),
+    viewport = make("div", "raid-viewport"),
+    canvas = make("div", "raid-canvas");
+  viewport.append(canvas);
+  const details = make("div", "raid-mapping"),
+    actions = make("div", "raid-actions"),
+    challenge = button("このページに挑戦", "raid-action"),
+    skip = button("今回は回収を見送る", "raid-subtle");
+  skip.hidden = true;
+  actions.append(challenge, skip);
+  const privacy = make(
+    "p",
+    "raid-privacy",
+    "取得した外観と由来は個人コレクションに保存。非同期対戦では相手に標準の見た目を表示します。JSON書き出しに画像は含まれません。",
+  );
+  host.append(
+    heading,
+    description,
+    form,
+    fixtureBar,
+    status,
+    tabs,
+    meta,
+    viewport,
+    details,
+    actions,
+    privacy,
+  );
+  const say = (message: string, error = false) => {
+    if (disposed) return;
+    status.textContent = message;
+    status.classList.toggle("is-error", error);
+  };
+  const fit = () => {
+    if (!disposed) {
+      canvas.style.transform = `scale(${Math.max(0.1, viewport.clientWidth / 960)})`;
+      viewport.style.height = `${(viewport.clientWidth * 680) / 960}px`;
+    }
+  };
+  const resize =
+    typeof ResizeObserver === "function" ? new ResizeObserver(fit) : null;
+  resize?.observe(viewport);
+  const sync = () => {
+    const state = encounter.state,
+      locked = saving || ["battling", "claiming", "won"].includes(state.phase);
+    load.disabled = locked;
+    input.disabled = locked;
+    fixtureButtons.forEach((b) => (b.disabled = locked));
+    challenge.disabled =
+      loading ||
+      !state.blueprint ||
+      !["ready", "lost", "claimed"].includes(state.phase);
+    challenge.textContent =
+      state.phase === "battling" ? "対戦中…" : "このページに挑戦";
+    skip.hidden = state.phase !== "won" || !callbacks.onDiscard;
+    cancel.hidden = !loading || saving;
+    reconstruction.classList.toggle("is-selected", view === "reconstructed");
+    reference.classList.toggle("is-selected", view === "reference");
+  };
+  const draw = () => {
+    if (disposed) return;
+    const state = encounter.state,
+      b = state.blueprint;
+    sync();
+    if (!b) return;
+    meta.textContent = `${b.source.name}  ·  ${b.fidelity === "code-approximation" ? "コード解析による近似配置" : b.source.kind === "fixture" ? "付属の検証用ページ" : "静的取得"}  ·  ${b.components.length}個の戦闘UI  ·  960×680`;
+    details.replaceChildren();
+    for (const c of b.components) {
+      const def = D.PARTS[c.canonicalType];
+      details.append(make("span", "", `${def.name} / CPU ${def.load}`));
+    }
+    reference.disabled = b.source.kind !== "fixture";
+    reference.textContent =
+      b.source.kind === "fixture"
+        ? "静的ページと比較"
+        : "元サイトの比較画像は未取得";
+    canvas.replaceChildren();
+    if (view === "reference" && b.source.kind === "fixture") {
+      const key = b.source.displayUrl.replace("fixture://", ""),
+        src = REFERENCES[key];
+      if (src) {
+        const frame = make("iframe", "raid-reference");
+        frame.title = `${b.source.name}の付属静的ページ`;
+        frame.setAttribute("sandbox", "");
+        frame.src = src;
+        frame.width = "960";
+        frame.height = "680";
+        canvas.append(frame);
+      }
+    } else {
+      const scene = make("div");
+      renderRaidScene(scene, b);
+      canvas.append(scene);
+      for (const item of scene.querySelectorAll<HTMLElement>(
+        "[data-component-id]",
+      )) {
+        if (state.phase === "won") {
+          item.classList.add("raid-loot-ready");
+          item.tabIndex = 0;
+          item.setAttribute("role", "button");
+          item.setAttribute(
+            "aria-label",
+            `${D.PARTS[item.dataset.canonicalType!].name}${b.fidelity === "code-approximation" ? "（近似再構成のUI）" : ""}を回収`,
+          );
+        }
+        if (
+          state.phase === "claimed" &&
+          item.dataset.componentId === claimedComponent
+        ) {
+          item.classList.add("raid-claimed");
+          item.setAttribute("aria-label", "回収済みのUI");
+        }
+      }
+    }
+    fit();
+  };
+  const select = async (blueprint: RaidBlueprint) => {
+    const result = await encounter.select(blueprint);
+    if (disposed) return;
+    if (result.ok) {
+      view = "reconstructed";
+      claimedComponent = "";
+      say(blueprint.warnings.join(" "));
+      draw();
+    } else say(result.error, true);
+  };
+  const fixture = async (id: string) => {
+    capture.cancel();
+    loading = false;
+    const mine = ++generation;
+    sync();
+    try {
+      const b = await createFixtureRaid(id);
+      if (!disposed && mine === generation) await select(b);
+    } catch (error) {
+      say(
+        error instanceof Error
+          ? error.message
+          : "付属ページを読み込めませんでした。",
+        true,
+      );
+    }
+  };
+  for (const item of listRaidFixtures()) {
+    const b = button(item.name);
+    b.dataset.raidFixture = item.id;
+    b.addEventListener("click", () => void fixture(item.id));
+    fixtureButtons.push(b);
+    fixtureBar.append(b);
+  }
+  const stop = () => {
+    if (saving) return;
+    capture.cancel();
+    generation++;
+    loading = false;
+    say("取得を中止しました。選択中のページは変更していません。");
+    sync();
+  };
+  const beginCapture = async (kind: "new" | "reanalyze" = "new") => {
+    if (
+      saving ||
+      ["battling", "won", "claiming"].includes(encounter.state.phase)
+    )
+      return;
+    const mine = ++generation;
+    loading = true;
+    say("公開HTMLを取得し、タグ・名前・CSSから近似再構成しています。");
+    sync();
+    const result = await capture.capture(input.value);
+    if (disposed || mine !== generation) return;
+    if (result.ok) {
+      try {
+        if (callbacks.onCaptured) {
+          saving = true;
+          say("取得したページを保存しています。");
+          sync();
+          await callbacks.onCaptured(structuredClone(result.value), kind);
+        }
+        if (!disposed && mine === generation) await select(result.value);
+      } catch (error) {
+        if (!disposed && mine === generation)
+          say(
+            error instanceof Error
+              ? error.message
+              : "取得したページを保存できませんでした。",
+            true,
+          );
+      } finally {
+        saving = false;
+      }
+    } else say(result.error, result.code !== "cancelled");
+    loading = false;
+    sync();
+  };
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    void beginCapture();
+  });
+  cancel.addEventListener("click", stop);
+  input.addEventListener("input", () => {
+    if (loading) stop();
+  });
+  reconstruction.addEventListener("click", () => {
+    view = "reconstructed";
+    draw();
+  });
+  reference.addEventListener("click", () => {
+    view = "reference";
+    draw();
+  });
+  challenge.addEventListener("click", async () => {
+    capture.cancel();
+    loading = false;
+    generation++;
+    view = "reconstructed";
+    claimedComponent = "";
+    const promise = encounter.challenge();
+    sync();
+    say("現在のビルドのコピーで対戦しています。");
+    const result = await promise;
+    if (disposed) return;
+    say(result.ok ? encounter.state.message : result.error, !result.ok);
+    draw();
+  });
+  skip.addEventListener("click", async () => {
+    const promise = encounter.discard();
+    sync();
+    const result = await promise;
+    if (disposed) return;
+    say(result.ok ? encounter.state.message : result.error, !result.ok);
+    draw();
+  });
+  const claim = async (id: string) => {
+    const promise = encounter.claim(id);
+    sync();
+    const result = await promise;
+    if (disposed) return;
+    if (result.ok) claimedComponent = id;
+    say(result.ok ? encounter.state.message : result.error, !result.ok);
+    draw();
+  };
+  canvas.addEventListener("click", (e) => {
+    const target =
+      e.target instanceof Element
+        ? e.target.closest<HTMLElement>("[data-component-id]")
+        : null;
+    if (target && encounter.state.phase === "won")
+      void claim(target.dataset.componentId!);
+  });
+  canvas.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const target =
+      e.target instanceof Element
+        ? e.target.closest<HTMLElement>("[data-component-id]")
+        : null;
+    if (target && encounter.state.phase === "won") {
+      e.preventDefault();
+      void claim(target.dataset.componentId!);
+    }
+  });
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === "Escape" && loading) {
+      e.preventDefault();
+      stop();
+    }
+  };
+  doc.addEventListener("keydown", onKey);
+  const beginInitial = async (request: RaidInitialRequest) => {
+    if (
+      typeof request.url !== "string" ||
+      !["new", "cached", "reanalyze"].includes(request.kind)
+    ) {
+      say("巡回のURLまたは取得方法が正しくありません。", true);
+      return;
+    }
+    input.value = request.url;
+    if (request.kind !== "cached") {
+      await beginCapture(request.kind);
+      return;
+    }
+    const mine = ++generation;
+    const url = normalizePublicPageUrl(request.url);
+    if (!url.ok) {
+      say(url.error, true);
+      return;
+    }
+    if (!request.cachedBlueprint) {
+      say("保存済みのページがありません。新規取得を選んでください。", true);
+      return;
+    }
+    const verified = await verifyRaidBlueprint(request.cachedBlueprint);
+    if (disposed || mine !== generation) return;
+    if (
+      !verified.ok ||
+      verified.value.source.kind !== "static-public" ||
+      verified.value.source.displayUrl !== new URL(url.value).origin + "/"
+    ) {
+      say("保存済みのページと指定URLの一致を確認できませんでした。", true);
+      return;
+    }
+    await select(verified.value);
+  };
+  sync();
+  if (resume) {
+    void encounter.restore(resume).then((result) => {
+      if (disposed) return;
+      say(result.ok ? encounter.state.message : result.error, !result.ok);
+      draw();
+    });
+  } else if (initialRequest) void beginInitial(initialRequest);
+  else void fixture("archive");
+  return {
+    dispose() {
+      if (disposed) return;
+      disposed = true;
+      generation++;
+      capture.cancel();
+      encounter.dispose();
+      resize?.disconnect();
+      doc.removeEventListener("keydown", onKey);
+    },
+  };
+}

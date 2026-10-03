@@ -1,0 +1,17 @@
+/* Flat ranked-news chrome; every collected control keeps its native silhouette. */
+.site-theme-rankednews .site-header{padding:0 24px;gap:28px;background:#d98341;border-bottom:1px solid #bb6e32;color:#30271e}
+.ranked-word{display:flex;align-items:center;gap:9px;font:700 21px/1 Arial,sans-serif;white-space:nowrap}
+.ranked-word>i{display:grid;place-items:center;box-sizing:border-box;width:26px;height:26px;border:1px solid #ffefd9;font:22px/1 Georgia,serif;color:#ffefd9}
+.ranked-word small{display:block;margin-top:6px;font:8px/1.2 Arial,sans-serif;color:#3e2c20}
+.site-theme-rankednews .site-header nav{font:11px Arial,sans-serif;white-space:nowrap}.site-theme-rankednews .site-header nav>span{padding:0 5px;color:#744723}
+.ranked-local{margin-left:auto;font:8px Arial,sans-serif;color:#49311f}
+.site-theme-rankednews .page-body{background:#f6f5ee}.site-theme-rankednews .site-footer{background:#eee9dc;color:#6a6456}
+.ranked-context{height:100%;display:flex;align-items:center;gap:20px;box-sizing:border-box;border-bottom:1px solid #ddd7c7;font:10px Arial,sans-serif;color:#645d50}
+.ranked-context>b{font-size:11px;font-weight:500;color:#464137}.ranked-context>small{margin-left:auto;font-size:8px}
+.ranked-number{display:block;height:100%;text-align:right;box-sizing:border-box;padding:3px 3px 0 0;font:13px/18px Arial,sans-serif;color:#726b5e}
+.ranked-meta{height:100%;display:flex;align-items:center;gap:9px;font:9px/16px Arial,sans-serif;color:#6f695e;white-space:nowrap;overflow:hidden}
+.ranked-meta>small{font-size:8px;color:#797061;margin-left:8px}
+.ranked-more-note{display:block;font:9px/24px Arial,sans-serif;color:#6d6658;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ranked-discussion-heading{box-sizing:border-box;display:flex;align-items:center;gap:20px;height:100%;margin:0;border-top:1px solid #d8d1c0;font:10px/20px Arial,sans-serif;color:#4f493d}
+.ranked-discussion-heading>small{font-size:8px;color:#716757}
+.ranked-disclaimer{display:block;font:8px/20px Arial,sans-serif;color:#6d6251;white-space:nowrap}

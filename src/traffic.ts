@@ -1,5 +1,5 @@
-/* Shared visitors: ~100 cursors flow between the two pages. A page's visitor count mirrors its integrity,
-   so the engine stays authoritative while the battle reads as a tug-of-war over people. */
+/* Cursor counts are a scaled animation of each page's HP ratio, not additional combat HP.
+   The engine alone owns damage, healing, resources and battle outcomes. */
 import type Effects from "./effects.js";
 import type { Battle } from "./engine.js";
 import type { BattleEvent, SideName, BattleSide } from "./types.js";
@@ -160,7 +160,7 @@ class Traffic {
   isBlock(type: string | undefined) {
     return type != null && Object.hasOwn(BLOCK, type);
   }
-  // Structure is rewarded with audience: every composite and nested component brings more visitors.
+  // Composition changes the density of this cursor animation; it grants no combat HP.
   start(battle: Battle) {
     this.stop();
     this.battle = battle;
@@ -176,21 +176,15 @@ class Traffic {
       const info = battle[side].info,
         groups = info.groups.length,
         nested = Object.keys(info.parents).length,
-        b = Math.min(8, groups) * 5 + Math.min(6, nested) * 2,
-        sns = battle[side].admin.has("sns") ? 10 : 0;
-      this.base[side] = Math.min(104, 44 + b + sns);
+        b = Math.min(8, groups) * 5 + Math.min(6, nested) * 2;
+      this.base[side] = Math.min(104, 44 + b);
       if (b)
         this.fx.log(
           side,
-          `導線ボーナス <em class="inc">+${b}人</em>（連結 ${groups}・内包 ${nested}）`,
+          `カーソルの演出密度 +${b}（連結 ${groups}・内包 ${nested}。戦闘HPへの加算なし）`,
           0,
         );
-      if (sns)
-        this.fx.log(
-          side,
-          '<span class="log-admin">管理画面</span> SNS運用 <em class="inc">+10人</em>',
-          0,
-        );
+
       if (battle[side].bots)
         this.fx.log(
           side,
@@ -867,7 +861,7 @@ class Traffic {
     const st = s.adminState;
     switch (id) {
       case "server":
-        return `負荷 ${Math.round(100 - (100 * s.hp) / s.maxHp)}%（上限 +25%）`;
+        return `閲覧者HP ${Math.round(s.hp * 100) / 100} / ${s.maxHp}（最大HP +25%）`;
       case "cdn":
         return `軽減 ${Math.round(st.cdn || 0)}`;
       case "backup":
@@ -879,7 +873,7 @@ class Traffic {
       case "adnet":
         return `収益 ×1.5　$${s.income}`;
       case "sns":
-        return `SNS流入 +${Math.round(((st.sns || 0) / s.maxHp) * this.base[s.name]) + (s.admin.has("sns") ? 10 : 0)}人`;
+        return `累計回復 ${Math.round((st.sns || 0) * 100) / 100} 閲覧者HP（初回3秒・以降5秒ごと）`;
       case "sakura":
         return st.exposed
           ? "⚠ ステマ発覚・炎上"
@@ -914,11 +908,17 @@ class Traffic {
         const id = w.dataset.admin,
           mt = w.querySelector(".aw-metric");
         if (mt) mt.textContent = this.metric(id, s);
-        if (id === "server")
-          w.style.setProperty(
-            "--load",
-            Math.round(100 - (100 * s.hp) / s.maxHp) + "%",
-          );
+        if (id === "server") {
+          const depletion = Math.max(0, Math.min(100, Math.round(100 - (100 * s.hp) / s.maxHp)));
+          w.style.setProperty("--load", depletion + "%");
+          const meter = w.querySelector<HTMLElement>(".v-load");
+          meter?.setAttribute("role", "progressbar");
+          meter?.setAttribute("aria-label", "閲覧者HPの減少率（CPU負荷ではありません）");
+          meter?.setAttribute("aria-valuemin", "0");
+          meter?.setAttribute("aria-valuemax", "100");
+          meter?.setAttribute("aria-valuenow", String(depletion));
+          meter?.setAttribute("title", `閲覧者HPの減少率 ${depletion}%`);
+        }
         if (id === "sakura")
           w.classList.toggle("is-alert", !!s.adminState.exposed);
       }

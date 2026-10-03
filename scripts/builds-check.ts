@@ -1,72 +1,142 @@
-/* Validate the archetype builds (placement + which synergies actually connect) and run a
-   round-robin between them and the campaign sites.  npx tsx scripts/builds-check.ts [--quiet] */
+/** Explicit-condition benchmarks. No win-rate target substitutes for resource/counter evidence. */
 import D from "../src/data.js";
-import C from "../src/document.js";
-import E from "../src/engine.js";
+import { fortressCandidate } from "../src/balance-candidates.js";
 import { BUILDS } from "../src/builds.js";
-import type { Item, LayoutEntry } from "../src/types.js";
+import { BATTLE_RULES_VERSION } from "../src/combat-rules.js";
+import {
+  measureMatch,
+  resources,
+  fusedEntrant,
+  type MatchConditions,
+  type Entrant,
+} from "../src/buildlab.js";
 
-const quiet = process.argv.includes("--quiet");
-function board(layout: LayoutEntry[], prefix: string): Item[] {
-  return layout.map(([t, x, y, w, h, shape, label], i) =>
-    Object.assign(C.makeItem(t, prefix + i, x, y, w, h), shape ? { shape } : {}, label ? { label } : {}),
-  );
-}
-let bad = 0;
-for (const b of BUILDS) {
-  const items = board(b.layout, "p");
-  for (const it of items)
-    if (!C.canPlace(items, it, it.x, it.y, it.w, it.h)) {
-      bad++;
-      console.log(`✗ ${b.id}: illegal placement ${it.type} @${it.x},${it.y} ${it.w}x${it.h}`);
-    }
-  const a = E.analyze(items);
-  if (quiet) continue;
-  console.log(`\n== ${b.name}  load ${a.load}  free ${(a.freeRatio * 100).toFixed(0)}%  sets ${a.sets.map((s) => s.faction + s.count).join(",")}`);
-  console.log("  groups: " + a.groups.map((g) => `${g.kind}[${g.items.map((id) => items.find((q) => q.id === id)!.type).join(",")}]`).join("  "));
-  for (const it of items) {
-    const m = a.mods[it.id],
-      d = D.PARTS[it.type];
-    if (!d.cd) continue;
-    console.log(`  ${it.type.padEnd(14)} ${d.kind.padEnd(7)} spd×${m.speed.toFixed(2)} pow×${m.power.toFixed(2)} pierce ${m.pierce}  ${m.notes.join(" / ")}`);
-  }
-}
-if (bad) process.exitCode = 1;
-
-type Side = { name: string; layout: LayoutEntry[]; admin: string[]; hp: number };
-const sides: Side[] = [
-  ...BUILDS.map((b) => ({ name: b.name.replace("【理想形】", ""), layout: b.layout, admin: b.admin, hp: 440 })),
-  ...D.ENEMIES.slice(0, 5).map((e) => ({ name: e.name, layout: e.layout, admin: e.admin, hp: 440 })),
+const list: Entrant[] = BUILDS.map((b) => ({ ...b, build: true }));
+const profiles: {
+  id: string;
+  description: string;
+  budget: number | null;
+  conditions: MatchConditions;
+}[] = [
+  {
+    id: "core",
+    description:
+      "Natural build cores, no administration; unequal invested cost reported",
+    budget: null,
+    conditions: { hp: 440, capacity: 56, adminSlots: 0 },
+  },
+  {
+    id: "common-ceiling",
+    description:
+      "Shared $100 acquisition ceiling and CPU35, unspent budget reported, no free additions",
+    budget: 100,
+    conditions: { hp: 440, capacity: 35, adminSlots: 0 },
+  },
+  {
+    id: "two-slot-pressure",
+    description:
+      "CPU24 and two own admins; stress case, not a claim these complete boards are progression-reachable",
+    budget: null,
+    conditions: { hp: 440, capacity: 24, adminSlots: 2 },
+  },
+  {
+    id: "showcase",
+    description:
+      "As-authored finished layouts, CPU56 and four own admins; not campaign-reachable admin allowance",
+    budget: null,
+    conditions: { hp: 440, capacity: 56, adminSlots: 4 },
+  },
 ];
-function fight(a: Side, b: Side) {
-  const battle = new E.Battle(board(a.layout, "p"), board(b.layout, "e"), {
-    playerHp: a.hp,
-    enemyHp: b.hp,
-    playerAdmin: a.admin,
-    enemyAdmin: b.admin,
-  });
-  for (let t = 0; t < 1201 && !battle.result; t++) battle.step(0.05);
-  return { winner: battle.result!.winner, time: battle.elapsed, hpA: battle.player.hp / battle.player.maxHp, hpB: battle.enemy.hp / battle.enemy.maxHp, top: [...battle.player.parts].sort((x, y) => y.damage - x.damage).slice(0, 2).map((p) => `${p.type}:${Math.round(p.damage)}`) };
-}
-console.log("\n== round robin (row = player, both 440 HP, own admin) ==");
-const header = ["".padEnd(14), ...sides.map((s) => s.name.slice(0, 6).padEnd(8))].join("");
-console.log(header);
-const wins: Record<string, number> = {};
-for (const a of sides) {
-  let line = a.name.slice(0, 12).padEnd(14);
-  for (const b of sides) {
-    if (a === b) {
-      line += "  —     ";
-      continue;
-    }
-    const r = fight(a, b);
-    if (r.winner === "player") wins[a.name] = (wins[a.name] || 0) + 1;
-    line += (r.winner === "player" ? "W" : r.winner === "draw" ? "D" : "L") + `${r.time.toFixed(0)}s`.padEnd(7);
+const results = profiles.map((profile) => ({
+  profile,
+  resources: list.map((a) => ({
+    id: a.id,
+    ...resources(a.layout),
+    unspent:
+      profile.budget === null
+        ? null
+        : profile.budget - resources(a.layout).acquisitionValue,
+  })),
+  matches: list.flatMap((a) =>
+    list
+      .filter((b) => a !== b)
+      .map((b) => ({
+        a: a.id,
+        b: b.id,
+        ...measureMatch(a, b, profile.conditions),
+      })),
+  ),
+}));
+const illegal = results[0].resources.filter((r) => !r.legal);
+if (illegal.length) process.exitCode = 1;
+const fused = list.map((a) => fusedEntrant(a));
+const candidateList = list.map((a) =>
+  a.id === "b_fort" ? fortressCandidate(a) : a,
+);
+const productionList = list.map((a) => ({
+  ...a,
+  layout: a.layout.filter((row) => D.PARTS[row[0]].status !== "experimental"),
+}));
+const extraCases = [
+  {
+    id: "production-filtered",
+    note: "Experimental parts removed; retained-gold opportunities are reported, not filled for free. Not a reconstructed optimal progression build.",
+    list: productionList,
+  },
+  {
+    id: "post-fusion",
+    note: "Accepted current fusion choices in lab; includes experimental parts where identified. Input material costs retained.",
+    list: fused.map((f) => f.entrant),
+  },
+  {
+    id: "limiter-candidate",
+    note: "Experimental counter replacement; NOT obtainable in current campaign or online pools.",
+    list: candidateList,
+  },
+].map((group) => ({
+  id: group.id,
+  note: group.note,
+  results: profiles.map((profile) => ({
+    profile,
+    resources: group.list.map((a) => ({ id: a.id, ...resources(a.layout) })),
+    matches: group.list.flatMap((a) =>
+      group.list
+        .filter((b) => a !== b)
+        .map((b) => ({
+          a: a.id,
+          b: b.id,
+          ...measureMatch(a, b, profile.conditions),
+        })),
+    ),
+  })),
+}));
+const output = {
+  rulesVersion: BATTLE_RULES_VERSION,
+  extraCases,
+  fusions: fused.map((f) => ({
+    id: f.entrant.id,
+    recipes: f.recipes,
+    held: f.held,
+  })),
+  warning:
+    "Deterministic scenario measurements, not population win rates. Complete archetypes have different acquisition paths. No automatic threshold tuning.",
+  results,
+};
+if (process.argv.includes("--json"))
+  console.log(JSON.stringify(output, null, 2));
+else
+  for (const r of results) {
+    console.log(`\n${r.profile.id}: ${r.profile.description}`);
+    console.table(r.resources);
+    console.table(
+      list.map((a) => ({
+        build: a.id,
+        wins: r.matches.filter((m) => m.a === a.id && m.winner === "player")
+          .length,
+        losses: r.matches.filter((m) => m.a === a.id && m.winner === "enemy")
+          .length,
+        draws: r.matches.filter((m) => m.a === a.id && m.winner === "draw")
+          .length,
+      })),
+    );
   }
-  console.log(line);
-}
-console.log("\nwins:", Object.entries(wins).sort((x, y) => y[1] - x[1]).map(([k, v]) => `${k} ${v}`).join(" / "));
-for (const a of sides.slice(0, BUILDS.length)) {
-  const r = fight(a, sides[BUILDS.length + 4]);
-  console.log(`vs YouTube: ${a.name.padEnd(10)} ${r.winner} ${r.time.toFixed(1)}s hp ${(r.hpA * 100).toFixed(0)}%/${(r.hpB * 100).toFixed(0)}%  top ${r.top.join(" ")}`);
-}

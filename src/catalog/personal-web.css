@@ -1,0 +1,11 @@
+/* Original tiled-paper homepage chrome, with unchanged legacy component markup. */
+.site-theme-personalweb .site-header{justify-content:center;gap:44px;padding:0 24px;background:#eeeaf5;border-bottom:3px double #aaa0c0;color:#4c3d6b}
+.personal-word{display:flex;align-items:center;gap:10px;font:19px Georgia,'Yu Mincho',serif}.personal-word>span{font-size:27px;color:#8371a4}.personal-word>b{font-weight:500}.personal-word>small{margin-left:10px;font:8px Arial,sans-serif;color:#78668e}
+.personal-welcome{font:8px/1.4 Georgia,serif;letter-spacing:1px;color:#7b6b91}
+.site-theme-personalweb .page-body{background-color:#f8f6fc;background-image:radial-gradient(#d8d1e8 .6px,transparent .7px);background-size:10px 10px}.site-theme-personalweb .site-footer{background:#eae5f2;color:#75698b;border-top:3px double #bdb3cf}
+.personal-intro{height:100%;box-sizing:border-box;text-align:center;color:#66547c;font:12px/1.7 'Yu Mincho',Georgia,serif}.personal-intro>p{margin:0 0 8px}.personal-intro>p+p{font-size:10px;color:#726382}
+.personal-update{display:flex;align-items:center;justify-content:center;gap:12px;height:100%;font:10px Georgia,'Yu Mincho',serif;color:#675c7a}.personal-update>b{font:700 10px Arial,sans-serif;color:#a75059}.personal-update>small{font-size:8px;color:#7f6f94}
+.personal-bbs-note{height:100%;margin:0;text-align:center;font:8px/20px Georgia,'Yu Mincho',serif;color:#756486;white-space:nowrap}
+.personal-construction{box-sizing:border-box;height:100%;display:flex;align-items:center;justify-content:center;gap:10px;border-top:5px solid transparent;border-bottom:5px solid transparent;border-image:repeating-linear-gradient(120deg,#73643b 0 8px,#f1d984 8px 16px) 5;background:#fbf0be;color:#66582f;font-family:Arial,sans-serif}.personal-construction>span{font-size:10px;font-weight:700;letter-spacing:.3px}.personal-construction>small{font-size:7px}
+.personal-webring{display:flex;justify-content:center;align-items:center;gap:12px;box-sizing:border-box;height:100%;border:1px solid #bcb1cc;background:#f0ebf8;color:#5e4d77;font:9px Georgia,'Yu Mincho',serif}.personal-webring>b{font-size:10px;font-weight:500}.personal-webring>span{color:#6b5b85}.personal-webring>small{font:7px Arial,sans-serif;color:#7b6b90}
+.personal-disclaimer{display:block;text-align:center;font:8px/20px Georgia,'Yu Mincho',serif;color:#79688d;white-space:nowrap}

@@ -15,6 +15,7 @@ export interface TitleOptions {
   hasSave: boolean;
   /** Play the retro boot + upgrade intro (first launch of a session). */
   intro: boolean;
+  onStory?(): void;
   onContinue(): void;
   onNewRun(): void;
   onTutorial(): void;
@@ -329,8 +330,10 @@ export function showTitle(opts: TitleOptions): { close(): void } {
     menu.append(b);
     return b;
   };
-  const primary = button(opts.hasSave ? "つづきから" : "はじめから", opts.hasSave ? "前回のページを開く" : "空っぽのページから", "tt-primary", opts.hasSave ? opts.onContinue : opts.onNewRun);
-  if (opts.hasSave) button("新しいページで", "最初からやり直す", "", opts.onNewRun);
+  const storyPrimary = opts.onStory ? button("THE LAST BROWSER", "物語・ジャンクの作業場", "tt-primary", opts.onStory) : null;
+  const legacyPrimary = button(opts.hasSave ? "旧遠征を続ける" : "旧遠征を始める", "8ラウンドの遠征", storyPrimary ? "" : "tt-primary", opts.hasSave ? opts.onContinue : opts.onNewRun);
+  const primary = storyPrimary ?? legacyPrimary;
+  if (opts.hasSave) button("旧遠征をやり直す", "最初からやり直す", "", opts.onNewRun);
   button("あそびかた", "チュートリアル", "", opts.onTutorial);
   button("実験室", "すべてのUIで自由に", "", opts.onLab);
   button("設定", "音量など", "tt-small", opts.onSettings, false);

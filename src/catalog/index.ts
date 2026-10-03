@@ -1,0 +1,17 @@
+import { SOCIAL_TEMPLATES } from "./social-templates.js";
+import { KNOWLEDGE_TEMPLATES } from "./knowledge-templates.js";
+import { COMMUNITY_TEMPLATES } from "./community-templates.js";
+import { DISCOVERY_TEMPLATES } from "./discovery-templates.js";
+import { TIME_MEDIA_TEMPLATES } from "./time-media-templates.js";
+import { DOCUMENT_TEMPLATES } from "./documents-templates.js";
+import { AUDIO_TEMPLATES } from "./audio-templates.js";
+import { QANDA_TEMPLATES } from "./qanda-templates.js";
+import { FEEDREADER_TEMPLATES } from "./feedreader-templates.js";
+import { MARKETPLACE_TEMPLATES } from "./marketplace-templates.js";
+import { RELEASE_TEMPLATES } from "./releases-templates.js";
+import { RANKED_NEWS_TEMPLATES } from "./ranked-news-templates.js";
+import { MAP_SEARCH_TEMPLATES } from "./map-search-templates.js";
+import { PERSONAL_WEB_TEMPLATES } from "./personal-web-templates.js";
+import { MUSIC_SHOP_TEMPLATES } from "./music-shop-templates.js";
+export const SITE_TEMPLATES = [...SOCIAL_TEMPLATES, ...KNOWLEDGE_TEMPLATES, ...COMMUNITY_TEMPLATES, ...DISCOVERY_TEMPLATES, ...TIME_MEDIA_TEMPLATES, ...DOCUMENT_TEMPLATES, ...AUDIO_TEMPLATES, ...QANDA_TEMPLATES, ...FEEDREADER_TEMPLATES, ...MARKETPLACE_TEMPLATES, ...RELEASE_TEMPLATES, ...RANKED_NEWS_TEMPLATES, ...MAP_SEARCH_TEMPLATES, ...PERSONAL_WEB_TEMPLATES, ...MUSIC_SHOP_TEMPLATES];
+export type { SiteTemplate } from "./types.js";

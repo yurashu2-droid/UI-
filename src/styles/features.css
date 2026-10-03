@@ -1,0 +1,12 @@
+#modal.feature-modal { width: min(1480px, calc(100vw - 24px)); max-width: none; max-height: calc(100vh - 24px); }
+#modal.feature-modal #modal-content { max-height: calc(100vh - 28px); overflow: auto; }
+.raid-live-battle { padding: 16px; margin-bottom: 20px; border: 1px solid #adc3c4; background: #f5faf8; color: #19342c; }
+.raid-live-pages { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.raid-live-viewport { position: relative; width: 100%; aspect-ratio: 960 / 680; overflow: hidden; background: white; border: 1px solid #b0bcbb; }
+.raid-live-paper { position: relative; width: 960px; height: 680px; transform-origin: 0 0; transform: scale(var(--raid-scale, .4)); }
+.raid-live-paper .web-node { position: absolute; }
+.collection-acquisition { padding: 16px 0; border-bottom: 1px solid #c7d0d7; }
+.collection-preview { position: relative; width: min(100%, 520px); min-height: 60px; max-height: 220px; overflow: hidden; margin-bottom: 12px; }
+.collection-acquisition button { padding: 8px 12px; }
+@media(max-width:900px) { .raid-live-pages { grid-template-columns: 1fr; } }
+@media(prefers-reduced-motion:reduce) { .raid-live-paper * { animation: none !important; } }
