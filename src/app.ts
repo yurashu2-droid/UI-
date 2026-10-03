@@ -34,6 +34,7 @@ import { navigationGuidance, renderNavigationGuidance } from "./navigation-guida
 import { conversionGuidance, renderConversionGuidance } from "./conversion-guidance.js";
 import { incomeRouteGuidance, renderIncomeRouteGuidance } from "./income-route-guidance.js";
 import { containmentGuidance, renderContainmentGuidance } from "./containment-guidance.js";
+import { sidechannelPlacementGuide, renderSidechannelPlacementGuide, type SidechannelPlacement } from "./sidechannel-placement-guide.js";
 import { battleIncomeResult, renderBattleIncomeResult, type BattleIncomeResultView } from "./battle-income-result.js";
 import { getHelpContent, renderHelpBody } from "./help-content.js";
 import { createDeferredMount } from "./feature-loader.js";
@@ -100,6 +101,7 @@ let run: Run,
   fitRAF = 0,
   coachHidden = false;
 let incomeRouteBinding: { element: HTMLSelectElement; run: Run; sourceId: string } | null = null;
+const sidechannelPlacementBindings = new Map<HTMLButtonElement, { run: Run; sourceId: string; owned: string; key: SidechannelPlacement }>();
 const memory: Partial<Record<Mode, Run>> = {};
 const labBattleController = createLabBattleController();
 let storyActive = false;
@@ -474,6 +476,55 @@ function setIncomeRouteFromControl(el: HTMLSelectElement) {
     next.element.isConnected && !next.element.disabled && incomeRouteEditingAllowed() &&
     (document.activeElement === document.body || document.activeElement === null))
     next.element.focus({ preventScroll: true });
+}
+function sidechannelPlacementEditingAllowed() {
+  return run.mode === "lab" && !storyActive && incomeRouteEditingAllowed() &&
+    !editor.drag && !editor.pending;
+}
+function bindSidechannelPlacementControls(host: HTMLElement, sel: Item[]) {
+  if (run.mode !== "lab" || storyActive || run.page.templateId !== "site_slack" ||
+    editor.selection.size !== 1 || sel.length !== 1) return;
+  const guide = sidechannelPlacementGuide(run, [...editor.selection], { editable: sidechannelPlacementEditingAllowed() });
+  if (!guide) return;
+  const owned = JSON.stringify(run.owned);
+  for (const element of host.querySelectorAll<HTMLButtonElement>("button[data-sidechannel-placement]")) {
+    const target = guide.targets.find(target => target.key === element.dataset.sidechannelPlacement);
+    if (target && element.dataset.sourceId === guide.breadcrumbId)
+      sidechannelPlacementBindings.set(element, { run, sourceId: guide.breadcrumbId, owned, key: target.key });
+  }
+}
+function setSidechannelPlacementFromControl(el: HTMLButtonElement) {
+  const binding = sidechannelPlacementBindings.get(el);
+  if (!binding) return;
+  const current = () => sidechannelPlacementBindings.get(el) === binding && binding.run === run &&
+    el.isConnected && !el.disabled && el.dataset.sourceId === binding.sourceId &&
+    el.dataset.sidechannelPlacement === binding.key &&
+    !!document.querySelector("#inspector")?.contains(el) && sidechannelPlacementEditingAllowed() &&
+    editor.selection.size === 1 && editor.selected().length === 1 && editor.selected()[0].id === binding.sourceId &&
+    JSON.stringify(run.owned) === binding.owned;
+  if (!current()) return;
+  const guide = sidechannelPlacementGuide(run, [...editor.selection], { editable: true });
+  if (!guide?.editable || guide.breadcrumbId !== binding.sourceId || guide.current === binding.key) return;
+  const focused = document.activeElement === el, originalRun = run;
+  const committed = editor.commit(() => {
+    if (!current()) return false;
+    const fresh = sidechannelPlacementGuide(run, [...editor.selection], { editable: sidechannelPlacementEditingAllowed() });
+    const target = fresh?.editable && fresh.breadcrumbId === binding.sourceId
+      ? fresh.targets.find(target => target.key === binding.key) : undefined;
+    return !!target && UIRaidEditor.patchItem(run.owned, binding.sourceId, { x: target.x, y: target.y });
+  });
+  if (!committed || !focused || run !== originalRun || !sidechannelPlacementEditingAllowed() ||
+    editor.selection.size !== 1 || editor.selected().length !== 1 || editor.selected()[0].id !== binding.sourceId ||
+    (document.activeElement !== document.body && document.activeElement !== null)) return;
+  // Restore only the same operated control after its own successful repaint.
+  for (const [element, next] of sidechannelPlacementBindings) {
+    if (next.run === run && next.sourceId === binding.sourceId && next.key === binding.key &&
+      next.owned === JSON.stringify(run.owned) && element.isConnected && !element.disabled &&
+      document.querySelector("#inspector")?.contains(element)) {
+      element.focus({ preventScroll: true });
+      break;
+    }
+  }
 }
 function matchHint(t: string, info: EngineInfo) {
   if (t === "yt_speed") return videoSpeedHint(info);
@@ -1204,6 +1255,8 @@ function selectionCard(sel: Item[], info: EngineInfo) {
     instantSupport = instantSearchSupport(p, info);
   const interval=battle?.player.parts.find(part=>part.id===p.id)?.period ?? E.naturalPeriod(p,info,battle?.player.capacity??(labPressureCapacity()??(run.mode==="lab"&&!storyActive?Infinity:R.capacity(run))));
   const notes = [...m.notes];
+  const placementGuide = run.mode === "lab" && !storyActive && run.page.templateId === "site_slack"
+    ? renderSidechannelPlacementGuide(sidechannelPlacementGuide(run, [...editor.selection], { editable: sidechannelPlacementEditingAllowed() })) : "";
   return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2>${d.status === "experimental" ? '<p class="sel-warn">実験用UI · バランス調整中。本編・オンラインの入手候補には入りません。</p>' : ""}<p class="sel-desc">${esc(d.desc)}</p>
  <div class="sel-stats">${p.type === "go_jobs" ? `<div><small>試験価格</small><b>$${d.price}</b></div><div><small>設置サイズ</small><b>${p.w}×${p.h}</b></div>` : ""}<div><small>自然発動</small><b>${d.cd ? (interval>0?interval.toFixed(2) + "秒ごと":"未配置") : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
  ${
@@ -1222,7 +1275,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
  <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>
  ${p.appearanceId ? '<p class="muted">取得元の外観を使用中。合成後は標準表示になりますが、元の外観と由来はコレクションに残ります。</p>' : ""}
  <details class="sel-more"><summary>見た目（時代）・部品ラベルを変える</summary>${skinPicker(p)}<label class="field-label">部品ラベル<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="標準の名前・表示を使用"></label><p class="muted">部品の識別に使うラベルです。対応するUIの標準表示では、ページ上の文字も変わります。</p></details>
- ${containment}
+ ${containment}${placementGuide}
  <div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : `売る +$${R.sellValue(run, p.type)}`}</button></div></section>`;
 }
 // Each site culture gets a tiny favicon so it is recognisable at a glance, not only by colour.
@@ -1280,6 +1333,7 @@ function opponentCard() {
 }
 function renderSide() {
   incomeRouteBinding = null;
+  sidechannelPlacementBindings.clear();
   const host = $("#inspector"),
     sel = editor.selected(),
     // Battle construction keeps analyze()'s full result; BattleSide exposes its base type.
@@ -1299,6 +1353,7 @@ function renderSide() {
   if (routeControl instanceof HTMLSelectElement && sel.length === 1 &&
     routeControl.dataset.sourceId === sel[0].id)
     incomeRouteBinding = { element: routeControl, run, sourceId: sel[0].id };
+  bindSidechannelPlacementControls(host, sel);
   if (run.mode === "lab" && !storyActive) {
     const controlHost = document.createElement("section");
     controlHost.className = "side-sec lab-experiment-control";
@@ -1663,7 +1718,7 @@ function openStoryHub() {
     onCommand:storyCommand,
     onClose:closeModal,
     renderOwnPage:host=>V.render(host,run.owned,{side:"story-ending",theme:run.page.theme,decor:R.pageDecor(run)}),
-    onEdit:target=>{closeModal();view="self";preview=false;render();if(target==="server")toast("左の巡回先にあるサーバープランで処理能力を増やせます。");},
+    onEdit:target=>{closeModal();view="self";preview=false;render();if(target==="shop")wm.show("crawl");if(target==="server")toast("左の巡回先にあるサーバープランで処理能力を増やせます。");},
     onBattle:()=>{
       if(!run.owned.some(item=>C.placed(item)&&P[item.type].kind==="attack"))throw new Error("まず作業台で、攻撃するUIを最低1つページに置いてください。");
       return start();
@@ -1791,13 +1846,28 @@ function onlinePanel() {
   modalFeatureDispose = feature.dispose;
   void feature.start();
 }
+function localRaidEditingAllowed() {
+  return !storyActive && run.mode === "lab" && run.phase === "build" &&
+    !battle && !preview && !settling && !pendingStorySettlement;
+}
 async function playRaidChallenge(host: HTMLElement, blueprint: RaidBlueprint, signal: AbortSignal) {
+  const sourceRun = run, sourceStory = storySession, victoryStore = profileStore;
+  const localCurrent = () => localRaidEditingAllowed() && run === sourceRun &&
+    storySession === sourceStory && profileStore === victoryStore && host.isConnected && !signal.aborted &&
+    !!document.querySelector<HTMLDialogElement>("#modal")?.open;
+  if (signal.aborted) throw new Error("対戦表示を閉じました。");
+  if (blueprint.source.kind === "local-file" && !localCurrent())
+    throw new Error("ローカルHTMLの対戦は実験室の編集画面で行ってください。");
   const prepared = prepareRaidChallenge(run, blueprint), challenge = prepared.battle;
   blueprint = prepared.blueprint;
-  await registerRaidBlueprint(blueprint);
+  const registered = await registerRaidBlueprint(blueprint);
+  if (!registered.ok) throw new Error(registered.error);
+  if (signal.aborted) throw new Error("対戦表示を閉じました。");
+  if (blueprint.source.kind === "local-file" && !localCurrent())
+    throw new Error("画面が変わったためローカルHTMLの対戦を開始しませんでした。");
   const live = document.createElement("section"); live.className = "raid-live-battle";
-  live.innerHTML = '<h3>ページ同士の対戦</h3><p class="raid-approximation">コード解析による近似配置で対戦します</p><p class="raid-live-status" role="status"></p><div class="raid-live-pages"><div><b>あなたのページ</b><div class="raid-live-viewport"><div class="raid-live-paper" data-raid-live="player"></div></div></div><div><b>取得したページ</b><div class="raid-live-viewport"><div class="raid-live-paper" data-raid-live="enemy"></div></div></div></div>';
-  live.querySelector<HTMLElement>(".raid-approximation")!.textContent = blueprint.fidelity === "code-approximation" ? "コード解析による近似配置で対戦します" : "保存された検証用の配置で対戦します";
+  live.innerHTML = `<h3>ページ同士の対戦</h3><p class="raid-approximation">コード解析による近似配置で対戦します</p><p class="raid-live-status" role="status"></p><div class="raid-live-pages"><div><b>あなたのページ</b><div class="raid-live-viewport"><div class="raid-live-paper" data-raid-live="player"></div></div></div><div><b>${blueprint.source.kind === "local-file" ? "ローカルHTMLの近似UI" : "取得したページ"}</b><div class="raid-live-viewport"><div class="raid-live-paper" data-raid-live="enemy"></div></div></div></div>`;
+  live.querySelector<HTMLElement>(".raid-approximation")!.textContent = blueprint.source.kind === "local-file" ? "ローカルファイルの静的コードを近似配置で対戦します。元ページやJavaScriptは実行しません。" : blueprint.fidelity === "code-approximation" ? "コード解析による近似配置で対戦します" : "保存された検証用の配置で対戦します";
   host.prepend(live);
   const you = live.querySelector<HTMLElement>('[data-raid-live="player"]')!, foe = live.querySelector<HTMLElement>('[data-raid-live="enemy"]')!;
   V.render(you, prepared.snapshot.owned, { side: "raid-player", theme: prepared.snapshot.page.theme, decor: R.pageDecor(prepared.snapshot) });
@@ -1839,7 +1909,7 @@ async function playRaidChallenge(host: HTMLElement, blueprint: RaidBlueprint, si
       if (!challenge.result) { raf = requestAnimationFrame(tick); return; }
       finished = true;
       const winner = challenge.result.winner;
-      void (winner === "player" && profileStore ? profileStore.recordRaidVictory(blueprint, prepared.battleId) : Promise.resolve())
+      void (winner === "player" && victoryStore ? victoryStore.recordRaidVictory(blueprint, prepared.battleId) : Promise.resolve())
         .then(() => { cleanup(); resolve({ battleId: prepared.battleId, winner }); })
         .catch((error: unknown) => { cleanup(); reject(error); });
     };
@@ -1848,14 +1918,25 @@ async function playRaidChallenge(host: HTMLElement, blueprint: RaidBlueprint, si
 }
 async function raidPanel(initialRequest?: RaidInitialRequest) {
   if (!profileStore) { toast("個人コレクションの保存領域を開けないため、回収を開始できません。"); return; }
-  const store = profileStore;
-  openModal(`<div class="modal-inner">${modalHead("URL RAID", "ページを巡回する")}<div id="raid-feature-host">保存された報酬を確認しています…</div></div>`);
+  const store = profileStore, sourceRun = run, sourceStory = storySession, sourceStoryMode = storyActive, sourceMode = run.mode;
+  openModal(`<div class="modal-inner">${modalHead(run.mode === "lab" && !storyActive ? "UI RAID" : "URL RAID", run.mode === "lab" && !storyActive ? "URLとローカルHTMLから回収" : "ページを巡回する")}<div id="raid-feature-host">保存された報酬を確認しています…</div></div>`);
   $("#modal").classList.add("feature-modal");
   const host = $("#raid-feature-host"), controller = new AbortController();
+  const ownsPanel = () => !controller.signal.aborted && host.isConnected &&
+    $<HTMLDialogElement>("#modal").open && profileStore === store && run === sourceRun &&
+    run.mode === sourceMode && storySession === sourceStory && storyActive === sourceStoryMode;
+  const isLocalImportAllowed = () => ownsPanel() && localRaidEditingAllowed();
   const feature = deferredModalFeature(host,
     () => Promise.all([import("./raid/panel.js"), store.listPendingRaids()]),
-    ([{ mountRaidPanel }, pending]) => mountRaidPanel(host, {
+    ([{ mountRaidPanel }, pending]) => {
+      if (!ownsPanel()) return { dispose() {} };
+      const localAllowed = isLocalImportAllowed();
+      const hiddenLocalCount = localAllowed ? 0 : pending.filter(saved => saved.blueprint.source?.kind === "local-file").length;
+      const resume = pending.find(saved => saved.blueprint.source?.kind !== "local-file" || localAllowed);
+      const panel = mountRaidPanel(host, {
+      isLocalImportAllowed,
       onCaptured: async (blueprint,kind) => {
+        if (blueprint.source.kind === "local-file") throw new Error("ローカルHTMLは実験室の専用取り込みから解析してください。");
         if(!storyActive||!storySession)return;
         const sourceSession=storySession;
         const result=await StorySession.cacheStoryAnalysis(sourceSession,blueprint,kind);
@@ -1864,18 +1945,35 @@ async function raidPanel(initialRequest?: RaidInitialRequest) {
         if(controller.signal.aborted)throw new Error("解析画面を閉じました。エネルギーは消費していません。");
         commitStorySession(result.session);render();
       },
-      onChallenge: blueprint => playRaidChallenge(host, blueprint, controller.signal),
+      onChallenge: blueprint => {
+        if (!ownsPanel()) return Promise.reject(new Error("画面を開き直してから対戦してください。"));
+        if (blueprint.source.kind === "local-file" && !isLocalImportAllowed())
+          return Promise.reject(new Error("ローカルHTMLの対戦は実験室の編集画面で行ってください。"));
+        return playRaidChallenge(host, blueprint, controller.signal);
+      },
       onClaim: async (reward, blueprint) => {
         try {
+          const local = blueprint.source.kind === "local-file";
+          if (local && !isLocalImportAllowed()) throw new Error("ローカルHTMLの報酬は実験室で受け取ってください。");
           const claimRun=clone(run),writeRunProfile=!storyActive;
           await profileWrites;
+          if (local && !isLocalImportAllowed()) throw new Error("画面が変わったため受け取りを開始しませんでした。実験室で開き直してください。");
           const result = await store.claimRaidReward(claimRun, reward, blueprint, {writeRunProfile});
-          await registerRaidBlueprint(blueprint);
-          return { ok: true as const, message: result.created ? "個人コレクションへ保存しました。メニューのコレクションから使えます。" : "このUIはコレクションへ保存済みです。" };
+          if (ownsPanel()) await registerRaidBlueprint(blueprint);
+          return { ok: true as const, message: result.created ? (local ? "ローカルHTMLから回収した外観を個人コレクションへ保存しました。" : "個人コレクションへ保存しました。メニューのコレクションから使えます。") : "このUIはコレクションへ保存済みです。" };
         } catch (error) { return { ok: false as const, error: error instanceof Error ? error.message : "保存できませんでした。" }; }
       },
       onDiscard: async battleId => { try { await store.discardRaidVictory(battleId); return { ok: true as const }; } catch { return { ok: false as const, error: "報酬の状態を保存できません。" }; } },
-    }, pending[0], initialRequest));
+      }, resume, initialRequest);
+      if (hiddenLocalCount) {
+        const note = document.createElement("p");
+        note.className = "raid-local-pending-note";
+        note.dataset.localPendingCount = String(hiddenLocalCount);
+        note.textContent = `実験室専用のローカル解析報酬が、読み込み時点で${hiddenLocalCount}件あります。実験室でこの画面を開き直すと受け取れます。`;
+        host.prepend(note);
+      }
+      return panel;
+    });
   modalFeatureDispose = () => { controller.abort(); feature.dispose(); };
   await feature.start();
 }
@@ -1920,7 +2018,7 @@ async function collectionPanel() {
         }
         const capture = captures.get(trophy.captureId), component = capture?.components.find(c => c.componentId === trophy.componentId);
         const section = document.createElement("section"); section.className = "collection-acquisition";
-        const title = document.createElement("h3"); title.textContent = `${P[trophy.item.type].name} · ${capture?.source.name ?? "保存されたページ"}${capture?.fidelity === "code-approximation" ? " · コード解析による近似配置" : ""}`;
+        const title = document.createElement("h3"); title.textContent = `${P[trophy.item.type].name} · ${capture?.source.name ?? "保存されたページ"}${capture?.source.kind === "local-file" ? " · ローカルファイルの静的コード近似" : capture?.fidelity === "code-approximation" ? " · コード解析による近似配置" : ""}`;
         const previewHost = document.createElement("div"); previewHost.className = "collection-preview";
         if (component) renderRaidAppearance(previewHost, component.appearance);
         else previewHost.textContent = "外観データがないため標準表示を使います。";
@@ -1995,7 +2093,7 @@ function menu() {
  <button id="m-tutorial"><b>チュートリアル</b><small>最初から手順つきで</small></button>
  <button id="m-lab" class="${run.mode === "lab" ? "on" : ""}"><b>実験室</b><small>全UIを無料で試す</small></button>
  <button id="m-online"><b>非同期オンライン</b><small>保存された他のプレイヤーと対戦</small></button>
- <button id="m-raid"><b>URLレイド</b><small>ページを巡回してUIを回収</small></button>
+ <button id="m-raid"><b>URLレイド</b><small>${run.mode === "lab" && !storyActive ? "URL・ローカルHTMLからUIを回収" : "ページを巡回してUIを回収"}</small></button>
  <button id="m-collection"><b>個人コレクション</b><small>持ち帰ったUIを使う</small></button>
  <button id="m-overflow"><b>報酬の受取箱</b><small>未受取 ${(run.pendingInventory ?? []).length} 個</small></button>
  <button id="m-preview"><b>◉ サイトを触ってみる</b><small>検索窓やボタンを操作</small></button>
@@ -2808,6 +2906,10 @@ document.addEventListener("click", (e) => {
   if (target.hasAttribute("data-close-modal")) {
     closeModal();
     if (battle?.result) leaveBattle();
+    return;
+  }
+  if (target.dataset.sidechannelPlacement !== undefined) {
+    setSidechannelPlacementFromControl(target);
     return;
   }
   if (target.dataset.editorAction) {

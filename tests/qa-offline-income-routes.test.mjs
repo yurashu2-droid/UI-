@@ -37,7 +37,8 @@ const change = app.match(/^document.addEventListener\("change",[^]*?^\}\);/m)?.[
 assert.ok(options); assert.ok(change);
 const rules = app.slice(app.indexOf("const KIND:"), app.indexOf("function shortDesc("));
 const routeHelpers = ["incomeRouteEditingAllowed", "setIncomeRouteFromControl"].filter(name => app.includes(`function ${name}(`)).map(extract).join("\n");
-const compiled = transformSync(`${rules}\n${routeHelpers}\n${["save", "renderStorageNotice", "labPressureCapacity", "selectionCard", "renderSide", "commitStorySession"].map(extract).join("\n")}\n${options}\n${change}\nglobalThis.editor=editor;`, {loader:"ts",target:"es2022"}).code;
+const placementHelpers = ["bindSidechannelPlacementControls"].filter(name => app.includes(`function ${name}(`)).map(extract).join("\n");
+const compiled = transformSync(`${rules}\n${routeHelpers}\n${placementHelpers}\n${["save", "renderStorageNotice", "labPressureCapacity", "selectionCard", "renderSide", "commitStorySession"].map(extract).join("\n")}\n${options}\n${change}\nglobalThis.editor=editor;`, {loader:"ts",target:"es2022"}).code;
 const camel = value => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 
 class ElementAdapter {
@@ -189,7 +190,7 @@ function host(t, {mode="lab", story=false, secondType="am_oneclick", sourceType=
     ...appGuidance,...navigation,...conversion,...incomeRoutes,...containmentViews,targetCaption,
     UIRaidEditor:{Editor},E,C,D,P:D.PARTS,R,StorySession,V:{...V,render(){}},
     run,storyActive:story,storySession:session,storyPersistence,runPersistence,
-    incomeRouteBinding:null,memory:{},profileStore:null,profileProblem:"",profileWrites:Promise.resolve(),
+    incomeRouteBinding:null,sidechannelPlacementBindings:new Map(),memory:{},profileStore:null,profileProblem:"",profileWrites:Promise.resolve(),
     saveOK:true,saveProblem:"",settling:false,pendingStorySettlement:null,battle:null,preview:false,view:"self",clone:structuredClone,
     document:doc,Element:ElementAdapter,HTMLElement:ElementAdapter,HTMLSelectElement:SelectAdapter,HTMLInputElement:InputAdapter,
     $:selector=>doc.querySelector(selector),esc:V.esc,skinPicker:()=>"",synergyPanel:()=>"",

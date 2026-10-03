@@ -1,0 +1,148 @@
+[
+  {
+    "source": {
+      "recordedBooks": true
+    },
+    "expected": {
+      "jsonHash": "8faf30cb571669839b4fa575817af74deccee919290b957c562b432990adaf34",
+      "captureId": "capture_b51a0697f50e53fd012abd53d1225079e61099a4f71884658397e90dd5624fd5",
+      "appearanceIds": [
+        "appearance_40d2e571c79a1b21e3cea71ca0ee48fc9d4d3194def3e560b9d33fc415917544",
+        "appearance_d30ff827a1c2daac79828e388dcde19e9a9681c6aa2cc7545b9d06ea5a95ce2a",
+        "appearance_c2f99d13fb631b5e279e4406de1fb17d036ef0aefb3917c590310c09defd484b",
+        "appearance_13f2fba47eba3c5624f2dc9edc47bf886a7e496afafac1cd6eb06d43c42130db",
+        "appearance_ce381866f7f92a506af8671f37744d11f4bff478e4964a8c1bee5536b0adf43a",
+        "appearance_2bc659d6b8bd15a3e0638bd69134a491b9f1ff163e99d812898bb05da979e825",
+        "appearance_ff65c3fed6a3c28d211ae3429d8d6b40438f49050ba82002b587afede5f97479",
+        "appearance_2bc659d6b8bd15a3e0638bd69134a491b9f1ff163e99d812898bb05da979e825"
+      ]
+    }
+  },
+  {
+    "source": {
+      "html": "<title>夜の地図 café 🌙</title><style>button{background:#123456}</style><h1>地図</h1><a>North</a><button>Add to cart</button>",
+      "requestedUrl": "https://example.com/",
+      "bytes": 134,
+      "sourceHash": "d0e0df93e3759cc037c37f38c66d5624529e3ef4b6b02022693272a00714f133",
+      "capturedAt": "2026-10-03T03:20:00.000Z",
+      "extraction": {
+        "title": "unused",
+        "candidates": []
+      }
+    },
+    "expected": {
+      "jsonHash": "30aa34a95391d782e53b22319252c8e9758cf93bcd331a448458835e3bc6febd",
+      "captureId": "capture_fcf8183aef62e8719417da811033121e18d64a0ad4269bca9a07413dba0dfa57",
+      "appearanceIds": [
+        "appearance_825c3a38cdaec59f1952e030cab3f5e1f115511134bbd986e0986dce37dd915b",
+        "appearance_8d67a52630034410d22f3a79cc3346ef5ab0d1dbbdb0c5e491efc140c0a5f7c5",
+        "appearance_122d96dc4c774fb407cd5cd1a45410616bcc9496be0c1c058b23db72cf66a13d"
+      ]
+    }
+  },
+  {
+    "source": {
+      "html": "﻿<title>夜の地図 café 🌙</title><style>button{background:#123456}</style><h1>地図</h1><a>North</a><button>Add to cart</button>",
+      "requestedUrl": "https://example.com/",
+      "bytes": 137,
+      "sourceHash": "1d0b53b769fdfb84eac540514b3ce85e3e6a7c43cd0dad49bbbcb6dabc768f33",
+      "capturedAt": "2026-10-03T03:20:00.000Z",
+      "extraction": {
+        "title": "unused",
+        "candidates": []
+      }
+    },
+    "expected": {
+      "jsonHash": "e4f73b704ccb27e6db87e8a976707a7c5dab40d31f2ab88951fcb419cf001797",
+      "captureId": "capture_0f693c7dde04fd7b08ef9fe89c1b8962ebf518a10a9158325ff29148c7a66cbb",
+      "appearanceIds": [
+        "appearance_825c3a38cdaec59f1952e030cab3f5e1f115511134bbd986e0986dce37dd915b",
+        "appearance_8d67a52630034410d22f3a79cc3346ef5ab0d1dbbdb0c5e491efc140c0a5f7c5",
+        "appearance_122d96dc4c774fb407cd5cd1a45410616bcc9496be0c1c058b23db72cf66a13d"
+      ]
+    }
+  },
+  {
+    "source": {
+      "html": "<title>Legacy order</title><link rel=stylesheet href=\"theme.css\"><style>button{background:#123456}</style><h1>Heading</h1><button>Add to cart</button>",
+      "requestedUrl": "https://example.com/",
+      "stylesheets": [
+        {
+          "css": "button{background:#654321}",
+          "sourceHash": "cfc66406414778994098e8b7d5d9881318408cefb808d5b6176fa87ccb45558b",
+          "url": "https://example.com/theme.css"
+        }
+      ],
+      "bytes": 150,
+      "sourceHash": "1726570af55f8a7d5648d872000b4c9a92d51a14f4962e0efa8efc64d63e48cb",
+      "capturedAt": "2026-10-03T03:20:00.000Z",
+      "extraction": {
+        "title": "unused",
+        "candidates": []
+      }
+    },
+    "expected": {
+      "jsonHash": "03780fd8067b53dc9d24c78e9d80a5916160c5f476a9c6c5317c7b291b52d588",
+      "captureId": "capture_ee5b8ebe3582fda26dbe27c365d5ccafa64189750b2b70ad67c1ecb3ec524676",
+      "appearanceIds": [
+        "appearance_d277eb56d50125c0aa22c8d39df14b4d37ca22745ea6cd289ce5403baeabb0fc",
+        "appearance_122d96dc4c774fb407cd5cd1a45410616bcc9496be0c1c058b23db72cf66a13d"
+      ]
+    }
+  },
+  {
+    "source": {
+      "html": "<title>Legacy order</title><style>button{background:#123456}</style><link rel=stylesheet href=\"theme.css\"><h1>Heading</h1><button>Add to cart</button>",
+      "requestedUrl": "https://example.com/",
+      "stylesheets": [
+        {
+          "css": "button{background:#654321}",
+          "sourceHash": "cfc66406414778994098e8b7d5d9881318408cefb808d5b6176fa87ccb45558b",
+          "url": "https://example.com/theme.css"
+        }
+      ],
+      "bytes": 150,
+      "sourceHash": "87ca38e571d3e6e7678949abf096c79624986fdfee173e0c7a9f4969a84a4326",
+      "capturedAt": "2026-10-03T03:20:00.000Z",
+      "extraction": {
+        "title": "unused",
+        "candidates": []
+      }
+    },
+    "expected": {
+      "jsonHash": "81e7595016199c72d5eaab8f2db501598fa67c32cf7ab0f20e744666569b2a8f",
+      "captureId": "capture_7f04423234c02b66a14cdf48c962ad3d2cea27a96c0507da4bf08111b21dd0a0",
+      "appearanceIds": [
+        "appearance_d277eb56d50125c0aa22c8d39df14b4d37ca22745ea6cd289ce5403baeabb0fc",
+        "appearance_213ef3623d46bd01e78b564257a05d37da09216e0537089e31d1fbe112bc3c89"
+      ]
+    }
+  },
+  {
+    "source": {
+      "html": "<h1>Legacy strings</h1><style>h1{color:#123456}</style>",
+      "requestedUrl": "https://example.com/",
+      "stylesheets": [
+        {
+          "css": "h1{color:#654321}",
+          "sourceHash": "ae0e2c4a9b873dd2c2617353c0f4dc447a570062795cf139a306b1c71c9e7977"
+        }
+      ],
+      "stylesheetWarning": true,
+      "bytes": 55,
+      "sourceHash": "5f4a69aaa907ce30b51384c86b5fe4fc150c85d4b209910a793d4821ec0effd2",
+      "capturedAt": "2026-10-03T03:20:00.000Z",
+      "extraction": {
+        "title": "unused",
+        "candidates": []
+      }
+    },
+    "expected": {
+      "jsonHash": "946cd5ba0341f3879a31bc2883933ae2bddd3c29b586a6150e2d3e5d9ba1e32b",
+      "captureId": "capture_ea0ed1882c2e8b66834541ccd82b99ec621ad4bc602e8f07f54fffa873531e5d",
+      "appearanceIds": [
+        "appearance_a248f68686b4183a714d85dbe93180f74ad3bb7ee59094828168cacacb78b2a9"
+      ]
+    }
+  }
+]

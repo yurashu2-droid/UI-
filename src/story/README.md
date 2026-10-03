@@ -4,13 +4,13 @@ This module follows the supplied THE LAST BROWSER story. It contains eight stage
 
 ## Current application integration
 
-The title and main menu open the story workshop. `app.ts` uses `session.ts` to connect the existing editor, authored battle engine inputs, paid shops, rewards and final placed hyperlink. The editor continues to show the player’s own named page. `THE LAST BROWSER` and the legacy eight-round expedition have distinct menu entries.
+The title and main menu open the story workshop. `app.ts` uses `session.ts` to connect the existing editor, authored battle engine inputs, paid shops, rewards and final placed hyperlink. The editor continues to show the player’s own named page. `THE LAST BROWSER` and the legacy eight-round expedition have distinct menu entries. From the workshop, UI棚 → “UIの取引を開く” returns to the editor and calls the existing `wm.show("crawl")`, restoring a minimized crawl/shop window without resetting its saved size or position. This changes navigation recovery only, not plot, shop rules or progression.
 
 One `ui-raid-last-browser-v1` local-storage payload contains the run, story progress, guaranteed-item inbox, protected tutorial item IDs, optional-analysis cache and receipts. It never replaces legacy or online profile keys. Successful writes compare against the last observed raw payload to reject stale-tab saves. This is an optimistic conflict guard, not a cross-process compare-and-swap primitive.
 
 A failed final battle settlement remains in memory behind a guarded retry/export screen. Escape and generic close do not discard it. The player can explicitly abandon the unsaved outcome and reopen saved progress after a confirmation. Export during this condition includes the completed outcome, allowing recovery.
 
-Story URL captures use the URL-raid panel’s validated `onCaptured` handoff. A successful capture and its energy receipt are committed in the same story payload; a failed or stale save leaves the previous selection and energy intact. Cached mode selects a matching stored URL without fetching. Optional URL trophies use the shared collection ledger with legacy-profile writes disabled.
+Story URL captures use the URL-raid panel’s validated `onCaptured` handoff. A successful capture and its energy receipt are committed in the same story payload; a failed or stale save leaves the previous selection and energy intact. Cached mode selects a matching stored URL without fetching. Optional URL trophies use the shared collection ledger with legacy-profile writes disabled. Local-file reconstruction is laboratory-only: session validation rejects local captures in `analysisCache`, `cacheStoryAnalysis` rejects them before energy/receipt changes, and cache lookup excludes them. App and domain guards also reject local challenge/claim outside the laboratory. A pending local victory is retained, skipped when opening this panel from the story, and accompanied by guidance to reopen it in the laboratory; an eligible public pending reward still takes priority over a new request. Previously acquired local cosmetic skins may follow the existing owned-canonical-part reskin rules, but importing HTML is not a story or online acquisition route.
 
 
 ## Host ownership
@@ -49,4 +49,4 @@ Main-route connections have supplied energy and remain available at zero optiona
 
 Domain, real-engine session and fake-DOM interaction tests cover save reload, order, replay protection, naming, local layouts, machine separation, URL handoff, interrupted battles, duplicate clicks and dispose-while-awaiting. Independent QA traverses all authored encounters through the ending using an intentionally strong legal mixed build. That test proves transactions and persistence, not ordinary acquisition balance. Paid progression is measured separately by `scripts/story-progression-benchmark.ts`.
 
-These checks do not constitute browser screenshot or visual-layout verification. The workshop and ending still require supported-browser visual review before claiming visual quality.
+These checks do not constitute browser screenshot, native click, keyboard or assistive-technology acceptance. The workshop shop-window recovery and ending still require supported-browser review; the browser route in this environment remains blocked.

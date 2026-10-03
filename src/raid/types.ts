@@ -68,7 +68,7 @@ export interface RaidBlueprint {
   captureId: string;
   viewport: { width: 960; height: 680 };
   source: {
-    kind: "fixture" | "static-public";
+    kind: "fixture" | "static-public" | "local-file";
     name: string;
     displayUrl: string;
     capturedAt: string;
@@ -114,6 +114,8 @@ export interface RaidInitialRequest {
   cachedBlueprint?: RaidBlueprint;
 }
 export interface RaidPanelCallbacks {
+  /** Live lab-only gate; absent, throwing or false disables local acquisition. */
+  isLocalImportAllowed?(): boolean;
   /** Integration persists acquisition/energy receipts before the new opponent is selected. */
   onCaptured?(
     blueprint: RaidBlueprint,

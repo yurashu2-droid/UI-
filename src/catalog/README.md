@@ -38,6 +38,10 @@ Stash rows now share the same edited-label/canonical caption as placed wrappers 
 
 Deferred story/online dialogs transfer focus only when their removed loading Close/retry actually owned it. The current live Close can also survive the online connection's immediate follow-up repaint; deliberate focus elsewhere is preserved. Native cancellation synchronously disposes pending delivery while retaining the pending-result protection. These are real-host/renderer tests with a DOM focus adapter; actual browser focus, Tab and assistive-technology acceptance remain unverified.
 
+SIDECHANNEL now has a narrow inspector guide: in the laboratory's own-page edit view, select the original breadcrumb (`p4`) while the original four owned IDs, dimensions and the other three placements remain intact. “履歴の上へ（15%加速）” places it at `(208,316)`; “PDFの上へ（15%加速）” places it at `(648,228)`. The current choice is marked, and changing it patches only that owned breadcrumb's x/y through the real editor commit/Undo/Redo path. Edited labels and acquired skins are retained. Changes to inventory, size, placement or identity, a breadcrumb outside these two positions, non-editable state and stale controls refuse the comparison; no template reset or replacement inventory is performed. The guide does not start a battle or promise restoration or a winning layout. The timing-sensitive comparisons below remain the evidence limits. Actual browser click, focus and assistive-technology acceptance remain unverified.
+
+Local-file appearances use the same canonical safe native rendering and cosmetic rules as other acquired appearances. They do not register catalogue definitions, templates, ordinary-shop rewards or online acquisition. Their lab-only import/battle/claim boundary is described in [the source-ingest documentation](../../server/site-ingest/README.md#local-htmlcss-import-separate-laboratory-only-boundary); unsupported static semantics are rejected rather than assigned invented combat parts.
+
 ## Template design distinctions
 
 | Template | Structural identity | Mechanical purpose | Surrendered opportunity |

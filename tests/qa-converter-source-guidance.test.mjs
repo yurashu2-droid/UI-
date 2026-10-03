@@ -239,7 +239,7 @@ function inspectSide(run, battle, selected) {
   const node = () => ({ innerHTML: '', disabled: false, querySelector: () => ({}) });
   const context = {
     ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, ...containmentViews, incomeRouteEditingAllowed:()=>false, targetCaption,
-    D, P: D.PARTS, E, R, C, run, battle, storyActive: false, preview: false,
+    D, P: D.PARTS, E, R, C, run, battle, storyActive: false, preview: false, sidechannelPlacementBindings: new Map(),
     labPressureCapacity: () => null, labBattleController: { value: 'normal' },
     HTMLSelectElement: class {}, editor: { selected: () => [selected], history: [], future: [] },
     $: key => { if (!nodes.has(key)) nodes.set(key, node()); return nodes.get(key); },
@@ -247,7 +247,7 @@ function inspectSide(run, battle, selected) {
     appOpponent: () => ({ faction: 'retro', pageName: 'Opponent', decor: [] }),
     appEnemyBoard: () => [], V: { header: () => '', render() {} }, scheduleFit() {},
   };
-  vm.runInNewContext(`${selectionCode}\n${compiled('renderSide')}\nrenderSide();`, context);
+  vm.runInNewContext(`${selectionCode}\n${compiled('bindSidechannelPlacementControls')}\n${compiled('renderSide')}\nrenderSide();`, context);
   return nodes.get('#inspector').innerHTML;
 }
 

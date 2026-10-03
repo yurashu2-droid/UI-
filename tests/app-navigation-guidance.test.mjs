@@ -41,11 +41,11 @@ test('actual side-panel rendering uses the current battle analysis for legacy co
   for(const version of ['combat-v2','combat-v3','combat-v4']){
     const battle=new E.Battle(run.owned,[],{combatVersion:version}),nodes=new Map();let selectedInfo,synergyInfo;
     const node=()=>({innerHTML:'',disabled:false,querySelector:()=>({})});
-    const context={D,P:D.PARTS,E,R,C,run,battle,storyActive:false,preview:false,labPressureCapacity:()=>null,
+    const context={D,P:D.PARTS,E,R,C,run,battle,storyActive:false,preview:false,labPressureCapacity:()=>null,sidechannelPlacementBindings:new Map(),
       HTMLSelectElement:class {},editor:{selected:()=>[run.owned[0]],history:[],future:[]},$:key=>{if(!nodes.has(key))nodes.set(key,node());return nodes.get(key);},
       selectionCard:(_,info)=>{selectedInfo=info;return '';},synergyPanel:info=>{synergyInfo=info;return '';},opponentCard:()=>'',
       appOpponent:()=>({faction:'retro',pageName:'Test',decor:[]}),appEnemyBoard:()=>[],V:{header:()=>'',render(){}},scheduleFit(){}};
-    vm.runInNewContext(compiled('renderSide')+'\nrenderSide();',context);
+    vm.runInNewContext(compiled('bindSidechannelPlacementControls')+compiled('renderSide')+'\nrenderSide();',context);
     assert.equal(selectedInfo,battle.player.info,'inspector must use battle-authoritative analysis');
     assert.equal(synergyInfo,battle.player.info);
     assert.equal(navigation.navigationGuidance(synergyInfo).targets.length,version==='combat-v2'?3:2);

@@ -209,3 +209,16 @@ test("overflow is a persisted pending award and keeps exact appearance on retry 
   assert.equal(awards[0].appearanceId, b.components[4].appearanceId);
   assert.equal((await controller.claim("component-04")).ok, false);
 });
+
+test('selection guard preserves the previous opponent when cancelled during verification', async () => {
+  const controller = raid.createRaidEncounterController({onChallenge:async()=>({battleId:'unused',winner:'draw'}),onClaim:async()=>({ok:true})});
+  const old=await raid.createFixtureRaid('archive'),next=await raid.createFixtureRaid('commerce');
+  await controller.select(old);
+  let live=true;const selecting=controller.select(next,()=>live);live=false;
+  assert.equal((await selecting).ok,false);
+  assert.equal(controller.state.blueprint.captureId,old.captureId);
+  assert.equal(controller.state.phase,'ready');
+  assert.equal((await controller.select(next,()=>{throw Error('detached');})).ok,false);
+  assert.equal(controller.state.blueprint.captureId,old.captureId);
+  assert.equal((await controller.select(next,()=>true)).ok,true);
+});

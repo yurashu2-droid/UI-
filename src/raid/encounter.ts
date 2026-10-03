@@ -33,12 +33,26 @@ export function createRaidEncounterController(callbacks: RaidPanelCallbacks) {
     get state(): State {
       return structuredClone(state);
     },
-    async select(blueprint: RaidBlueprint): Promise<RaidResult<RaidBlueprint>> {
-      if (disposed || ["battling", "won", "claiming"].includes(state.phase))
+    async select(
+      blueprint: RaidBlueprint,
+      isCurrent?: () => boolean,
+    ): Promise<RaidResult<RaidBlueprint>> {
+      const current = () => {
+        try {
+          return isCurrent?.() ?? true;
+        } catch {
+          return false;
+        }
+      };
+      if (
+        disposed ||
+        !current() ||
+        ["battling", "won", "claiming"].includes(state.phase)
+      )
         return fail("先に対戦または報酬の受け取りを完了してください。");
       const mine = ++generation;
       const checked = await registerRaidBlueprint(blueprint);
-      if (disposed || mine !== generation)
+      if (disposed || mine !== generation || !current())
         return fail("ページの選択を中止しました。");
       if (!checked.ok) return checked;
       state = {

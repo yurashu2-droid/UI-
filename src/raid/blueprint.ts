@@ -242,7 +242,9 @@ export function validateRaidBlueprint(
   if (
     !record(source) ||
     !exact(source, ["kind", "name", "displayUrl", "capturedAt"]) ||
-    (source.kind !== "fixture" && source.kind !== "static-public") ||
+    (source.kind !== "fixture" &&
+      source.kind !== "static-public" &&
+      source.kind !== "local-file") ||
     !text(source.name) ||
     !text(source.displayUrl, 240) ||
     !text(source.capturedAt, 30) ||
@@ -258,6 +260,15 @@ export function validateRaidBlueprint(
       approximate
     )
       return invalid("検証用ページの識別子が正しくありません。");
+  } else if (source.kind === "local-file") {
+    if (
+      !approximate ||
+      value.fidelity !== "code-approximation" ||
+      !record(value.analysis) ||
+      value.analysis.styles !== "safe-css-subset-v1" ||
+      source.displayUrl !== "local://" + value.analysis.sourceHash
+    )
+      return invalid("ローカルHTMLの由来と内容ハッシュが一致しません。");
   } else {
     try {
       const u = new URL(source.displayUrl);

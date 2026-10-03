@@ -1,5 +1,6 @@
 import D from "../data.js";
 import { createRaidCaptureSession } from "./capture.js";
+import { mountLocalImportControls } from "./local-import-controls.js";
 import { createRaidEncounterController } from "./encounter.js";
 import { createFixtureRaid, listRaidFixtures } from "./fixtures.js";
 import { raidComponentCaption, renderRaidScene } from "./render.js";
@@ -39,14 +40,41 @@ export function mountRaidPanel(
     el.type = "button";
     return el;
   };
-  const encounter = createRaidEncounterController(callbacks),
+  const localAllowed = () => {
+    try {
+      return (
+        !disposed &&
+        host.isConnected &&
+        callbacks.isLocalImportAllowed?.() === true
+      );
+    } catch {
+      return false;
+    }
+  };
+  const localBlocked = (blueprint: RaidBlueprint | null) =>
+    blueprint?.source.kind === "local-file" && !localAllowed();
+  const localUnavailable = "ローカルHTMLの読込・対戦・回収は実験室限定です。";
+  const encounter = createRaidEncounterController({
+      ...callbacks,
+      onChallenge: (blueprint) => {
+        if (localBlocked(blueprint)) throw new Error(localUnavailable);
+        return callbacks.onChallenge(blueprint);
+      },
+      onClaim: (reward, blueprint) =>
+        localBlocked(blueprint)
+          ? Promise.resolve({ ok: false as const, error: localUnavailable })
+          : callbacks.onClaim(reward, blueprint),
+    }),
     capture = createRaidCaptureSession();
   let disposed = false,
     loading = false,
+    localLoading = false,
+    restoring = !!resume,
     saving = false,
     generation = 0,
     view: "reconstructed" | "reference" = "reconstructed",
     claimedComponent = "";
+  let localControls: ReturnType<typeof mountLocalImportControls> | undefined;
   host.replaceChildren();
   host.classList.add("raid-panel");
   const heading = make("div", "raid-heading");
@@ -81,6 +109,8 @@ export function mountRaidPanel(
   });
   fixtureButtons.push(publicTest);
   fixtureBar.append(publicTest);
+  const localHost = make("div");
+  localHost.hidden = !callbacks.isLocalImportAllowed;
   const status = make("p", "raid-status", "付属ページを読み込んでいます。");
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
@@ -108,6 +138,7 @@ export function mountRaidPanel(
     description,
     form,
     fixtureBar,
+    localHost,
     status,
     tabs,
     meta,
@@ -132,18 +163,25 @@ export function mountRaidPanel(
   resize?.observe(viewport);
   const sync = () => {
     const state = encounter.state,
-      locked = saving || ["battling", "claiming", "won"].includes(state.phase);
+      locked =
+        saving ||
+        restoring ||
+        ["battling", "claiming", "won"].includes(state.phase);
     load.disabled = locked;
     input.disabled = locked;
     fixtureButtons.forEach((b) => (b.disabled = locked));
     challenge.disabled =
       loading ||
+      localLoading ||
+      restoring ||
+      localBlocked(state.blueprint) ||
       !state.blueprint ||
       !["ready", "lost", "claimed"].includes(state.phase);
     challenge.textContent =
       state.phase === "battling" ? "対戦中…" : "このページに挑戦";
     skip.hidden = state.phase !== "won" || !callbacks.onDiscard;
-    cancel.hidden = !loading || saving;
+    cancel.hidden = !(loading || localLoading) || saving;
+    localControls?.refresh();
     reconstruction.classList.toggle("is-selected", view === "reconstructed");
     reference.classList.toggle("is-selected", view === "reference");
   };
@@ -153,7 +191,7 @@ export function mountRaidPanel(
       b = state.blueprint;
     sync();
     if (!b) return;
-    meta.textContent = `${b.source.name}  ·  ${b.fidelity === "code-approximation" ? "コード解析による近似配置" : b.source.kind === "fixture" ? "付属の検証用ページ" : "静的取得"}  ·  ${b.components.length}個の戦闘UI  ·  960×680`;
+    meta.textContent = `${b.source.name}  ·  ${b.source.kind === "local-file" ? "ローカルHTMLの近似配置・実験室限定" : b.fidelity === "code-approximation" ? "コード解析による近似配置" : b.source.kind === "fixture" ? "付属の検証用ページ" : "静的取得"}  ·  ${b.components.length}個の戦闘UI  ·  960×680`;
     details.replaceChildren();
     for (const c of b.components) {
       const def = D.PARTS[c.canonicalType];
@@ -165,7 +203,9 @@ export function mountRaidPanel(
     reference.textContent =
       b.source.kind === "fixture"
         ? "静的ページと比較"
-        : "元サイトの比較画像は未取得";
+        : b.source.kind === "local-file"
+          ? "元HTMLの比較は利用できません"
+          : "元サイトの比較画像は未取得";
     canvas.replaceChildren();
     if (view === "reference" && b.source.kind === "fixture") {
       const key = b.source.displayUrl.replace("fixture://", ""),
@@ -190,10 +230,11 @@ export function mountRaidPanel(
           (c) => c.componentId === item.dataset.componentId,
         );
         if (!component) continue;
-        const caption = `${raidComponentCaption(component)}${b.fidelity === "code-approximation" ? "（近似再構成のUI）" : ""}`;
+        const caption = `${raidComponentCaption(component)}${b.source.kind === "local-file" ? "（ローカルHTMLの近似再構成UI・実験室限定）" : b.fidelity === "code-approximation" ? "（近似再構成のUI）" : ""}`;
         if (state.phase === "won") {
           item.classList.add("raid-loot-ready");
-          item.tabIndex = 0;
+          item.tabIndex = localBlocked(b) ? -1 : 0;
+          if (localBlocked(b)) item.setAttribute("aria-disabled", "true");
           item.setAttribute("role", "button");
           item.setAttribute("aria-label", `${caption}を回収`);
         }
@@ -208,24 +249,37 @@ export function mountRaidPanel(
     }
     fit();
   };
-  const select = async (blueprint: RaidBlueprint) => {
-    const result = await encounter.select(blueprint);
-    if (disposed) return;
+  const select = async (
+    blueprint: RaidBlueprint,
+    isCurrent: () => boolean = () => !disposed,
+  ) => {
+    const result = await encounter.select(blueprint, isCurrent);
+    if (disposed || !isCurrent()) return result;
     if (result.ok) {
       view = "reconstructed";
       claimedComponent = "";
       say(blueprint.warnings.join(" "));
       draw();
     } else say(result.error, true);
+    return result;
   };
   const fixture = async (id: string) => {
+    if (
+      disposed ||
+      restoring ||
+      saving ||
+      ["battling", "won", "claiming"].includes(encounter.state.phase)
+    )
+      return;
+    localControls?.cancel();
     capture.cancel();
     loading = false;
     const mine = ++generation;
     sync();
     try {
       const b = await createFixtureRaid(id);
-      if (!disposed && mine === generation) await select(b);
+      if (!disposed && mine === generation)
+        await select(b, () => !disposed && mine === generation);
     } catch (error) {
       say(
         error instanceof Error
@@ -244,6 +298,7 @@ export function mountRaidPanel(
   }
   const stop = () => {
     if (saving) return;
+    localControls?.cancel();
     capture.cancel();
     generation++;
     loading = false;
@@ -253,9 +308,11 @@ export function mountRaidPanel(
   const beginCapture = async (kind: "new" | "reanalyze" = "new") => {
     if (
       saving ||
+      restoring ||
       ["battling", "won", "claiming"].includes(encounter.state.phase)
     )
       return;
+    localControls?.cancel();
     const mine = ++generation;
     loading = true;
     say("公開HTMLを取得し、タグ・名前・CSSから近似再構成しています。");
@@ -270,7 +327,8 @@ export function mountRaidPanel(
           sync();
           await callbacks.onCaptured(structuredClone(result.value), kind);
         }
-        if (!disposed && mine === generation) await select(result.value);
+        if (!disposed && mine === generation)
+          await select(result.value, () => !disposed && mine === generation);
       } catch (error) {
         if (!disposed && mine === generation)
           say(
@@ -292,7 +350,7 @@ export function mountRaidPanel(
   });
   cancel.addEventListener("click", stop);
   input.addEventListener("input", () => {
-    if (loading) stop();
+    if (loading || localLoading) stop();
   });
   reconstruction.addEventListener("click", () => {
     view = "reconstructed";
@@ -303,6 +361,13 @@ export function mountRaidPanel(
     draw();
   });
   challenge.addEventListener("click", async () => {
+    if (disposed || loading || localLoading || restoring) return;
+    if (localBlocked(encounter.state.blueprint)) {
+      say(localUnavailable, true);
+      sync();
+      return;
+    }
+    localControls?.cancel();
     capture.cancel();
     loading = false;
     generation++;
@@ -325,6 +390,11 @@ export function mountRaidPanel(
     draw();
   });
   const claim = async (id: string) => {
+    if (localBlocked(encounter.state.blueprint)) {
+      say(localUnavailable, true);
+      sync();
+      return;
+    }
     const promise = encounter.claim(id);
     sync();
     const result = await promise;
@@ -353,7 +423,7 @@ export function mountRaidPanel(
     }
   });
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === "Escape" && loading) {
+    if (e.key === "Escape" && (loading || localLoading)) {
       e.preventDefault();
       stop();
     }
@@ -392,12 +462,33 @@ export function mountRaidPanel(
       say("保存済みのページと指定URLの一致を確認できませんでした。", true);
       return;
     }
-    await select(verified.value);
+    await select(verified.value, () => !disposed && mine === generation);
   };
+  if (typeof callbacks.isLocalImportAllowed === "function") {
+    localControls = mountLocalImportControls(localHost, {
+      isAllowed: localAllowed,
+      isLocked: () =>
+        saving ||
+        restoring ||
+        ["battling", "won", "claiming"].includes(encounter.state.phase),
+      onStart: () => {
+        capture.cancel();
+        generation++;
+        loading = false;
+      },
+      onBusyChange: (value) => {
+        localLoading = value;
+        sync();
+      },
+      onSelected: (blueprint, isCurrent) =>
+        select(blueprint, () => !disposed && localAllowed() && isCurrent()),
+    });
+  }
   sync();
   if (resume) {
     void encounter.restore(resume).then((result) => {
       if (disposed) return;
+      restoring = false;
       say(result.ok ? encounter.state.message : result.error, !result.ok);
       draw();
     });
@@ -409,6 +500,7 @@ export function mountRaidPanel(
       disposed = true;
       generation++;
       capture.cancel();
+      localControls?.dispose();
       encounter.dispose();
       resize?.disconnect();
       doc.removeEventListener("keydown", onKey);

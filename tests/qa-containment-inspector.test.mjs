@@ -18,7 +18,7 @@ import { DESIGN_CANVAS_TEMPLATES } from '../src/catalog/design-canvas-templates.
 
 const app = readFileSync(new URL('../src/app.ts', import.meta.url), 'utf8');
 const rules = app.slice(app.indexOf('const KIND:'), app.indexOf('function shortDesc('));
-const functions = ['incomeRouteEditingAllowed', 'selectionCard', 'renderSide'].map(name => {
+const functions = ['incomeRouteEditingAllowed', 'selectionCard', 'bindSidechannelPlacementControls', 'renderSide'].map(name => {
   const fn = app.match(new RegExp(`^function ${name}\\([^]*?^}`, 'm'))?.[0];
   assert.ok(fn, `use actual ${name}`); return fn;
 });
@@ -53,7 +53,7 @@ function inspector(board = frameset(), selected = ['p3']) {
     ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, ...containment,
     D, P: D.PARTS, C, E, R, targetCaption, run, battle: null, preview: false,
     settling: false, pendingStorySettlement: null, storyActive: false, view: 'self', dialogOpen: false,
-    incomeRouteBinding: null, HTMLSelectElement: Select,
+    incomeRouteBinding: null, sidechannelPlacementBindings: new Map(), HTMLSelectElement: Select,
     labPressureCapacity: () => null, labBattleController: {value: 'normal'},
     esc: escape, skinPicker: () => '', synergyPanel: () => '', opponentCard: () => '',
     V: {header: () => '', render() {}}, scheduleFit() {}, appOpponent: () => ({faction: 'retro', pageName: 'Enemy'}), appEnemyBoard: () => [],

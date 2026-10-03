@@ -183,7 +183,9 @@ export function validateStorySession(value: unknown): value is StorySession {
     s.analysisCache !== undefined &&
     (!Array.isArray(s.analysisCache) ||
       s.analysisCache.length > 8 ||
-      s.analysisCache.some((bp) => !validateRaidBlueprint(bp).ok) ||
+      s.analysisCache.some(
+        (bp) => !validateRaidBlueprint(bp).ok || bp.source.kind === "local-file",
+      ) ||
       new Set(s.analysisCache.map((bp) => bp.captureId)).size !==
         s.analysisCache.length)
   )
@@ -638,6 +640,8 @@ export async function cacheStoryAnalysis(
   blueprint = structuredClone(blueprint);
   const verified = await verifyRaidBlueprint(blueprint);
   if (!verified.ok) return failure(input, verified.error);
+  if (verified.value.source.kind === "local-file")
+    return failure(input, "ローカルHTMLの解析は実験室だけで利用できます。");
   const receiptId = `analysis_${blueprint.captureId}`;
   if (input.story.analysisReceipts.includes(receiptId)) return success(input);
   const result = transitionStory(input.story, {
@@ -673,6 +677,9 @@ export function findStoryCapture(
   };
   const match = [...(input.analysisCache ?? [])]
     .reverse()
-    .find((bp) => normalize(bp.source.displayUrl) === normalize(url));
+    .find(
+      (bp) => bp.source.kind !== "local-file" &&
+        normalize(bp.source.displayUrl) === normalize(url),
+    );
   return match ? structuredClone(match) : undefined;
 }

@@ -109,16 +109,16 @@ test('QA: actual URL-raid tick host uses the same side-aware captions, safely re
   const battle=fixture(),boards=nativeBoards(battle),status=textField();
   let tick,removed=0,disconnected=0;
   const live={className:'',innerHTML:'',remove(){removed++;},querySelector(selector){return selector==='[data-raid-live="player"]'?boards.player:selector==='[data-raid-live="enemy"]'?boards.enemy:status;}};
-  const context={D,P:D.PARTS,targetCaption,applyCombatFeedback,combatFeedback,run:{},profileStore:null,
-    prepareRaidChallenge(){return {battle,blueprint:{},battleId:'qa-caption-raid',snapshot:{owned:[],page:{theme:'mixed'}}};},
-    registerRaidBlueprint:async()=>{},V:{render(){}},R:{pageDecor(){return [];}},createRaidEnemy(){return [];},renderRaidAppearance(){},
+  const context={D,P:D.PARTS,targetCaption,applyCombatFeedback,combatFeedback,run:{},storySession:null,profileStore:null,
+    prepareRaidChallenge(){return {battle,blueprint:{source:{kind:'fixture'}},battleId:'qa-caption-raid',snapshot:{owned:[],page:{theme:'mixed'}}};},
+    registerRaidBlueprint:async()=>({ok:true}),V:{render(){}},R:{pageDecor(){return [];}},createRaidEnemy(){return [];},renderRaidAppearance(){},
     document:{createElement(type){return type==='section'?live:{style:{}};}},
     ResizeObserver:class{observe(){}disconnect(){disconnected++;}},performance:{now(){return 0;}},
     requestAnimationFrame(callback){tick=callback;return 1;},cancelAnimationFrame(){},setTimeout(){},
   };
   vm.runInNewContext(transformSync(source.slice(start,end),{loader:'ts',target:'es2022'}).code,context);
   const controller=new AbortController();
-  const promise=context.playRaidChallenge({prepend(){}},{},controller.signal);
+  const promise=context.playRaidChallenge({prepend(){}},{source:{kind:'fixture'}},controller.signal);
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(typeof tick,'function');
   try {exerciseProjection(battle,boards,()=>tick(0));}

@@ -74,6 +74,8 @@ export function createProfileStore(factory: IDBFactory, name = "ui-raid-studio-v
     if (!R.validateRun(run)) throw new Error("現在の構成を保存できません。");
     const verified = await verifyRaidBlueprint(blueprint);
     if (!verified.ok) throw new Error(verified.error);
+    if (verified.value.source.kind === "local-file" && run.mode !== "lab")
+      throw new Error("ローカルHTMLの回収は実験室だけで利用できます。");
     const expected = prepareRaidRewards(blueprint, reward.battleId).find(r => r.rewardId === reward.rewardId);
     if (!expected || await contentHash(expected) !== await contentHash(reward)) throw new Error("報酬が対戦のスナップショットと一致しません。");
     const trophy: RaidTrophy = {
