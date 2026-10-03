@@ -35,6 +35,7 @@ import { conversionGuidance, renderConversionGuidance } from "./conversion-guida
 import { incomeRouteGuidance, renderIncomeRouteGuidance } from "./income-route-guidance.js";
 import { containmentGuidance, renderContainmentGuidance } from "./containment-guidance.js";
 import { sidechannelPlacementGuide, renderSidechannelPlacementGuide, type SidechannelPlacement } from "./sidechannel-placement-guide.js";
+import { redditSidebarPlacementGuide, redditSidebarPlacementIntent, renderRedditSidebarPlacementGuide, type RedditSidebarPlacement } from "./reddit-sidebar-placement-guide.js";
 import { battleIncomeResult, renderBattleIncomeResult, type BattleIncomeResultView } from "./battle-income-result.js";
 import { getHelpContent, renderHelpBody } from "./help-content.js";
 import { createDeferredMount } from "./feature-loader.js";
@@ -103,6 +104,7 @@ let run: Run,
   coachHidden = false;
 let incomeRouteBinding: { element: HTMLSelectElement; run: Run; sourceId: string } | null = null;
 const sidechannelPlacementBindings = new Map<HTMLButtonElement, { run: Run; sourceId: string; owned: string; key: SidechannelPlacement }>();
+let redditSidebarPlacementBindings = new WeakMap<HTMLButtonElement, { run: Run; editor: typeof editor; sourceId: string; owned: string; key: RedditSidebarPlacement }>();
 const memory: Partial<Record<Mode, Run>> = {};
 const labBattleController = createLabBattleController();
 let storyActive = false;
@@ -522,6 +524,54 @@ function setSidechannelPlacementFromControl(el: HTMLButtonElement) {
     if (next.run === run && next.sourceId === binding.sourceId && next.key === binding.key &&
       next.owned === JSON.stringify(run.owned) && element.isConnected && !element.disabled &&
       document.querySelector("#inspector")?.contains(element)) {
+      element.focus({ preventScroll: true });
+      break;
+    }
+  }
+}
+function redditSidebarPlacementEditingAllowed() {
+  return run.mode === "lab" && !storyActive && run.page.templateId === "lesson_reddit_sidebar" &&
+    editor.run === run && incomeRouteEditingAllowed() && !editor.drag && !editor.pending && editor.o.enabled();
+}
+function bindRedditSidebarPlacementControls(host: HTMLElement, sel: Item[]) {
+  if (run.mode !== "lab" || storyActive || run.page.templateId !== "lesson_reddit_sidebar" ||
+    editor.selection.size !== 1 || sel.length !== 1 || editor.run !== run) return;
+  const guide = redditSidebarPlacementGuide(run, [...editor.selection], { editable: redditSidebarPlacementEditingAllowed() });
+  if (!guide) return;
+  const owned = JSON.stringify(run.owned);
+  for (const element of host.querySelectorAll<HTMLButtonElement>("button[data-reddit-sidebar-placement]")) {
+    const target = guide.targets.find(target => target.key === element.dataset.redditSidebarPlacement);
+    if (target && element.dataset.sourceId === guide.sourceId)
+      redditSidebarPlacementBindings.set(element, { run, editor, sourceId: guide.sourceId, owned, key: target.key });
+  }
+}
+function setRedditSidebarPlacementFromControl(el: HTMLButtonElement) {
+  const binding = redditSidebarPlacementBindings.get(el);
+  if (!binding) return;
+  const current = () => redditSidebarPlacementBindings.get(el) === binding && binding.run === run &&
+    binding.editor === editor && editor.run === run && el.isConnected && !el.disabled &&
+    el.dataset.sourceId === binding.sourceId && el.dataset.redditSidebarPlacement === binding.key &&
+    !!document.querySelector("#inspector")?.contains(el) && redditSidebarPlacementEditingAllowed() &&
+    editor.selection.size === 1 && editor.selected().length === 1 && editor.selected()[0].id === binding.sourceId &&
+    JSON.stringify(run.owned) === binding.owned;
+  if (!current()) return;
+  const intent = redditSidebarPlacementIntent(run, [...editor.selection], binding.key, { editable: true });
+  if (!intent || intent.sourceId !== binding.sourceId) return;
+  const focused = document.activeElement === el, originalRun = run;
+  const committed = editor.commit(() => {
+    if (!current()) return false;
+    const fresh = redditSidebarPlacementIntent(run, [...editor.selection], binding.key,
+      { editable: redditSidebarPlacementEditingAllowed() });
+    return !!fresh && fresh.sourceId === binding.sourceId &&
+      UIRaidEditor.patchItem(run.owned, binding.sourceId, { x: fresh.x, y: fresh.y });
+  });
+  if (!committed || !focused || run !== originalRun || !redditSidebarPlacementEditingAllowed() ||
+    editor.selection.size !== 1 || editor.selected().length !== 1 || editor.selected()[0].id !== binding.sourceId ||
+    (document.activeElement !== document.body && document.activeElement !== null)) return;
+  for (const element of document.querySelector("#inspector")?.querySelectorAll<HTMLButtonElement>("button[data-reddit-sidebar-placement]") ?? []) {
+    const next = redditSidebarPlacementBindings.get(element);
+    if (next?.run === run && next.editor === editor && next.sourceId === binding.sourceId && next.key === binding.key &&
+      next.owned === JSON.stringify(run.owned) && element.isConnected && !element.disabled) {
       element.focus({ preventScroll: true });
       break;
     }
@@ -1257,7 +1307,9 @@ function selectionCard(sel: Item[], info: EngineInfo) {
   const interval=battle?.player.parts.find(part=>part.id===p.id)?.period ?? E.naturalPeriod(p,info,battle?.player.capacity??(labPressureCapacity()??(run.mode==="lab"&&!storyActive?Infinity:R.capacity(run))));
   const notes = [...m.notes];
   const placementGuide = run.mode === "lab" && !storyActive && run.page.templateId === "site_slack"
-    ? renderSidechannelPlacementGuide(sidechannelPlacementGuide(run, [...editor.selection], { editable: sidechannelPlacementEditingAllowed() })) : "";
+    ? renderSidechannelPlacementGuide(sidechannelPlacementGuide(run, [...editor.selection], { editable: sidechannelPlacementEditingAllowed() }))
+    : run.mode === "lab" && !storyActive && run.page.templateId === "lesson_reddit_sidebar"
+      ? renderRedditSidebarPlacementGuide(redditSidebarPlacementGuide(run, [...editor.selection], { editable: redditSidebarPlacementEditingAllowed() })) : "";
   return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2>${d.status === "experimental" ? '<p class="sel-warn">実験用UI · バランス調整中。本編・オンラインの入手候補には入りません。</p>' : ""}<p class="sel-desc">${esc(d.desc)}</p>
  <div class="sel-stats">${p.type === "go_jobs" ? `<div><small>試験価格</small><b>$${d.price}</b></div><div><small>設置サイズ</small><b>${p.w}×${p.h}</b></div>` : ""}<div><small>自然発動</small><b>${d.cd ? (interval>0?interval.toFixed(2) + "秒ごと":"未配置") : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
  ${
@@ -1335,6 +1387,8 @@ function opponentCard() {
 function renderSide() {
   incomeRouteBinding = null;
   sidechannelPlacementBindings.clear();
+  // Retire lesson nodes on every repaint, including a switch to another template.
+  redditSidebarPlacementBindings = new WeakMap();
   const host = $("#inspector"),
     sel = editor.selected(),
     // Battle construction keeps analyze()'s full result; BattleSide exposes its base type.
@@ -1355,6 +1409,7 @@ function renderSide() {
     routeControl.dataset.sourceId === sel[0].id)
     incomeRouteBinding = { element: routeControl, run, sourceId: sel[0].id };
   bindSidechannelPlacementControls(host, sel);
+  if (run.page.templateId === "lesson_reddit_sidebar") bindRedditSidebarPlacementControls(host, sel);
   if (run.mode === "lab" && !storyActive) {
     const controlHost = document.createElement("section");
     controlHost.className = "side-sec lab-experiment-control";
@@ -3042,6 +3097,10 @@ document.addEventListener("click", (e) => {
   }
   if (target.dataset.sidechannelPlacement !== undefined) {
     setSidechannelPlacementFromControl(target);
+    return;
+  }
+  if (target.dataset.redditSidebarPlacement !== undefined) {
+    setRedditSidebarPlacementFromControl(target);
     return;
   }
   if (target.dataset.editorAction) {

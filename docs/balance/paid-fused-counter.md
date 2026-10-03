@@ -241,3 +241,108 @@ node --import tsx --test tests/balance-paid-admin-counter-witness.test.mjs tests
 Purchases, prices, offers, rerolls, claims, moves, legal placements, canonical battle outcomes and settlements are asserted against public APIs and recorded pursuit snapshots. Persistent states are validated and JSON-round-tripped after each purchase, reroll, move, settlement and claim. The final full inventory is matched to the unchanged pursuit harness. The complete Run is asserted unchanged after all reference duels. The report includes the gameplay-catalog SHA-256 fingerprint, excluding cosmetic template metadata.
 
 The new [focused regression](../../tests/balance-paid-admin-counter-witness.test.mjs) locks the complete inventory and ledger, actual administrator offers and claims, five real prior outcomes, matched starting/max HP, unchanged fixture opponents, the twelve actual-HP wins and the higher-HP Cart loss. The command above also reruns the older seed-122 regression. This reproducer verifies one witness and its controls; it does not rerun the separate thirty-seed study, introduce its exploratory policy, or certify the whole project suite, build, browser, canonical story, a closed counter cycle, or broad balance.
+
+## Retained-inventory rearrangement: seed 308 without enemy HP normalization
+
+This third witness keeps the earlier seed-122 and seed-217 evidence and limitations intact. One fixed, legally rearranged **and resized** version of an already acquired seed-308 inventory defeats the same two full-administrator fixtures at **common base HP 440: actual starting/max HP 440 for the paid board versus 550 for each opponent**. The enemy's base HP is never divided by 1.25. All fourteen ordinary pieces remain owned and placed, with earned `backup` only and load 23 / purchased capacity 31.
+
+**Reproduce these wins with the explicit CLI fixture-duel path below. Importing the saved Run and clicking ordinary Battle does not reproduce them.** The genuine saved state remains a legacy campaign before round 8; its next ordinary encounter is YouTube at actual HP 460 versus 560. Neither exact recorded Cart nor Six-onestop fixture is selectable as a normal laboratory enemy. A laboratory copy also launches with unbounded battle capacity and the selected enemy's HP, rather than this witness's finite capacities and common base HP. This study adds no launch option, opponent, preset or gameplay change.
+
+**The original retained geometry already wins both natural-start common-base-460 comparisons.** The new geometry closes the natural common-base-440 Cart loss and wins the declared finite phase/HP grid. It is not the first unnormalized natural victory at every HP, and it does not improve every surviving-HP margin.
+
+### Exact paid route and its costs
+
+The [bounded route fixture](../../fixtures/balance/paid-rearranged-counter-route.json) contains only project game data: the seed, initial Run fingerprint, 202 production-API actions and resulting full-Run fingerprints, the cash ledger, and 28 subsequent rearrangement moves with resulting fingerprints. It does not inject a final board or load an external research report. The [portable witness](../../scripts/paid-rearranged-counter-witness.ts) starts a new empty legacy expedition, chooses seed 308 and its real deterministic market, then executes every purchase, reroll, editor move, battle start, actual battle settlement and loot claim through the existing `R` APIs.
+
+| Resource or state | Saved before round 8 |
+| --- | ---: |
+| Retained ordinary inventory | 14 pieces, $57 input value, load 23 |
+| Bought pieces | $51 |
+| Genuine UI loot | `ab_nav` after round 1 and `ab_link` after round 5; $6 input value |
+| Capacity plans | $3 light plan in round 4; $9 large plan in round 7 |
+| Paid rerolls | 13, costing $13 |
+| Historical cash spending | **$51 + $12 + $13 = $76** |
+| Seven prior settlement rewards | $70 |
+| Cash conservation | **$10 + $70 − $76 = $4** |
+| Purchased capacity | 31, increased 12 → 17 → 31 |
+| Earned administrator | `backup` after round 2; no `server` |
+| Progress | stage 7, seven wins, three lives, no pending reward |
+| Acquired stage base / actual HP | 460 / 460 |
+
+The round-2 reward offers `gov_page`, `gov_notice` and `admin:backup`; the route claims the actual backup offer. Four other loot offers are declined through `R.claimLoot`. The 202 acquisition actions comprise 154 moves, 14 purchases (12 UI purchases and two plans), 13 rerolls, seven battle starts, seven settlements and seven loot claims. No selected action fails.
+
+**The font is bought for $5 before round 8, after all seven prior settlements**, following three paid round-8 rerolls. The saved inventory therefore does include a purchase after round 7. No round-8 battle, settlement or reward funds it. Subsequent rearrangement adds no expense or equipment and does not erase the historical $76 cost.
+
+| Acquisition round | Actual result | Time | Cash reward | Own prebattle load / capacity |
+| --- | --- | ---: | ---: | ---: |
+| 1 | Win | 10.25 s | $10 | 3 / 12 |
+| 2 | Win | 8.20 s | $10 | 8 / 12 |
+| 3 | Win | 8.85 s | $10 | 12 / 12 |
+| 4 | Win | 8.85 s | $10 | 14 / 17 |
+| 5 | Win | 13.55 s | $10 | **18 / 17, overloaded** |
+| 6 | Win | 8.10 s | $10 | **22 / 17, overloaded** |
+| 7 | Win | 16.10 s | $10 | 22 / 31 |
+
+This is a selected existing route, not a fresh seed cohort, reliable shopping policy, cheap acquisition recommendation or canonical fifteen-battle story result. Its real round-5 and round-6 overload is preserved. The opponent costs and capacities remain completed-board comparison conditions, with no paid opponent acquisition or equal-spend claim.
+
+### One exact rearrangement and resize
+
+All IDs, acquisition order, ordinary `source` shapes and empty labels remain unchanged. The real editor API temporarily holds all fourteen pieces in build mode, then legally places the form first and the remaining pieces. Every one of these 28 moves succeeds. Every persistent state validates and survives a JSON round-trip, every move preserves all nongeometry inventory fields and the full economic/progression state, and no battle starts with a held piece.
+
+| ID | Part | x | y | width | height |
+| --- | --- | ---: | ---: | ---: | ---: |
+| p1 | `ab_link` | 248 | 72 | 224 | 24 |
+| p2 | `ab_hr` | 32 | 330 | 640 | 8 |
+| p3 | `ab_link` | 248 | 96 | 224 | 24 |
+| p4 | `ab_nav` | 248 | 192 | 224 | 24 |
+| p5 | `ab_nav` | 248 | 216 | 224 | 24 |
+| p6 | `ab_heading` | 248 | 240 | 224 | 42 |
+| p7 | `ab_link` | 248 | 120 | 224 | 24 |
+| p8 | `ab_guestbook` | 32 | 354 | 240 | 96 |
+| p9 | `go_suggest` | 480 | 72 | 192 | **250** |
+| p10 | `ab_link` | 248 | 144 | 224 | 24 |
+| p11 | `gov_form` | 16 | 16 | 672 | 338 |
+| p12 | `ab_link` | 248 | 168 | 224 | 24 |
+| p13 | `gov_pdf` | 248 | 282 | 224 | 40 |
+| p14 | `gov_font` | 32 | 72 | 208 | **250** |
+
+The font and suggestion controls flank the attacks, supplying direct support to both navs and the heading. Their power multipliers become 2.1, from 1.5 / 1.0 / 1.4 respectively. The five links and PDF already had 2.1. The seven-entry navigation slowdown remains 1.05 and the first two highlighted links keep the +3 whitespace damage bonus. These are unchanged engine mechanics, not manually granted bonuses.
+
+This is **not an unchanged-size move**: among other changes, links widen from 96 to 224 px, navs from 112 to 224, the font changes from 576×32 to 208×250, suggestion from 576×56 to 192×250, and form from 920×240 to 672×338. Union occupied area increases from 243,840 to 250,176 px². The taller support controls and PDF's 40 px height are mechanically legal but **not visually or interactively accepted**. Wrapping, truncation, usability, keyboard operation and assistive-technology behavior have not been certified. This does not justify installing a preset or calling it an accepted product composition.
+
+### Common-base controls, including original-layout failures
+
+All comparisons use canonical combat-v4, no experimental rules and 0.05 s steps. The paid board retains `backup`, capacity 31 and load 23. Cart retains `server` + `backup`, capacity 35 and load 28; Six-onestop retains those same administrators, capacity 26 and load 19. Both opponent layouts are the existing unchanged [fixture](../../fixtures/balance/paid-counter-opponents.json). Neither side is overloaded in these reference duels.
+
+| Common base HP | Actual starting/max HP, own / foe | Original physical wins | Rearranged physical wins |
+| ---: | ---: | ---: | ---: |
+| 396 | 396 / 495 | 4 / 12 | 12 / 12 |
+| 440 | 440 / 550 | 4 / 12 | 12 / 12 |
+| 460 | 460 / 575 | 10 / 12 | 12 / 12 |
+| 484 | 484 / 605 | 10 / 12 | 12 / 12 |
+
+Each row includes two opponents, phases −0.5 / 0 / +0.5, and both physical seats. Negative phase delays every opponent periodic clock by 0.5 s; positive phase delays every paid-board periodic clock; zero keeps natural startup. These correlated side-wide shifts are not independent per-part jitter or exhaustive timing coverage. Base 460 preserves the acquired player's stage HP; 396/440/484 are explicitly counterfactual comparison options. No saved Run HP, administrator or economic state is rewritten, and no reference duel is settled into the expedition.
+
+| Natural-start condition | Original geometry | Rearranged geometry |
+| --- | --- | --- |
+| Common base 440, Cart | Loss; Cart keeps 30.8 HP at 10.80 s | Win; own 69.9 HP at 10.15 s |
+| Common base 440, Six-onestop | Win; own 23.2 HP at 11.50 s | Win; own 17.2 HP at 10.35 s |
+| Common base 460, Cart | Win; own 34 HP at 11.50 s | Win; own 34 HP at 11.35 s |
+| Common base 460, Six-onestop | Win; own 144 HP at 11.50 s | Win; own 144 HP at 11.35 s |
+
+Each result reproduces in both seats. The new layout wins **48/48 physical comparisons**, with minimum remaining HP about 10.2. The original wins 28/48. All twenty original physical losses remain in the report: Cart at base 396 and 440 in every phase, Cart at 460/+0.5 and 484/+0.5, and Six-onestop at 396/+0.5 and 440/+0.5. In particular, the new natural-440 Six-onestop win ends sooner but retains less HP than the original. Neither more starting HP nor this rearrangement monotonically improves every margin.
+
+### Reproduce the fixed witness
+
+From the repository root with the existing dependencies and supported Node version:
+
+```sh
+node --import tsx scripts/paid-rearranged-counter-witness.ts
+node --import tsx --test tests/balance-paid-rearranged-counter-witness.test.mjs
+```
+
+The explicit CLI prints one deterministic JSON report; importing the module is silent. No network, service, installation, browser, private workspace path or external study file is needed. Relative imports resolve from the script location, not the process working directory. The report includes the full original and rearranged Runs, all legal moves and transaction/reward ledgers, seven actual settlements, both exact opponents, explicit common-base and actual/max HP, finite capacities, administrators, both seats and all original losses. It also records the gameplay-catalog SHA-256 fingerprint used by the earlier witnesses.
+
+The replay checks every recorded resulting Run fingerprint against the actual production API state, rejects invalid actions and changed ledgers, and validates **224** persistent states including the initial empty state. A separately pinned action-sequence fingerprint also rejects a changed no-op hold even when all resulting Run states are identical. These unsigned fixture fingerprints are regression checks, not cryptographic proof of a player's history. The focused test includes mutated purchases, unsupported operations, altered state fingerprints, malformed arguments, missing steps, altered cash ledger and illegal/changed rearrangement moves, as well as silent imports and identical CLI output from different working directories.
+
+This public script executes 48 original-layout and 48 reachable-rearranged-layout reference duels. These are 96 physical comparisons of the same two fixed states, not additional paid witnesses or independent statistical trials. Passing the focused command alone does not certify the full project suite, build, browser presentation, other enemies, all HP values, a general counter cycle, global optimality or canonical story acquisition. No game source, price, combat rule, acquisition rule, preset or enemy pool is changed.

@@ -21,3 +21,14 @@
 .reddit-sidebar-font-seat { font-weight: 700; }
 .reddit-sidebar-detached-note { padding: 0; }
 .reddit-sidebar-footnote { padding-top: 4px; }
+
+/* Inspector actions may wrap in the narrow sidebar; never cap their text height. */
+.reddit-sidebar-placement-guide .sel-actions button {
+  min-width: 0;
+  min-height: 38px;
+  height: auto;
+  padding: 8px 10px;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
