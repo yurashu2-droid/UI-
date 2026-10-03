@@ -56,13 +56,21 @@ function distance(a: Item, b: Item) {
   );
 }
 const consumers = new Set(["am_cart", "am_oneclick", "ad_popup", "yt_tip"]);
-function selectRoute<T extends Item>(
+/** The same potential producers used by conversion analysis; earning still has its own conditions. */
+export function isIncomeProducer(p: Pick<Item, "type">) {
+  return Object.hasOwn(P, p.type) && (
+    (P[p.type].tags.includes("economy") && !consumers.has(p.type)) ||
+    ["gov_submit", "gov_onestop"].includes(p.type)
+  );
+}
+/** Engine-owned order for a placed source and the analyzed structural neighborhood. */
+export function incomeRouteCandidates<T extends Item>(
   items: T[],
   near: Record<string, string[]>,
   p: Item,
   pressure = false,
 ) {
-  const candidates = items
+  return items
     .filter(
       (q) =>
         (consumers.has(q.type) || (pressure && q.type === "go_jobs")) &&
@@ -71,6 +79,14 @@ function selectRoute<T extends Item>(
           (near[q.id] ?? []).includes(p.id)),
     )
     .sort((a, b) => distance(p, a) - distance(p, b) || compareParts(a, b));
+}
+function selectRoute<T extends Item>(
+  items: T[],
+  near: Record<string, string[]>,
+  p: Item,
+  pressure = false,
+) {
+  const candidates = incomeRouteCandidates(items, near, p, pressure);
   return candidates.find((q) => q.id === p.routeTo) ?? candidates[0];
 }
 function whitespaceBonus(p: Item, info: BattleAnalysis) {
@@ -382,10 +398,7 @@ function analyze(
       })),
   };
   for (const p of board) {
-    if (
-      (P[p.type].tags.includes("economy") && !consumers.has(p.type)) ||
-      ["gov_submit", "gov_onestop"].includes(p.type)
-    ) {
+    if (isIncomeProducer(p)) {
       const q = selectRoute(board, result.near, p, experimentalRules === "server-pressure-v1");
       if (q)
         rel(
@@ -1429,6 +1442,8 @@ class Battle {
 export { Battle };
 const api = {
   analyze,
+  isIncomeProducer,
+  incomeRouteCandidates,
   naturalPeriod,
   Battle,
   groupNames,

@@ -1,3 +1,4 @@
+import * as incomeRoutes from '../src/income-route-guidance.js';
 import * as conversionViews from '../src/conversion-guidance.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,7 +18,7 @@ const attr=(n,k)=>n.attrs?.find(a=>a.name===k)?.value;
 test('actual inspector names the field as part identity without promising every native control changes visible text',()=>{
   for(const type of ['yt_speed','yt_play']){
     const selected=C.makeItem(type,'p1',32,32);selected.label='My <part> & "title"';
-    const before=structuredClone(selected),context={P:D.PARTS,D,E,R,...guidance,...navigation,...conversionViews,selected,info:E.analyze([selected]),
+    const before=structuredClone(selected),context={P:D.PARTS,D,E,R,...guidance,...navigation,...conversionViews, ...incomeRoutes, incomeRouteEditingAllowed:()=>false,selected,info:E.analyze([selected]),
       battle:null,run:R.newRun('lab'),storyActive:false,working:()=>true,labPressureCapacity:()=>null,
       KIND:{passive:'補助',attack:'攻撃'},GROUP_BONUS:{},esc:V.esc,skinPicker:()=>'',connectText:()=>''};
     vm.runInNewContext(compiled+'\noutput=selectionCard([selected],info);',context);

@@ -1,3 +1,4 @@
+import * as incomeRoutes from '../src/income-route-guidance.js';
 import * as conversionViews from '../src/conversion-guidance.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -11,7 +12,7 @@ const source=readFileSync(new URL('../src/app.ts',import.meta.url),'utf8');
 function compiled(name){const found=source.match(new RegExp(`^function ${name}\\([^]*?^}`, 'm'));assert.ok(found);return transformSync(found[0],{loader:'ts',target:'es2022'}).code;}
 const escape=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 function render(name,board,selected){
-  const info=E.analyze(board),context={D,P:D.PARTS,E,R,...guidance,...navigation,...conversionViews,info,selected,run:R.newRun('campaign'),battle:null,storyActive:false,
+  const info=E.analyze(board),context={D,P:D.PARTS,E,R,...guidance,...navigation,...conversionViews, ...incomeRoutes, incomeRouteEditingAllowed:()=>false,info,selected,run:R.newRun('campaign'),battle:null,storyActive:false,
     labPressureCapacity:()=>null,working:()=>true,KIND:{attack:'攻撃'},GROUP_BONUS:{},esc:escape,connectText:()=>'',skinPicker:()=>'',favicon:()=>'',hints:()=>[],isFaction:key=>Object.hasOwn(D.FACTIONS,key)};
   vm.runInNewContext(compiled(name)+`\noutput=${name}(${name==='selectionCard'?'[selected],info':'info'});`,context);return context.output;
 }
@@ -40,7 +41,7 @@ test('actual side-panel rendering uses the current battle analysis for legacy co
     const battle=new E.Battle(run.owned,[],{combatVersion:version}),nodes=new Map();let selectedInfo,synergyInfo;
     const node=()=>({innerHTML:'',disabled:false,querySelector:()=>({})});
     const context={D,P:D.PARTS,E,R,C,run,battle,storyActive:false,preview:false,labPressureCapacity:()=>null,
-      editor:{selected:()=>[run.owned[0]],history:[],future:[]},$:key=>{if(!nodes.has(key))nodes.set(key,node());return nodes.get(key);},
+      HTMLSelectElement:class {},editor:{selected:()=>[run.owned[0]],history:[],future:[]},$:key=>{if(!nodes.has(key))nodes.set(key,node());return nodes.get(key);},
       selectionCard:(_,info)=>{selectedInfo=info;return '';},synergyPanel:info=>{synergyInfo=info;return '';},opponentCard:()=>'',
       appOpponent:()=>({faction:'retro',pageName:'Test',decor:[]}),appEnemyBoard:()=>[],V:{header:()=>'',render(){}},scheduleFit(){}};
     vm.runInNewContext(compiled('renderSide')+'\nrenderSide();',context);

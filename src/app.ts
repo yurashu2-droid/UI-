@@ -32,6 +32,7 @@ import { previewCatalogueAction } from "./catalog/preview.js";
 import { VIDEO_SPEED_HELP, INSTANT_SEARCH_HELP, instantSearchSupport, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
 import { navigationGuidance, renderNavigationGuidance } from "./navigation-guidance.js";
 import { conversionGuidance, renderConversionGuidance } from "./conversion-guidance.js";
+import { incomeRouteGuidance, renderIncomeRouteGuidance } from "./income-route-guidance.js";
 import { getHelpContent, renderHelpBody } from "./help-content.js";
 import { createDeferredMount } from "./feature-loader.js";
 import { createRaidEnemy } from "./raid/blueprint.js";
@@ -95,6 +96,7 @@ let run: Run,
   toastTimer: ReturnType<typeof setTimeout> | undefined,
   fitRAF = 0,
   coachHidden = false;
+let incomeRouteBinding: { element: HTMLSelectElement; run: Run; sourceId: string } | null = null;
 const memory: Partial<Record<Mode, Run>> = {};
 const labBattleController = createLabBattleController();
 let storyActive = false;
@@ -431,6 +433,44 @@ function working(p: Item, info: EngineInfo) {
 function shortDesc(d: PartDefinition) {
   const s = d.desc.split("。")[0];
   return s + "。";
+}
+function incomeRouteEditingAllowed() {
+  return !battle && !preview && !settling && !pendingStorySettlement &&
+    run.phase === "build" && view === "self" &&
+    !document.querySelector("dialog[open]");
+}
+function setIncomeRouteFromControl(el: HTMLSelectElement) {
+  const binding = incomeRouteBinding;
+  if (!binding || binding.element !== el || binding.run !== run ||
+    !el.isConnected || el.disabled || binding.sourceId !== el.dataset.sourceId ||
+    !document.querySelector("#inspector")?.contains(el) || !incomeRouteEditingAllowed()) return;
+  const selected = editor.selected();
+  if (editor.selection.size !== 1 || selected.length !== 1 || selected[0].id !== binding.sourceId) return;
+  const source = selected[0], pressure = labPressureCapacity() !== null;
+  const info = E.analyze(run.owned, pressure ? "server-pressure-v1" : null);
+  const route = incomeRouteGuidance(source, info, { owned: run.owned, pressure, editable: true });
+  if (!route?.editable) return;
+  const value = el.value, option = el.selectedOptions[0], previous = source.routeTo ?? "";
+  if (!Number.isInteger(el.selectedIndex) || el.selectedIndex < 0 || !option || option.disabled ||
+    (value !== "" && !route.candidates.some((candidate) => candidate.id === value))) {
+    el.value = previous;
+    return;
+  }
+  if (value === previous) return;
+  const focused = document.activeElement === el, originalRun = run, sourceId = source.id;
+  const committed = editor.commit(() => {
+    if (value === "") delete source.routeTo;
+    else source.routeTo = value;
+    return true;
+  });
+  const next = incomeRouteBinding, selection = editor.selected();
+  // A successful edit repaints the inspector. Preserve this focused control,
+  // but never reclaim focus chosen by another control, a dialog or a new run.
+  if (committed && focused && originalRun === run && next?.run === run &&
+    next.sourceId === sourceId && editor.selection.size === 1 && selection.length === 1 && selection[0].id === sourceId &&
+    next.element.isConnected && !next.element.disabled && incomeRouteEditingAllowed() &&
+    (document.activeElement === document.body || document.activeElement === null))
+    next.element.focus({ preventScroll: true });
 }
 function matchHint(t: string, info: EngineInfo) {
   if (t === "yt_speed") return videoSpeedHint(info);
@@ -1177,6 +1217,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
  }
  ${ok ? "" : `<p class="sel-warn">⚠ 今は働いていません</p>`}<div class="sel-connect"><b>つなぎ方</b>${esc(connectText(p.type))}</div>
  ${renderConversionGuidance(conversionGuidance(p, info))}
+ ${renderIncomeRouteGuidance(incomeRouteGuidance(p, info, { owned: run.owned, pressure: labPressureCapacity() !== null, editable: incomeRouteEditingAllowed() }))}
  ${instantSupport ? `<div class="sel-connect"><b>接続している文字攻撃</b>${!instantSupport.placed ? "未配置：ページに置くと、自分の攻撃と近くの文字攻撃を支援します。" : instantSupport.targets.length ? `<ul class="sel-bonus">${instantSupport.targets.map(target => `<li>${esc(target.label || P[target.type].name)}</li>`).join("")}</ul>` : "ほかの文字攻撃には未接続。自分の内蔵サジェストは有効です。"}</div>` : ""}
  ${d.kind === "attack" && d.tags.includes("navigation") ? `<details class="sel-more"><summary>このUIの余白加算</summary>${renderNavigationGuidance(navigationGuidance(info, p))}</details>` : ""}
  <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>
@@ -1238,6 +1279,7 @@ function opponentCard() {
   return `<section class="side-sec opp"><h3>${o.round ? `次の相手 <small>ROUND ${o.round}</small>` : "対戦相手"}</h3><div id="enemy-thumbnail" class="enemy-thumbnail" role="button" tabindex="0" aria-label="相手のサイトを大きく見る"></div><b class="opp-name">${esc(o.pageName)}</b><div class="opp-meta"><span>UI ${o.size}個</span><span>閲覧者の粘り ${o.hp}</span>${adm.length ? `<span>管理画面：${esc(adm.join("・"))}</span>` : ""}</div><p class="opp-tip">${esc(o.tip)}</p>${run.mode === "lab" ? `<select id="enemy-select" class="select-input">${enemyOptions(o.index)}</select><button id="open-builds" class="side-btn">構成例図鑑・相性表</button>` : ""}<button id="view-enemy" class="side-btn">相手のサイトをよく見る</button></section>`;
 }
 function renderSide() {
+  incomeRouteBinding = null;
   const host = $("#inspector"),
     sel = editor.selected(),
     // Battle construction keeps analyze()'s full result; BattleSide exposes its base type.
@@ -1253,6 +1295,10 @@ function renderSide() {
     selectionCard(sel, info) +
     synergyPanel(info) +
     opponentCard();
+  const routeControl = host.querySelector<HTMLSelectElement>("#sel-income-route");
+  if (routeControl instanceof HTMLSelectElement && sel.length === 1 &&
+    routeControl.dataset.sourceId === sel[0].id)
+    incomeRouteBinding = { element: routeControl, run, sourceId: sel[0].id };
   if (run.mode === "lab" && !storyActive) {
     const controlHost = document.createElement("section");
     controlHost.className = "side-sec lab-experiment-control";
@@ -2962,6 +3008,10 @@ document.addEventListener("change", (e) => {
   const el = e.target;
   if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement))
     return;
+  if (el.id === "sel-income-route" && el instanceof HTMLSelectElement) {
+    setIncomeRouteFromControl(el);
+    return;
+  }
   if (el.id === "part-label") {
     editor.update({ label: el.value });
     return;

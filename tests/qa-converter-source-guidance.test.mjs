@@ -1,3 +1,4 @@
+import * as incomeRoutes from '../src/income-route-guidance.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -28,7 +29,7 @@ const selectionCode = transformSync(rules, { loader: 'ts', target: 'es2022' }).c
 const escape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 function inspect(selected, info) {
   const context = {
-    ...appGuidance, ...navigation, ...conversion, targetCaption, D, P: D.PARTS, E, R, selected, info,
+    ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, incomeRouteEditingAllowed:()=>false, targetCaption, D, P: D.PARTS, E, R, selected, info,
     run: R.newRun('campaign'), battle: null, storyActive: false,
     labPressureCapacity: () => null, labBattleController: { value: 'normal' },
     esc: escape, skinPicker: () => '',
@@ -236,10 +237,10 @@ function inspectSide(run, battle, selected) {
   const nodes = new Map();
   const node = () => ({ innerHTML: '', disabled: false, querySelector: () => ({}) });
   const context = {
-    ...appGuidance, ...navigation, ...conversion, targetCaption,
+    ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, incomeRouteEditingAllowed:()=>false, targetCaption,
     D, P: D.PARTS, E, R, C, run, battle, storyActive: false, preview: false,
     labPressureCapacity: () => null, labBattleController: { value: 'normal' },
-    editor: { selected: () => [selected], history: [], future: [] },
+    HTMLSelectElement: class {}, editor: { selected: () => [selected], history: [], future: [] },
     $: key => { if (!nodes.has(key)) nodes.set(key, node()); return nodes.get(key); },
     esc: escape, skinPicker: () => '', synergyPanel: () => '', opponentCard: () => '',
     appOpponent: () => ({ faction: 'retro', pageName: 'Opponent', decor: [] }),
