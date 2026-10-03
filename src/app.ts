@@ -33,13 +33,16 @@ import { VIDEO_SPEED_HELP, INSTANT_SEARCH_HELP, instantSearchSupport, isVideoSou
 import { navigationGuidance, renderNavigationGuidance } from "./navigation-guidance.js";
 import { conversionGuidance, renderConversionGuidance } from "./conversion-guidance.js";
 import { incomeRouteGuidance, renderIncomeRouteGuidance } from "./income-route-guidance.js";
+import { containmentGuidance, renderContainmentGuidance } from "./containment-guidance.js";
+import { battleIncomeResult, renderBattleIncomeResult, type BattleIncomeResultView } from "./battle-income-result.js";
 import { getHelpContent, renderHelpBody } from "./help-content.js";
 import { createDeferredMount } from "./feature-loader.js";
 import { createRaidEnemy } from "./raid/blueprint.js";
 import { registerRaidBlueprint } from "./raid/registry.js";
 import { applyRaidAppearance, renderRaidAppearance } from "./raid/render.js";
 import type { RaidBlueprint, RaidInitialRequest } from "./raid/types.js";
-import * as Story from "./story/index.js";
+import { currentStoryEncounter, currentStoryStage } from "./story/state.js";
+import { STORY_WORLD } from "./story/content.js";
 import * as StorySession from "./story/session.js";
 import type { StoryCommand, StoryEncounter, StoryTransition } from "./story/types.js";
 
@@ -109,7 +112,7 @@ const storyPersistence = StorySession.createStorySessionPersistence({
 });
 function appOpponent() {
   if (!storyActive || !storySession) return R.opponent(run);
-  const encounter = storyBattleEncounter ?? Story.currentStoryEncounter(storySession.story) ?? Story.currentStoryStage(storySession.story).encounters.at(-1)!;
+  const encounter = storyBattleEncounter ?? currentStoryEncounter(storySession.story) ?? currentStoryStage(storySession.story).encounters.at(-1)!;
   return { ...encounter.enemy, index: -1, round: null, size: encounter.enemy.layout.length, full: true };
 }
 function appEnemyBoard() {
@@ -776,7 +779,7 @@ function renderTopbar() {
   const info = C.analyze(run.owned);
   wm.setTitle("page", run.page.name);
   if (storyActive && storySession) {
-    const stage = Story.currentStoryStage(storySession.story);
+    const stage = currentStoryStage(storySession.story);
     $("#tb-run").innerHTML = `<div class="tb-round"><small>STAGE</small><b>${stage.number}</b><span>/ 8</span></div><div class="tb-mode"><b>${esc(stage.title)}</b></div><div class="tb-lives">${"♥".repeat(run.lives)}</div><button id="story-hub-button" class="side-btn">ジャンクの作業場</button>`;
     $("#tb-stats").innerHTML = `<div class="tb-money"><small>資金</small>$<b>${run.cash}</b></div>${loadMeter(info)}`;
   } else if (run.mode === "campaign") {
@@ -1187,24 +1190,20 @@ function renderStash() {
 /* ---------- Right panel: selection, synergy, opponent ---------- */
 function selectionCard(sel: Item[], info: EngineInfo) {
   if (!sel.length) return "";
+  const containment = renderContainmentGuidance(containmentGuidance(sel, info, { editable: incomeRouteEditingAllowed() }));
   if (sel.length > 1) {
     const skinnable = sel.find((p) => D.SKINNABLE.includes(P[p.type].layout));
-    return `<section class="side-sec sel-card"><div class="sel-kicker">${sel.length}個を選択中</div><h2>まとめて操作</h2><p class="sel-desc">ドラッグで一緒に移動できます。同じ高さに揃えて横につなぐこともできます。</p><div class="sel-actions"><button data-editor-action="horizontal">横につなぐ</button><button data-editor-action="vertical">縦に揃える</button></div><div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : "まとめて売る"}</button></div>${skinnable ? `<details class="sel-more"><summary>見た目（時代）をまとめて変える</summary>${skinPicker(skinnable, true)}</details>` : ""}</section>`;
+    return `<section class="side-sec sel-card"><div class="sel-kicker">${sel.length}個を選択中</div><h2>まとめて操作</h2><p class="sel-desc">ドラッグで一緒に移動できます。同じ高さに揃えて横につなぐこともできます。</p>${containment}<div class="sel-actions"><button data-editor-action="horizontal">横につなぐ</button><button data-editor-action="vertical">縦に揃える</button></div><div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : "まとめて売る"}</button></div>${skinnable ? `<details class="sel-more"><summary>見た目（時代）をまとめて変える</summary>${skinPicker(skinnable, true)}</details>` : ""}</section>`;
   }
   const p = sel[0],
     d = P[p.type],
     f = D.FACTIONS[d.faction],
     m = info.mods[p.id] || { speed: 1, power: 1, notes: [] },
     groups = info.member[p.id] || [],
-    parent = info.parents[p.id],
     ok = working(p, info),
     instantSupport = instantSearchSupport(p, info);
   const interval=battle?.player.parts.find(part=>part.id===p.id)?.period ?? E.naturalPeriod(p,info,battle?.player.capacity??(labPressureCapacity()??(run.mode==="lab"&&!storyActive?Infinity:R.capacity(run))));
   const notes = [...m.notes];
-  if (parent)
-    notes.unshift(
-      `${P[info.board.find((q) => q.id === parent)!.type].name}の内側`,
-    );
   return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2>${d.status === "experimental" ? '<p class="sel-warn">実験用UI · バランス調整中。本編・オンラインの入手候補には入りません。</p>' : ""}<p class="sel-desc">${esc(d.desc)}</p>
  <div class="sel-stats">${p.type === "go_jobs" ? `<div><small>試験価格</small><b>$${d.price}</b></div><div><small>設置サイズ</small><b>${p.w}×${p.h}</b></div>` : ""}<div><small>自然発動</small><b>${d.cd ? (interval>0?interval.toFixed(2) + "秒ごと":"未配置") : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
  ${
@@ -1223,6 +1222,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
  <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>
  ${p.appearanceId ? '<p class="muted">取得元の外観を使用中。合成後は標準表示になりますが、元の外観と由来はコレクションに残ります。</p>' : ""}
  <details class="sel-more"><summary>見た目（時代）・部品ラベルを変える</summary>${skinPicker(p)}<label class="field-label">部品ラベル<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="標準の名前・表示を使用"></label><p class="muted">部品の識別に使うラベルです。対応するUIの標準表示では、ページ上の文字も変わります。</p></details>
+ ${containment}
  <div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : `売る +$${R.sellValue(run, p.type)}`}</button></div></section>`;
 }
 // Each site culture gets a tiny favicon so it is recognisable at a glance, not only by colour.
@@ -1607,6 +1607,9 @@ $("#modal").addEventListener("close", () => {
   // A queued close from the previous panel may arrive after a story hub reopens.
   if ($<HTMLDialogElement>("#modal").open) return;
   modalFeatureDispose?.(); modalFeatureDispose = undefined;
+  // Story transactions can repaint the inspector while the dialog is open.
+  // Recompute its controls after actual dismissal, including native Escape.
+  renderSide();
 });
 /* ---------- Isolated story profile and actual editor/battle bridge ---------- */
 function commitStorySession(next: StorySession.StorySession) {
@@ -1646,10 +1649,16 @@ function openStoryHub() {
     openModal(`<div class="modal-inner">${modalHead("THE LAST BROWSER","接続が途切れた")}<p>この旅のライフが尽きました。作ったページと回収記録は保存されています。</p><button id="story-restart" class="primary">白紙のページから新しい旅へ</button><button data-close-modal>最後のページを見る</button></div>`);
     $("#story-restart").onclick=()=>enterStory(true);return;
   }
-  openModal('<div class="story-host-controls"><button id="story-open-inbox" class="side-btn"></button></div><div id="story-feature-host"></div>');
+  openModal(`<div class="modal-inner" id="story-loading-head">${modalHead("THE LAST BROWSER","ジャンクの作業場")}</div><div class="story-host-controls"><button id="story-open-inbox" class="side-btn"></button></div><div id="story-feature-host"></div>`);
   $("#modal").classList.add("feature-modal");
   const inbox=$("#story-open-inbox");inbox.textContent=`物語の受取箱 (${storySession.inbox.length})`;inbox.onclick=storyInboxPanel;
-  const panel=Story.mountStoryHub($("#story-feature-host"),{
+  const host=$("#story-feature-host");
+  const feature=deferredModalFeature(host,async()=>{
+    const panel=await import("./story/panel.js");
+    await panel.loadStyles();
+    return panel;
+  },({mountStoryHub})=>{
+    const panel=mountStoryHub(host,{
     getState:()=>storySession!.story,
     onCommand:storyCommand,
     onClose:closeModal,
@@ -1664,14 +1673,18 @@ function openStoryHub() {
       const result=StorySession.rehearseStoryFusion(storySession);
       if(!result.ok)throw new Error(result.error);
       commitStorySession(result.session);pendingFusions="fusions" in result?result.fusions:[];render();
-      if(result.effects.some(e=>e.type==="fusion-reaction"))toast(Story.STORY_WORLD.fusion.join(" "));
+      if(result.effects.some(e=>e.type==="fusion-reaction"))toast(STORY_WORLD.fusion.join(" "));
       else toast("配置した部品を統合しました。");
     },
     onOptionalRaid:async(url,kind)=>{
       await raidPanel({url,kind,...(kind==="cached"&&storySession?{cachedBlueprint:StorySession.findStoryCapture(storySession,url)}:{})});
     },
+    });
+    $("#story-loading-head").remove();
+    return panel;
   });
-  modalFeatureDispose=panel.dispose;
+  modalFeatureDispose=feature.dispose;
+  void feature.start();
 }
 function storyRewardPanel() {
   const reward=storySession?.reward;if(!reward)return;
@@ -1698,7 +1711,7 @@ function storyInboxPanel() {
 }
 async function finishStoryBattle() {
   if(!battle||!storySession||!storyMatchId)return;
-  const current=battle,settled=StorySession.settleStoryBattle(storySession,storyMatchId,current);
+  const current=battle,incomeView=battleIncomeResult(current),settled=StorySession.settleStoryBattle(storySession,storyMatchId,current);
   if(!settled.ok){toast(settled.error);return;}
   if(!("summary" in settled)||!settled.summary)return;
   try{commitStorySession(settled.session);pendingStorySettlement=null;}catch(error){
@@ -1713,7 +1726,7 @@ async function finishStoryBattle() {
   await Cer.showOutcome({win:summary.winner==="player",draw:summary.winner==="draw",round:null,you:visitors.player,foe:visitors.enemy,headline:summary.winner==="player"?"接続先から回収しました":"ページを組み直そう"});
   if(battle!==current)return;
   const reaction=settled.effects.some(e=>e.type==="fusion-reaction");
-  openModal(`<div class="modal-inner">${modalHead("STORY / アクセス解析",summary.winner==="player"?"回収成功":"接続から帰還")}<p>相手：${esc(summary.enemy)}</p><p>基本収入 $${summary.base} ＋ 勝利 $${summary.bonus} ＋ 収益 $${summary.income} = $${summary.total}</p>${reaction?`<p>${esc(Story.STORY_WORLD.fusion.join(" "))}</p>`:""}<p>${summary.winner==="player"?"次に持ち帰るUIを選びます。重要な記録は確実に保存されます。":"同じ段階で、配置と部品を見直せます。"}</p><button id="story-result-hub" class="primary">ジャンクの作業場へ</button><button id="story-result-editor">ページを編集する</button></div>`);
+  openModal(`<div class="modal-inner">${modalHead("STORY / アクセス解析",summary.winner==="player"?"回収成功":"接続から帰還")}<p>相手：${esc(summary.enemy)}</p><p>基本収入 $${summary.base} ＋ 勝利 $${summary.bonus} ＋ 収益 $${summary.income} = $${summary.total}</p>${renderBattleIncomeResult(incomeView)}${reaction?`<p>${esc(STORY_WORLD.fusion.join(" "))}</p>`:""}<p>${summary.winner==="player"?"次に持ち帰るUIを選びます。重要な記録は確実に保存されます。":"同じ段階で、配置と部品を見直せます。"}</p><button id="story-result-hub" class="primary">ジャンクの作業場へ</button><button id="story-result-editor">ページを編集する</button></div>`);
   $("#story-result-hub").onclick=()=>{leaveBattle();openStoryHub();};
   $("#story-result-editor").onclick=()=>leaveBattle();
 }
@@ -1747,7 +1760,11 @@ function onlinePanel() {
   openModal(`<div class="modal-inner" id="online-loading-head">${modalHead("ONLINE", "非同期オンライン")}</div><div id="online-feature-host"></div>`);
   $("#modal").classList.add("feature-modal");
   const host = $("#online-feature-host");
-  const feature = deferredModalFeature(host, () => import("./online/panel.js"), ({ mountOnlinePanel }) => {
+  const feature = deferredModalFeature(host, async () => {
+    const panel = await import("./online/panel.js");
+    await panel.loadStyles();
+    return panel;
+  }, ({ mountOnlinePanel }) => {
     const panel = mountOnlinePanel(host, { baseUrl: "/api/arena", onClose: closeModal });
     $("#online-loading-head").remove();
     return panel;
@@ -2026,7 +2043,7 @@ function settings() {
     `<div class="modal-inner">${modalHead("SITE", "サイト名とヘッダー")}<label class="field-label">サイト名<input class="text-input" id="page-name" maxlength="40" value="${esc(run.page.name)}"></label><label class="field-label">ヘッダーのデザイン<select id="page-theme" class="select-input">${[["mixed", "ごちゃ混ぜ"], ...Object.entries(D.FACTIONS).map(([k, v]) => [k, v.name.endsWith("風") ? v.name : v.name + "風"])].map(([v, t]) => `<option value="${v}" ${v === run.page.theme ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label><div class="modal-footer"><button data-close-modal class="primary">閉じる</button></div></div>`,
   );
 }
-function resultModal(s: BattleSummary) {
+function resultModal(s: BattleSummary, incomeView: BattleIncomeResultView | null = null) {
   const win = s.winner === "player",
     camp = run.mode === "campaign",
     v = s.visitors || { player: 0, enemy: 0 },
@@ -2043,6 +2060,7 @@ function resultModal(s: BattleSummary) {
   openModal(`<div class="modal-inner result ${win ? "win" : "lose"}">${modalHead(s.round ? `ROUND ${s.round}` : "TEST BATTLE", win ? "勝利！ 閲覧者を奪い取った" : s.winner === "draw" ? "引き分け" : "敗北…閲覧者を奪われた")}
  <div class="res-share"><div><small>あなた</small><b>${v.player}人</b></div><div class="res-bar"><i style="width:${(100 * v.player) / tot}%"></i></div><div class="foe"><small>${esc(s.enemy)}</small><b>${v.enemy}人</b></div></div>
  ${camp ? `<div class="res-money"><div><span>基本収入</span><b>+$${s.base}</b></div><div><span>勝利ボーナス</span><b>+$${s.bonus}</b></div><div><span>サイト収益：戦闘中に稼いだ $${s.rawIncome} の半分（上限 $10）</span><b>+$${s.income}</b></div><div class="sum"><span>所持金</span><b>$${run.cash}</b></div></div>${!win && run.lives > 0 ? `<p class="res-note">ライフ残り ${"♥".repeat(run.lives)}。次のラウンドに進みます。</p>` : ""}` : ""}
+ ${renderBattleIncomeResult(incomeView)}
  ${best.length ? `<h4>活躍したUI</h4><div class="res-mvp">${best.map((p, i) => `<div><em>${i + 1}</em><b>${esc(P[p.type]?.name || "UI")}</b><span>${s.visitors ? `約${Math.max(1, Math.round((p.damage / s.visitors.max) * s.visitors.base))}人を奪取` : Math.round(p.damage) + "ダメージ"} ・ ${p.fires}回発動</span></div>`).join("")}</div>` : ""}
  <div class="result-actions">${next}</div></div>`);
 }
@@ -2083,7 +2101,7 @@ function finishModal() {
 /* ---------- Battle ---------- */
 async function start() {
   if (battle) return;
-  if (storyActive && storySession && (storySession.reward || storySession.story.phase !== "hub" || !Story.currentStoryEncounter(storySession.story) || run.lives <= 0)) { openStoryHub(); return; }
+  if (storyActive && storySession && (storySession.reward || storySession.story.phase !== "hub" || !currentStoryEncounter(storySession.story) || run.lives <= 0)) { openStoryHub(); return; }
   if (run.phase === "reward") {
     rewardModal();
     return;
@@ -2194,6 +2212,7 @@ function abort() {
 async function finishBattle() {
   if (!battle) return;
   if (storyActive && storySession && storyMatchId) { await finishStoryBattle(); return; }
+  const current = battle, incomeView = battleIncomeResult(current);
   const visitors = traffic.active
     ? { ...traffic.final(), base: traffic.base.enemy, max: battle.enemy.maxHp }
     : null;
@@ -2222,7 +2241,8 @@ async function finishBattle() {
     foe: visitors?.enemy ?? 0,
     mvp: best ? P[best.type]?.name : undefined,
   });
-  resultModal(s);
+  if (battle !== current) return;
+  resultModal(s, incomeView);
 }
 function leaveBattle() {
   if (pendingStorySettlement) return;

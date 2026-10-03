@@ -17,12 +17,18 @@ export interface VisibleHistoryRecord {
   consumed:boolean;
 }
 
+const historyStates = ['empty','recoverable','used','expired','unneeded'] as const;
+type HistoryState = typeof historyStates[number];
+const observedHistoryStates = new WeakMap<HTMLElement,HistoryState>();
+
 /** Strings are intended for textContent; timestamps are simulation ticks, never wall-clock time. */
 export function historyFeedback(record:VisibleHistoryRecord|null|undefined,ticks:number) {
-  if(!record)return {available:false,consumed:false,source:'ページの変更を待っています',time:'履歴なし',status:'復元できる被害はありません',expiry:'ページ共有の履歴'};
+  if(!record)return {state:'empty' as const,available:false,consumed:false,source:'ページの変更を待っています',time:'履歴なし',status:'復元できる被害はありません',expiry:'ページ共有の履歴'};
   const expired=record.expiresAt<=ticks;
   const available=!record.consumed&&!expired&&record.recoverable>0;
+  const state:HistoryState=record.consumed?'used':expired?'expired':available?'recoverable':'unneeded';
   return {
+    state,
     available,
     consumed:record.consumed,
     source:record.sourceName,
@@ -34,7 +40,14 @@ export function historyFeedback(record:VisibleHistoryRecord|null|undefined,ticks
 
 
 export function applyHistoryFeedback(panel:HTMLElement,view:ReturnType<typeof historyFeedback>):void {
-  panel.classList.toggle('is-history-used',view.consumed);
+  const previous=observedHistoryStates.get(panel);
+  if(previous!==view.state){
+    // A record is eligible, not necessarily ready to fire. Animate only an observed
+    // loss of eligibility; first observation and replacement never replay a heal.
+    panel.classList.toggle('is-history-closing',previous==='recoverable'&&['used','expired','unneeded'].includes(view.state));
+    observedHistoryStates.set(panel,view.state);
+  }
+  for(const state of historyStates)panel.classList.toggle(`is-history-${state}`,view.state===state);
   const fields:Record<string,string>={'.history-time':view.time,'.history-source':view.source,'.history-recovery':view.status,'.history-expiry':view.expiry};
   for(const [selector,text] of Object.entries(fields)){
     const field=panel.querySelector(selector);

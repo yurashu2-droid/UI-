@@ -1,3 +1,4 @@
+import * as containmentViews from '../src/containment-guidance.js';
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
@@ -185,7 +186,7 @@ function host(t, {mode="lab", story=false, secondType="am_oneclick", sourceType=
   const storyPersistence=StorySession.createStorySessionPersistence(storage);
   let context;
   context=vm.createContext({
-    ...appGuidance,...navigation,...conversion,...incomeRoutes,targetCaption,
+    ...appGuidance,...navigation,...conversion,...incomeRoutes,...containmentViews,targetCaption,
     UIRaidEditor:{Editor},E,C,D,P:D.PARTS,R,StorySession,V:{...V,render(){}},
     run,storyActive:story,storySession:session,storyPersistence,runPersistence,
     incomeRouteBinding:null,memory:{},profileStore:null,profileProblem:"",profileWrites:Promise.resolve(),

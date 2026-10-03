@@ -15,7 +15,10 @@ import {
   createOnlineReplayBattle,
 } from "./replay.js";
 import type { OnlineView } from "./types.js";
-import "../styles/online.css";
+import stylesheetUrl from "../styles/online.css?url";
+import { loadFeatureStylesheet } from "../feature-styles.js";
+
+export const loadStyles = () => loadFeatureStylesheet(stylesheetUrl);
 
 const esc = V.esc;
 function connectionMessage(error: unknown) {
@@ -24,6 +27,13 @@ function connectionMessage(error: unknown) {
   return error instanceof Error
     ? error.message
     : "オンラインサービスに接続できませんでした。";
+}
+function outcomeMessage(next: OnlineView, fallback: string) {
+  // A recovered receipt can accompany a newer view. Describe its search as
+  // historical; current publication is shown separately from the view below.
+  return next.outcome?.code === "NO_OPPONENT"
+    ? "前回の検索では、条件に合うほかのプレイヤーの公開ビルドが見つかりませんでした。この検索で資金・残機は減っていません。"
+    : next.outcome?.message || fallback;
 }
 type Command = Parameters<ReturnType<typeof createOnlineClient>["command"]>[0];
 type HistoryEffect =
@@ -130,7 +140,7 @@ export function mountOnlinePanel(
     guestExpired = false;
     view = next;
     draft = null;
-    message = next.outcome?.message || "サーバーに保存済み";
+    message = outcomeMessage(next, "サーバーに保存済み");
     error = false;
     render();
   }
@@ -183,7 +193,7 @@ export function mountOnlinePanel(
       message =
         effect.kind === "move"
           ? "配置を保存しました。"
-          : next.outcome?.message || "保存しました。";
+          : outcomeMessage(next, "保存しました。");
     } catch (e) {
       if (disposed) return;
       rejectHistory(e);
@@ -240,7 +250,10 @@ export function mountOnlinePanel(
     }
     const s = guestExpired ? undefined : view?.run,
       build = s?.phase === "build" && !view?.online.requiresNewRun,
-      match = view?.match;
+      match = view?.match,
+      confirmedBuild = build && !locked() && !error,
+      noOpponent = confirmedBuild && view?.outcome?.code === "NO_OPPONENT",
+      published = confirmedBuild && !!view?.online.publishedSnapshotId;
     root.innerHTML = `<header class="arena-header"><div><span class="arena-kicker">ASYNC NETWORK</span><h1>保存されたページと対戦</h1><p>他のプレイヤーの公開ビルドと戦います。相手の接続を待つ必要はありません</p></div><button data-arena="close" aria-label="オンラインを閉じる">閉じる ×</button></header>
       <div class="arena-status ${error ? "is-error" : ""}" role="status">${esc(message)} ${error ? '<button data-arena="retry">結果を確認・再接続</button>' : ""} ${guestExpired ? '<button data-arena="new-guest">新しいゲストで開始</button>' : ""}</div>
       ${
@@ -281,7 +294,7 @@ export function mountOnlinePanel(
        ${match && !build ? `<div class="arena-match-label">対戦相手：ほかのプレイヤーが登録した保存ビルド · ROUND ${match.opponent.round + 1} · ${match.opponent.wins}勝 · 記録時レート${match.opponent.rating}</div>${page(match.opponent.items, "opponent", "保存された相手のページ")}<div class="arena-replay"><button data-arena="replay">▶ リプレイ</button><button data-arena="pause">一時停止 / 再開</button><select data-arena-speed aria-label="リプレイ速度"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select><span data-arena-clock>サーバー結果: ${match.winner === "player" ? "勝利" : match.winner === "enemy" ? "敗北" : "引き分け"} · ${match.summary.time.toFixed(1)}秒</span></div>` : ""}
        </main>
        <aside class="arena-inspector">${build ? selection() : ""}
-       ${build ? `<h2>公開して対戦</h2><p>登録されるのは標準UIと配置・性能だけです。URLの画像・取得元・元サイトの文言は送信されません。</p><button class="arena-primary" data-arena="match" ${locked() ? "disabled" : ""}>ビルドを公開して対戦</button><button data-arena="publish" ${locked() ? "disabled" : ""}>ビルドだけ公開</button><div class="arena-undo"><button data-arena="undo" ${locked() || !undo.length ? "disabled" : ""}>元に戻す</button><button data-arena="redo" ${locked() || !redo.length ? "disabled" : ""}>やり直す</button></div>` : ""}
+       ${build ? `<h2>公開して対戦</h2><p>登録されるのは標準UIと配置・性能だけです。URLの画像・取得元・元サイトの文言は送信されません。</p>${published ? "<p data-arena-published>現在のビルドは公開済みです。</p>" : ""}${noOpponent ? "<p data-arena-no-opponent>同じサービスに条件に合う公開ビルドが追加されたら、もう一度対戦相手を探してください。</p>" : ""}<button class="arena-primary" data-arena="match" ${locked() ? "disabled" : ""}>${noOpponent ? "もう一度対戦相手を探す" : "ビルドを公開して対戦"}</button><button data-arena="publish" ${locked() ? "disabled" : ""}>ビルドだけ公開</button><details data-arena-pool-guidance ${noOpponent ? "open" : ""}><summary>対戦相手の条件</summary><p>同じサービスに公開された、同じラウンド・対応ルールのほかのプレイヤーの保存ビルドが必要です。公開した相手が今オンラインでなくても対戦できます。</p><p>同じゲストの別タブを開いても対戦相手は増えません。自動では検索しません。</p><p>「結果を確認・再接続」は前の操作の復旧です。新たに相手を探すときは対戦ボタンを押してください。</p><p>現在の開発版は、このPCのローカル対戦サービスを使います。</p></details><div class="arena-undo"><button data-arena="undo" ${locked() || !undo.length ? "disabled" : ""}>元に戻す</button><button data-arena="redo" ${locked() || !redo.length ? "disabled" : ""}>やり直す</button></div>` : ""}
        ${s.phase === "battle" && match ? `<h2>${match.winner === "player" ? "勝利" : match.winner === "enemy" ? "敗北" : "引き分け"}</h2><p>基本 $${match.summary.base} ＋ 勝利 $${match.summary.bonus} ＋ 収益 $${match.summary.income}</p><button class="arena-primary" data-arena="settle" ${locked() ? "disabled" : ""}>結果を受け取る $${match.summary.total}</button>` : ""}
        ${s.phase === "reward" && s.pending ? `<h2>報酬を一つ選ぶ</h2>${s.pending.loot.map((t) => `<button class="arena-reward" data-arena="claim" data-type="${esc(t)}" ${locked() ? "disabled" : ""}>${esc(t.startsWith("admin:") ? (D.ADMIN[t.slice(6)]?.name ?? t) : (D.PARTS[t]?.name ?? t))}</button>`).join("")}<button data-arena="skip" ${locked() ? "disabled" : ""}>選ばずに次へ</button>` : ""}
        ${s.phase === "complete" || s.phase === "gameover" || (view!.online.requiresNewRun && !view!.online.pendingMatchId) ? `<h2>${view!.online.requiresNewRun ? "ルールが更新されました" : s.phase === "complete" ? "ラン完了" : "残機がなくなりました"}</h2><p>${s.wins}勝 / ${s.history.length}戦。${view!.online.requiresNewRun ? "以前のルールの記録は引き続き閲覧できます。現在の対戦候補に参加するには、新しいランを始めてください。" : "保存ビルドは他のプレイヤーの対戦候補に残ります。"}</p><button class="arena-primary" data-arena="new-run" ${locked() ? "disabled" : ""}>新しいオンラインラン</button>` : ""}

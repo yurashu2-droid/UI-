@@ -1,3 +1,4 @@
+import * as containmentViews from '../src/containment-guidance.js';
 import * as incomeRoutes from '../src/income-route-guidance.js';
 import * as conversionViews from '../src/conversion-guidance.js';
 import test from 'node:test';
@@ -23,7 +24,7 @@ const escape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll(
 function inspect(board, selected) {
   const info = E.analyze(board);
   const context = {
-    ...guidance, ...navigationViews, ...conversionViews, ...incomeRoutes, incomeRouteEditingAllowed:()=>false, D, P: D.PARTS, E, R, info, selected,
+    ...guidance, ...navigationViews, ...conversionViews, ...incomeRoutes, ...containmentViews, incomeRouteEditingAllowed:()=>false, D, P: D.PARTS, E, R, info, selected,
     run: R.newRun('campaign'), battle: null, storyActive: false,
     labPressureCapacity: () => null, labBattleController: { value: 'normal' },
     esc: escape, skinPicker: () => '',

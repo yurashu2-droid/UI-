@@ -4,13 +4,20 @@ Ongoing development is delivered on `feat/raid-balance-async`. See [the current 
 
 ## Current user-facing workflows
 
+- Story workshop code and CSS load on first opening, with Close/retry and late-delivery disposal safety. State, persistence and combat stay synchronous. The isolated change removes 26,243 initial asset bytes but increases initial JS requests 4→6; startup plus first story use is 1,892 bytes larger in that isolated comparison, and browser timing remains unmeasured
+- Optional story/online stylesheets have explicit success readiness, bounded failure cleanup and fresh manual retry; emitted-module DOM-event checks prevent a cached failed preload from mounting an unstyled screen
+- Finished battle results separate measured gross income, accepted/spent/retained/unconverted charge and capped settlement payout. Missing historical telemetry is omitted, and stale ceremonies cannot overwrite newer battles
+- Online availability guidance distinguishes a historical no-opponent outcome from current publication and explicit search from connection recovery; no live population or automatic waiting is claimed
+- Containment guidance names the direct parent and distinguishes subtree move/stash from selected-only removal, with snapshot/editability boundaries and refresh after modal dismissal
+- Native version-history feedback distinguishes eligible, used, expired, unneeded and empty records; only an observed eligibility loss contracts its marker/stem, with quiet repeated frames and reduced-motion fallback
+
 - `npm run dev:local` starts the existing local client and arena together, checks both health paths and cleans up only its own child processes
 - Mode-aware help distinguishes the canonical story, legacy campaign and laboratory; paid transactions and save recovery preserve inventory and editor-history boundaries
 - Placed parts support keyboard selection and retain focus through keyboard move/undo/redo repaints when the same part remains available; edited labels identify wrappers and combat targets, and ordinary/fused native video titles reflect their labels. Inspector guidance limits visible-text changes to supporting standard artwork
 - Offline/story income producers offer an engine-aligned nearby route selector with separate saved and effective destinations. Unavailable preferences remain visible and restore when eligible again; Auto removes the preference. Ordinary save/Undo boundaries, stale-control checks and focused-select restoration apply; the online selector now applies the same saved/effective distinction through authoritative commands and pending/drag/stale-control guards
 - Converter inspectors name their engine-selected incoming charge sources and distinguish current-page placement from wiring. Source generation, charge acceptance and activation remain separate conditions
 - The laboratory catalogue contains twenty-five fictional, original-code templates and twenty-eight experimental UI definitions. PATCHBOARD, POSTROOM, WEEKGRID and FRAMESET reuse existing mechanics; template order and normal acquisition exclusions remain protected
-- Reviewed source CSS follows actual document order, bounded direct-child relationships and comment/string-aware declarations, and uncertain arena operations retain command identity through explicit retryable HTTP 408/429 recovery within the open panel. Recovered placement/Undo/Redo apply their local history effect once; authoritative run/revision changes invalidate obsolete history
+- Reviewed source CSS follows actual document order, bounded direct-child relationships and comment/string-aware declarations and inert-brace-safe rule boundaries, and uncertain arena operations retain command identity through explicit retryable HTTP 408/429 recovery within the open panel. Recovered placement/Undo/Redo apply their local history effect once; authoritative run/revision changes invalidate obsolete history
 - Paid-reachable navigation, supported-link and commerce recovery examples document inventory value, cumulative spending, CPU limits, finite recovery paths and losing controls rather than universal balance guarantees. A genuine paid Instant Search hold/merge decision separates target-only from retained-inventory effects, acquisition spending, overload and hypothetical startup sensitivity
 
 ## Earlier continuity fixes

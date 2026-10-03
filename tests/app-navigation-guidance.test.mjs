@@ -1,3 +1,4 @@
+import * as containmentViews from '../src/containment-guidance.js';
 import * as incomeRoutes from '../src/income-route-guidance.js';
 import * as conversionViews from '../src/conversion-guidance.js';
 import test from 'node:test';
@@ -12,7 +13,7 @@ const source=readFileSync(new URL('../src/app.ts',import.meta.url),'utf8');
 function compiled(name){const found=source.match(new RegExp(`^function ${name}\\([^]*?^}`, 'm'));assert.ok(found);return transformSync(found[0],{loader:'ts',target:'es2022'}).code;}
 const escape=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 function render(name,board,selected){
-  const info=E.analyze(board),context={D,P:D.PARTS,E,R,...guidance,...navigation,...conversionViews, ...incomeRoutes, incomeRouteEditingAllowed:()=>false,info,selected,run:R.newRun('campaign'),battle:null,storyActive:false,
+  const info=E.analyze(board),context={D,P:D.PARTS,E,R,...guidance,...navigation,...conversionViews, ...incomeRoutes, ...containmentViews, incomeRouteEditingAllowed:()=>false,info,selected,run:R.newRun('campaign'),battle:null,storyActive:false,
     labPressureCapacity:()=>null,working:()=>true,KIND:{attack:'攻撃'},GROUP_BONUS:{},esc:escape,connectText:()=>'',skinPicker:()=>'',favicon:()=>'',hints:()=>[],isFaction:key=>Object.hasOwn(D.FACTIONS,key)};
   vm.runInNewContext(compiled(name)+`\noutput=${name}(${name==='selectionCard'?'[selected],info':'info'});`,context);return context.output;
 }

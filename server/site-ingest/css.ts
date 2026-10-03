@@ -273,16 +273,20 @@ function blocks(
     if (css[i] !== "{") break;
     i++;
     const start = i;
-    let depth = 1;
+    let depth = 1,
+      nested = false;
     while (i < css.length && depth) {
       until("{}");
-      if (css[i] === "{") depth++;
-      else if (css[i] === "}") depth--;
+      if (css[i] === "{") {
+        depth++;
+        nested = true;
+      } else if (css[i] === "}") depth--;
       if (i < css.length) i++;
     }
     if (depth) break;
     const body = css.slice(start, i - 1);
-    if (!prelude.startsWith("@") && !body.includes("{")) emit(prelude, body);
+    // Only real nested blocks are unsupported; braces in inert data are not nesting.
+    if (!prelude.startsWith("@") && !nested) emit(prelude, body);
   }
   return false;
 }

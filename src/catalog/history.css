@@ -5,18 +5,29 @@
 .native-version-history>header>strong{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:10px;font-weight:500}
 .native-version-history>header>small{flex-shrink:0;font-size:7px;color:#616f7b}
 .history-entry{display:flex;align-items:center;gap:9px;min-height:0;overflow:hidden;padding:2px 10px}
-.history-entry>i{position:relative;width:7px;height:7px;flex-shrink:0;border:2px solid #7c9fb6;border-radius:50%;box-sizing:border-box}
-.history-entry>i:after{position:absolute;content:'';width:1px;top:7px;left:1px;height:28px;background:#d8e2e9}
+.history-entry>i{position:relative;width:7px;height:7px;flex-shrink:0;box-sizing:border-box}
+.history-entry>i:before{position:absolute;content:'';box-sizing:border-box;top:0;left:0;width:7px;height:7px;border:2px solid #7c9fb6;border-radius:50%}
+.history-entry>i:after{position:absolute;content:'';width:1px;top:7px;left:3px;height:0;background:#d8e2e9}
 .history-entry>div{min-width:0;display:flex;flex-direction:column;gap:1px}
 .history-time{font-size:7px;line-height:9px;color:#616f7b}
 .history-source{font-size:9px;line-height:12px;font-weight:500;color:#516777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.history-recovery{font-size:8px;line-height:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#3e7256}
+.history-recovery{font-size:8px;line-height:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#616f7b}
 .native-version-history>footer{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:3px 7px;box-sizing:border-box;border-top:1px solid #edf0f3}
 .history-expiry{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px;color:#616f7b}
 .native-version-history>footer>button{box-sizing:border-box;height:22px;padding:0 9px;flex-shrink:0;border:1px solid #c4d7e5;border-radius:3px;background:#edf5fa;color:#355d79;font:9px Arial,sans-serif}
 .native-version-history.is-history-used .history-entry{color:#616f7b;background:#fafbfc}
-.native-version-history.is-history-used .history-entry>i{border-color:#bdc8d0}
 .native-version-history.is-history-used .history-recovery{color:#616f7b}
+.native-version-history.is-history-expired .history-recovery{color:#616f7b}
+.native-version-history.is-history-unneeded .history-recovery{color:#616f7b}
+.native-version-history.is-history-recoverable .history-recovery{color:#3e7256}
+.native-version-history.is-history-recoverable .history-entry>i:before{border-color:#3e7256;background:#3e7256}
+.native-version-history.is-history-recoverable .history-entry>i:after{height:28px}
+.native-version-history:is(.is-history-used,.is-history-expired,.is-history-unneeded) .history-entry>i:before{top:3px;height:2px;border:0;border-radius:0;background:#616f7b}
+/* Eligibility closes into the same quiet dash for each reason; the text names why.
+   The class remains stable across RAF updates, and no animation controls gameplay. */
+.native-version-history.is-history-closing .history-entry>i:before{transition:height 80ms cubic-bezier(.3,0,.65,1),top 80ms cubic-bezier(.3,0,.65,1),border-radius 80ms cubic-bezier(.3,0,.65,1)}
+.native-version-history.is-history-closing .history-entry>i:after{transition:height 220ms cubic-bezier(.2,.8,.25,1)}
+@media(prefers-reduced-motion:reduce){.native-version-history.is-history-closing .history-entry>i:before,.native-version-history.is-history-closing .history-entry>i:after{transition:none}}
 .native-version-history>footer>button:disabled{border-color:#e1e5e8;background:#f7f8f9;color:#aeb7bd;cursor:default}
 .web-node.is-history-restoring .native-version-history>footer>button{transform:translateY(1px);background:#dcecf7;border-color:#94b8d2}
 .kind-restore{background:#e8f1f6;color:#467287}

@@ -16,7 +16,7 @@ function modalHost() {
     close() { if (!this.open) return; this.open = false; queued.push(()=>events.get("close")?.({target:this})); },
   };
   const content = {innerHTML:""};
-  const context = {pendingStorySettlement:null, $: selector => selector === "#modal" ? dialog : content};
+  const context = {renderSide(){},pendingStorySettlement:null, $: selector => selector === "#modal" ? dialog : content};
   const text = readFileSync(new URL("../src/app.ts", import.meta.url),"utf8");
   const source = text.slice(text.indexOf("let modalFeatureDispose:"),text.indexOf("/* ---------- Isolated story profile"));
   assert.ok(source.includes('addEventListener("close"'));

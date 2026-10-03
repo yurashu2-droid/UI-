@@ -26,8 +26,9 @@ const source = readFileSync(
   "utf8",
 )
   .replace(/^import\b[^]*?;\n/gm, "")
-  .replace("export function mountOnlinePanel", "function mountOnlinePanel");
-const compiled = transformSync(source, { loader: "ts", target: "es2022" }).code;
+  .replace("export function mountOnlinePanel", "function mountOnlinePanel")
+  .replace("export const loadStyles", "const loadStyles");
+const compiled = new vm.Script(transformSync(source, { loader: "ts", target: "es2022" }).code + "\nmountOnlinePanel;");
 const camel = (value) => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 class ElementAdapter {
   constructor(tag, document) {
@@ -198,8 +199,24 @@ class SelectAdapter extends ElementAdapter {}
 class FormAdapter extends ElementAdapter {}
 
 async function fixture(t) {
+  const previousDocument = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "document",
+  );
   const dir = mkdtempSync(join(tmpdir(), "online-panel-history-"));
   const server = createArenaServer({ filePath: join(dir, "store.json") });
+  let handle;
+  t.after(async () => {
+    try { handle?.dispose(); }
+    finally {
+      server.closeAllConnections();
+      if (server.listening) await new Promise((resolve) => server.close(resolve));
+      rmSync(dir, { recursive: true, force: true });
+      previousDocument
+        ? Object.defineProperty(globalThis, "document", previousDocument)
+        : delete globalThis.document;
+    }
+  });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${server.address().port}/api/arena`;
   const faults = [],
@@ -241,10 +258,6 @@ async function fixture(t) {
       active--;
     }
   };
-  const previousDocument = Object.getOwnPropertyDescriptor(
-    globalThis,
-    "document",
-  );
   const doc = {
     createElement(tag) {
       return new (
@@ -284,22 +297,15 @@ async function fixture(t) {
     HTMLSelectElement: SelectAdapter,
     HTMLFormElement: FormAdapter,
   };
-  const mount = vm.runInNewContext(compiled + "\nmountOnlinePanel;", context);
-  let handle = mount(host, {
+  const mount = compiled.runInNewContext(context);
+  handle = mount(host, {
     baseUrl: base,
     onClose() {
       handle.dispose();
     },
   });
   const root = host.children[0];
-  t.after(async () => {
-    handle.dispose();
-    await new Promise((resolve) => server.close(resolve));
-    rmSync(dir, { recursive: true, force: true });
-    previousDocument
-      ? Object.defineProperty(globalThis, "document", previousDocument)
-      : delete globalThis.document;
-  });
+
   async function flush() {
     const deadline = Date.now() + 5000;
     while (active) {

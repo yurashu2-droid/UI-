@@ -1,3 +1,4 @@
+import * as incomeResultViews from "../src/battle-income-result.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -49,7 +50,7 @@ function application(values = new Map()) {
   const initial = R.newRun("campaign");
   initial.seed = 401; initial.shop = R.market(initial);
   const context = {
-    JSON, Error, structuredClone, clone, crypto: {randomUUID}, R, C, P: D.PARTS, D, Story, StorySession,
+    JSON, Error, structuredClone, clone, crypto: {randomUUID}, R, C, P: D.PARTS, D, ...incomeResultViews, Story, currentStoryEncounter: Story.currentStoryEncounter, currentStoryStage: Story.currentStoryStage, STORY_WORLD: Story.STORY_WORLD, StorySession,
     Element: ElementAdapter,
     UIRaidEditor: {Editor: class { constructor(options) { return Object.assign(Object.create(Editor.prototype), {o: {...options, getOverlay: () => null}, history: [], future: [], selection: new Set(), pending: null, drag: null}); }}},
     run: initial, memory: {}, runPersistence: createRunPersistence(storage, "qa-boundary-"),

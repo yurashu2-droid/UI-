@@ -28,8 +28,9 @@ const source = readFileSync(
   "utf8",
 )
   .replace(/^import\b[^]*?;\n/gm, "")
-  .replace("export function mountOnlinePanel", "function mountOnlinePanel");
-const compiled = transformSync(source, { loader: "ts", target: "es2022" }).code;
+  .replace("export function mountOnlinePanel", "function mountOnlinePanel")
+  .replace("export const loadStyles", "const loadStyles");
+const compiled = new vm.Script(transformSync(source, { loader: "ts", target: "es2022" }).code + "\nmountOnlinePanel;");
 const camel = (value) => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 
 class ElementAdapter {
@@ -431,7 +432,7 @@ async function fixture(t, rules, duel = false) {
     HTMLSelectElement: class {},
     HTMLFormElement: class {},
   };
-  const mount = vm.runInNewContext(compiled + "\nmountOnlinePanel;", context);
+  const mount = compiled.runInNewContext(context);
   handle = mount(host, {
     baseUrl: base,
     onClose() {

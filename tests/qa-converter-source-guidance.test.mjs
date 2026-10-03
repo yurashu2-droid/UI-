@@ -1,3 +1,4 @@
+import * as containmentViews from '../src/containment-guidance.js';
 import * as incomeRoutes from '../src/income-route-guidance.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -29,7 +30,7 @@ const selectionCode = transformSync(rules, { loader: 'ts', target: 'es2022' }).c
 const escape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 function inspect(selected, info) {
   const context = {
-    ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, incomeRouteEditingAllowed:()=>false, targetCaption, D, P: D.PARTS, E, R, selected, info,
+    ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, ...containmentViews, incomeRouteEditingAllowed:()=>false, targetCaption, D, P: D.PARTS, E, R, selected, info,
     run: R.newRun('campaign'), battle: null, storyActive: false,
     labPressureCapacity: () => null, labBattleController: { value: 'normal' },
     esc: escape, skinPicker: () => '',
@@ -237,7 +238,7 @@ function inspectSide(run, battle, selected) {
   const nodes = new Map();
   const node = () => ({ innerHTML: '', disabled: false, querySelector: () => ({}) });
   const context = {
-    ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, incomeRouteEditingAllowed:()=>false, targetCaption,
+    ...appGuidance, ...navigation, ...conversion, ...incomeRoutes, ...containmentViews, incomeRouteEditingAllowed:()=>false, targetCaption,
     D, P: D.PARTS, E, R, C, run, battle, storyActive: false, preview: false,
     labPressureCapacity: () => null, labBattleController: { value: 'normal' },
     HTMLSelectElement: class {}, editor: { selected: () => [selected], history: [], future: [] },

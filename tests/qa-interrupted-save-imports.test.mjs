@@ -53,7 +53,7 @@ function application(initial = campaign("Original page", true)) {
   const toasts = [];
   const noop = () => {};
   const context = {
-    JSON, Error, structuredClone, clone, R, C, P: D.PARTS, Story, StorySession,
+    JSON, Error, structuredClone, clone, R, C, P: D.PARTS, Story, currentStoryEncounter: Story.currentStoryEncounter, currentStoryStage: Story.currentStoryStage, STORY_WORLD: Story.STORY_WORLD, StorySession,
     run: runPersistence.load(initial.mode).run,
     memory: {}, runPersistence, storyPersistence: StorySession.createStorySessionPersistence(storage),
     storyActive: false, storySession: null, storyMatchId: null, storyBattleEncounter: null,
