@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>こもれび文具室 | ローカルレイド見本</title>
+    <link rel="stylesheet" href="./example.css" />
+  </head>
+  <body>
+    <header>
+      <p class="eyebrow">小さな紙もの、ゆっくり選ぶ。</p>
+      <h1>こもれび文具室</h1>
+      <nav>
+        <p><a href="#selection">紙のたより</a></p>
+        <p><a href="#sample-notes">この見本について</a></p>
+      </nav>
+    </header>
+    <main>
+      <form class="search-box" role="search" method="dialog">
+        <label for="paper-search">文具を探す</label>
+        <input id="paper-search" type="search" placeholder="例：便せん" />
+        <button type="button">検索（見本）</button>
+      </form>
+      <section id="selection">
+        <p>今日の紙もの：木もれ日の便せん</p>
+        <p>余白をたっぷり残した、架空の文具の展示です。</p>
+        <p>
+          <input id="paper-texture" type="checkbox" />
+          <label class="check-caption" for="paper-texture"
+            >紙の手ざわりを楽しむ</label
+          >
+        </p>
+        <p>
+          <button class="buy-button" type="button">
+            便せんをカートに追加（見本）
+          </button>
+        </p>
+      </section>
+    </main>
+    <footer id="sample-notes">
+      <p class="footnote">
+        検索と購入は表示用の見本です。検索結果・注文・決済・送信はありません。
+      </p>
+      <p class="footnote">
+        UI
+        RAIDでは文字と限定CSSからゲーム用の配置を作ります。元の配置や寸法は再現しません。
+      </p>
+    </footer>
+  </body>
+</html>

@@ -44,7 +44,7 @@ After an accepted local reconstruction, one verified blueprint can be retained i
 - Supported candidates are bounded static headings, links, recognized purchase/product controls, search forms and labeled checkbox structures. JavaScript-only shells, arbitrary styled divs/canvas apps and generic controls outside that semantic subset are unsupported. No playable elements produces an error, not a fabricated opponent. The resulting `code-v1` / `code-approximation` still uses synthesized 960×680 game geometry, low confidence and `sourceRect: null`; it does not preserve the whole page, run source behavior or supply an original-page comparison.
 - Source JavaScript is never run. No raw source HTML/CSS is inserted into the game DOM, and local content is never loaded in an iframe. No source images, media, fonts, CSS imports/URLs or extra assets are requested. Source files are neither uploaded nor sent to a third party. Only bounded text/appearance primitives enter the canonical renderer; module loading for the game's own Worker is separate from source-resource acquisition.
 
-### Next increment: explicit local checkbox labels
+### Explicit local checkbox labels
 
 The local-only branch in [`src/raid/code.ts`](../../src/raid/code.ts) also recognizes a separate HTML `<label for="news">Receive updates</label>` associated with an HTML `<input id="news" type="checkbox">` in the same parsed document tree, before or after the label. It maps one eligible caption per checkbox to the existing `gov_check` approximation. The label supplies bounded visible text, safe style and structural provenance; input values and ARIA names do not supply the caption. This does not add a combat definition or change the public URL analyzer.
 
@@ -63,6 +63,12 @@ Local provenance uses `source.kind: "local-file"` and `source.displayUrl: "local
 This adds a source kind within blueprint schema 1. Older builds reject new local-file captures rather than treating them as public URLs or silently migrating them. Existing public/fixture hashes, saved capture/appearance bytes and old collection archives are not resealed or reinterpreted. The collection archive envelope and its 256-entry/256-capture/16 MiB limits remain unchanged. Local cosmetic skins use the existing lab-add/owned-canonical-reskin rules, without adding campaign or online acquisition. Content hashes and unsigned archives prove consistency only, not that a victory actually occurred. See [the user walkthrough](../../README.md).
 
 Native browser file picking, cancel/reselect, actual click/keyboard/assistive-technology behavior and visual acceptance remain unverified because the supported browser route is blocked. Worker/DOM adapters or emitted-module checks are not browser acceptance.
+
+### Approximation metadata in the panel
+
+The panel reads existing verified metadata only. `candidateCount` counts recognized labeled semantic candidates before per-kind/region quotas and final placement; `selectedCount` matches combat components, not total page elements. Their difference is reported as unselected candidates, never a reconstruction percentage. `css.rules` counts accepted stylesheet selector rules, with comma selectors counted separately and inline declarations excluded. `css.limited` signals existing byte/block/rule-budget truncation; false does not establish complete CSS support. Historical missing metadata and incoherent candidate totals suppress unavailable claims without resealing or rewriting the capture. Fixture/no-analysis transitions clear the summary.
+
+The repository includes an [original inert HTML/CSS example](../../examples/local-raid/README.md) with an exact selected stylesheet link, six recognized/selected components and ten accepted selector rules. Its focused test reads the real bytes, verifies hashes and canonical geometry, and checks the HTML-only alternative. No fixture URL, network allowlist entry, source-execution path or campaign/online acquisition route is added.
 
 ## Verified runtime blocker
 

@@ -1,4 +1,5 @@
 import D from "../data.js";
+import { raidAnalysisSummary } from "./analysis-summary.js";
 import { createRaidCaptureSession } from "./capture.js";
 import { mountLocalImportControls } from "./local-import-controls.js";
 import { createRaidEncounterController } from "./encounter.js";
@@ -131,8 +132,10 @@ export function mountRaidPanel(
     reference = button("静的ページと比較");
   tabs.append(reconstruction, reference);
   const meta = make("p", "raid-meta"),
+    analysisSummary = make("p", "raid-analysis-summary raid-description"),
     viewport = make("div", "raid-viewport"),
     canvas = make("div", "raid-canvas");
+  analysisSummary.hidden = true;
   viewport.append(canvas);
   const details = make("div", "raid-mapping"),
     actions = make("div", "raid-actions"),
@@ -155,6 +158,7 @@ export function mountRaidPanel(
     status,
     tabs,
     meta,
+    analysisSummary,
     viewport,
     details,
     actions,
@@ -230,6 +234,8 @@ export function mountRaidPanel(
     const state = encounter.state,
       b = state.blueprint;
     sync();
+    analysisSummary.textContent = b ? raidAnalysisSummary(b) : "";
+    analysisSummary.hidden = !analysisSummary.textContent;
     if (!b) return;
     meta.textContent = `${b.source.name}  ·  ${b.source.kind === "local-file" ? "ローカルHTMLの近似配置・実験室限定" : b.fidelity === "code-approximation" ? "コード解析による近似配置" : b.source.kind === "fixture" ? "付属の検証用ページ" : "静的取得"}  ·  ${b.components.length}個の戦闘UI  ·  960×680`;
     details.replaceChildren();

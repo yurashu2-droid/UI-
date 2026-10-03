@@ -2,7 +2,7 @@
 
 This catalogue uses original, fictional page content and hand-authored native controls. Public references explain the structural inspiration; no provider markup, logos, account data, or remote assets are required.
 
-## Next increment: LEAFNOTE notebook template
+## LEAFNOTE notebook template
 
 LEAFNOTE (`site_notion`, theme `notebook`) is a fictional Notion-inspired notebook built from three ordinary `ab_link` controls and one `gov_font`: four owned parts, $14 acquisition value, CPU4 and 28,832px² occupied area. [`notebook-templates.ts`](notebook-templates.ts), [`notebook-render.ts`](notebook-render.ts) and [`notebook.css`](notebook.css) define its original content and fixed chrome. The page list, callout, headings, contents and lower reading shelf have no independent controls, containment, sharing, syncing or external navigation. Existing native blue links and font controls retain their local game previews.
 
