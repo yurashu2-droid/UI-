@@ -391,6 +391,7 @@ const NEEDS: Record<string, { t: (item: Item) => boolean; x: string }> = {
 };
 function connectText(t: string) {
   if (t === "go_instant") return INSTANT_SEARCH_HELP;
+  if (t === "am_oneclick") return "近くの収益UIから届くチャージ$3で連動購入。累計収益による通常攻撃の威力増加とは別。ページに置けば、収益が未接続でも通常攻撃は使える。同じ収益を複数の受け皿へ二重配分しない。";
   if (t === "go_jobs") return "文字・動画 → 隣の広告などの収益UI → 隣のジョブ一覧。収益の行き先は1つだけ。実験室の一時サーバー負荷ルールを選んでください。";
   const d = P[t];
   if (NEEDS[t]) return NEEDS[t].x;

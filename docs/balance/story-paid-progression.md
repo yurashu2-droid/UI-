@@ -88,6 +88,42 @@ This is a narrow arrangement, not “buy any two attacks.” The review supports
 
 Reproduce with `node --import tsx scripts/navigation-recovery.ts` and `node --import tsx --test tests/navigation-recovery.test.mjs`. The script outputs before/after-loss saves, both paid recovery builds, the exact original paid prefix, full cash ledger and terminal session. Six regressions cover full completion, original-prefix agreement, the one-existing-item move, unchanged board/capacity through the ending, non-winning unchanged/one-purchase controls, disconnected review and oversized-result controls. Browser visuals remain unverified.
 
+## Seed 101 commerce: connect spendable income charge
+
+The original commerce policy remains **20/30 endings** in the fixed-seed baseline. This separate witness keeps seed 101's real first `permission-desk` loss: 20.65 seconds, enemy 65.2 HP, entering with $110, three lives, eighteen owned parts and load 33/capacity 35. Actual settlement leaves $126 and two lives, without a new fusion or changed inventory. The existing 1-Click `p18` was obtained by genuine earlier fusion. An unchanged retry loses again; no parts or funds are supplied for recovery.
+
+Apply these **five ordered editor transactions**, retaining every item and its size:
+
+1. Put Newsletter `p9` in inventory temporarily
+2. Move heading `p1` from `(528,80)` to `(592,16)`, the space just cleared
+3. Place that same Newsletter `p9` at `(544,80)`
+4. Move Wish List `p11` from `(320,96)` to `(32,288)`
+5. Move Mail `p14` from `(320,144)` to the now-free `(320,96)`
+
+Every transaction uses `R.move` and `updateStoryBuild`, validates and JSON-round-trips separately. There are no purchases, rerolls, resizes, sales, server upgrades or admin grants after the loss. Final placement still has load 33/capacity 35 and 62.965686% free space, with identical per-item combat modifiers, recognized groups and natural periods. This is a connection change rather than a new part or a whitespace-tier upgrade.
+
+Retry `permission-desk`: win in 18.40 seconds with 60/380 HP. Keep that board unchanged through `permission-proof` (20.40 seconds, 29 HP), `hidden-boundary` (322 HP), `hidden-relay` (283 HP), and WHITEOUT (163 HP). Claim the first reward whenever offered and leave new loot in inventory. The continuation obtains all fifteen canonical victories and eight records, restores the archive, places the ending link and performs the first restored-page visit. Final cash is **$226 = $11 − $55 purchases − $17 rerolls + $287 actual earnings**; capacity stays 35 and admins remain empty.
+
+### Cumulative income is not converter charge
+
+The failed board earns 41 battle income, but none is routed or spent: 1-Click is not connected to an earning source. The repaired desk/proof board earns 42; Newsletter and Mail route 23 into the existing 1-Click, which spends 21 in seven $3 conversions and retains charge 2. The other 19 income is not converted, but still belongs to cumulative income. Charge spending does not subtract from that cumulative total or directly debit run cash. Each winning settlement still grants its ordinary capped income reward; the desk grants $20 total, not an extra $21 converter refund.
+
+There is one additional income relation: moving Wish places it beside Counter `p24`, which earns once per four nearby fires. In the desk comparison this counter earns 6 rather than 4; Counter `p23` earns 4 rather than 5 because the repaired battle ends earlier. Hence baseline income 41 and repaired income 42 must not be treated as identical runtime traces. No text-power, speed or whitespace modifier is added.
+
+The following matched controls retain the repaired Wish-to-Counter relation, the same 42 raw income, money, modifiers, load and area:
+
+| Control from the repaired board | Routed / spent charge | Result |
+| --- | --- | --- |
+| Keep both income sources connected | 23 / 21 | Desk wins with 60 HP; proof wins with 29 HP |
+| Return Mail to `(320,144)` | 15 / 15 | Desk wins with 29 HP, then proof loses with enemy 21 HP |
+| Move Newsletter away to `(592,488)` | 8 / 6 | Desk loses with enemy 27 HP |
+
+These controls establish the need for both source connections in this exact continuation, without claiming every commerce page should use these coordinates. The baseline policy, shops, enemies, story and combat-v4 rules are unchanged. Browser visuals remain unverified.
+
+**Player lesson:** check whether income actually reaches the converter, not just whether cumulative income increases. A placed 1-Click still performs natural attacks without an income connection, and cumulative income can strengthen those attacks; the separate $3 spend requires nearby routed charge. The editor's 1-Click “つなぎ方” hint now states this distinction and the single-allocation rule.
+
+Reproduce with `node --import tsx scripts/commerce-recovery.ts` and `node --import tsx --test tests/commerce-recovery.test.mjs tests/qa-commerce-recovery.test.mjs tests/oneclick-connection-guidance.test.mjs`. The script replays the paid prefix from a fresh session and outputs before/after-loss and retry saves, each move, the cash ledger, compact per-round conversion totals and terminal session. It requires no scratch reports or injected saved inventory.
+
 ## Earlier bottleneck study and bounded correction
 
 The following candidate comparison and independent holdout are retained historical evidence, not fresh v4 runs of every rejected opponent. The six-part authored board remains current and is the board used in the recheck above.
