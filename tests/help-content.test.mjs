@@ -112,6 +112,8 @@ test("repeated mode changes produce independent content without stale story or l
 
 test("keyboard hints match real stash, undo and redo behavior for Control and Command", () => {
   const hints = content(false).controls.join(" / ");
+  assert.match(hints, /Tab.*Enter\/Space.*選択/);
+  assert.match(hints, /Shift\+Enter\/Space：選択を追加・解除/);
   assert.match(hints, /Delete\/Backspace：手持ちへ/);
   assert.match(hints, /売却は右の「売る」/);
   assert.match(hints, /Ctrl\/Cmd\+Z：元に戻す/);
@@ -123,7 +125,9 @@ test("keyboard hints match real stash, undo and redo behavior for Control and Co
 
   const originalElement = Object.getOwnPropertyDescriptor(globalThis, "Element");
   const originalDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
+  const originalHTMLElement = Object.getOwnPropertyDescriptor(globalThis, "HTMLElement");
   globalThis.Element = class {};
+  globalThis.HTMLElement = class extends globalThis.Element {};
   globalThis.document = { querySelector: () => null };
   try {
     for (const key of ["Delete", "Backspace"]) for (const modifier of ["ctrlKey", "metaKey"]) {
@@ -145,7 +149,7 @@ test("keyboard hints match real stash, undo and redo behavior for Control and Co
       assert.equal(run.owned[0].x, null);
     }
   } finally {
-    for (const [name, descriptor] of [["Element", originalElement], ["document", originalDocument]]) {
+    for (const [name, descriptor] of [["Element", originalElement], ["HTMLElement", originalHTMLElement], ["document", originalDocument]]) {
       if (descriptor) Object.defineProperty(globalThis, name, descriptor);
       else delete globalThis[name];
     }

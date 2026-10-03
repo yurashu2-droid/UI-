@@ -18,6 +18,8 @@ export function getHelpContent(context: {
 }): HelpContent {
   const lab = !context.storyActive && context.mode === "lab";
   const controls = [
+    "配置したUIにTabでフォーカス → Enter/Space：選択",
+    "Shift+Enter/Space：選択を追加・解除",
     "Shift＋クリック：複数選択",
     "G：まとまりを選択",
     "Alt＋ドラッグ：くっつき無効",

@@ -910,14 +910,38 @@ export class Editor {
     o.append(box);
   }
   key(e: KeyboardEvent): void {
+    const target = e.target;
     if (
       !this.o.enabled() ||
-      (e.target instanceof Element &&
-        e.target.closest("input,textarea,select,[contenteditable=true]")) ||
+      (target instanceof Element &&
+        target.closest("input,textarea,select,[contenteditable=true]")) ||
+      (target instanceof HTMLElement && target.isContentEditable) ||
       document.querySelector("dialog[open]")
     )
       return;
     const mod = e.ctrlKey || e.metaKey;
+    if (
+      !mod &&
+      !e.altKey &&
+      !e.isComposing &&
+      (e.key === "Enter" || e.key === " ") &&
+      target instanceof HTMLElement &&
+      target === document.activeElement &&
+      target.matches('.web-node[data-side="player"]') &&
+      this.host.contains(target)
+    ) {
+      const item = this.board.find((p) => p.id === target.dataset.id);
+      if (!isPlaced(item)) return;
+      e.preventDefault();
+      // Holding Space must neither scroll nor toggle the same part repeatedly.
+      if (e.repeat) return;
+      if (e.shiftKey) {
+        if (this.selection.has(item.id)) this.selection.delete(item.id);
+        else this.selection.add(item.id);
+        this.o.onSelect();
+      } else if (!this.selection.has(item.id)) this.select([item.id]);
+      return;
+    }
     if (mod && e.key.toLowerCase() === "z") {
       e.preventDefault();
       e.shiftKey ? this.redo() : this.undo();
