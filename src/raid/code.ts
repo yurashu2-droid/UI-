@@ -2,6 +2,7 @@ import { parse, type DefaultTreeAdapterMap } from "parse5";
 import { utf8Bytes, rawSourceHash } from "./code-source.js";
 import { parseBoundedLocalHtml } from "./local-parser.js";
 import { localNativeSearchNodes } from "./local-native-search.js";
+import { localPdfLinkNodes } from "./local-pdf-links.js";
 import { canonicalTypeFor, sealRaidBlueprint } from "./blueprint.js";
 import type { RaidBlueprint, RaidComponent, RaidPrimitive } from "./types.js";
 import type { Rect } from "../types.js";
@@ -285,10 +286,13 @@ function analyzeCode(
     ) > CSS_LIMITS.bytes
   )
     throw Error("source-too-large");
-  const reader = createSafeStyleReader(orderedStyles.map((sheet) => sheet.css), {
-    localOpaqueRgb: !!local,
-    localInputTypeSelectors: !!local,
-  });
+  const reader = createSafeStyleReader(
+    orderedStyles.map((sheet) => sheet.css),
+    {
+      localOpaqueRgb: !!local,
+      localInputTypeSelectors: !!local,
+    },
+  );
   const styleFor = (n: Node, _parent: Style = {}): Style => reader.styleFor(n);
   const hidden = (n: Node) =>
     attr(n, "hidden") !== undefined ||
@@ -323,6 +327,7 @@ function analyzeCode(
           ),
       )
     : undefined;
+  const localPdfs = local ? localPdfLinkNodes(nodes, hidden, omit) : undefined;
   const candidates: Candidate[] = [];
   let count = 0,
     order = 0,
@@ -403,7 +408,8 @@ function analyzeCode(
           });
       }
     } else if (/^h[1-3]$/.test(name) && !group) kind = "heading";
-    else if (name === "a" && !group) kind = "navigation";
+    else if (name === "a" && !group)
+      kind = localPdfs?.has(n) ? "pdf" : "navigation";
     else if (
       (name === "button" || inputLabel !== undefined) &&
       /add to (?:basket|cart)|buy|購入|カート|かご/i.test(label)
@@ -715,6 +721,12 @@ export async function reconstructCodeAnalysis(
       ...(source.stylesheetWarning
         ? [
             "許可したCSSを取得できなかったため、HTML内の情報だけで再構成しました。",
+          ]
+        : []),
+      ...(source.kind === "local-file" &&
+      components.some((c) => c.evidence === "pdf")
+        ? [
+            "PDFはリンク先のファイル名による表示上の手掛かりです。リンク先のファイル・MIME型・内容は取得・検証していません。",
           ]
         : []),
       "元ページの寸法を測定していません。回収できるのは、この近似再構成で表示したUIです。",

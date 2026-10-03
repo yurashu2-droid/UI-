@@ -2,6 +2,12 @@
 
 Ongoing development is delivered on `feat/raid-balance-async`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the incremental history, current scope and verification limits. The main branch and public hosting are unchanged.
 
+## Local PDF filename hints without destination access
+
+Eligible local HTML anchors with a literal `.pdf` path basename now use the existing PDF evidence and `gov_pdf` part. Raw Japanese names are supported; query-only hints, encoded source paths, ambiguous URL syntax and excluded ancestry preserve legacy behavior. This remains a conservative advertised-filename approximation. It performs no destination request, PDF read, MIME inspection, download or execution, and saves a fixed warning only when such a hint is selected.
+
+The [exact contract](../server/site-ingest/README.md#local-pdf-filename-hints) preserves existing product/form ownership, caption rules, selection quotas and inferred geometry. Public/default and unaffected local results remain unchanged; fresh newly eligible local captures can change selection and seals. Old captures are never re-parsed. Real emitted-Worker, victory/claim and archive-coexistence checks cover both old navigation and new PDF rewards. The [one-HTML sample](../examples/local-raid/README.md#pdfというファイル名の手掛かりを比べる見本) compares two path hints with two ordinary links and contains no PDF files. No part, save schema, network allowlist, campaign/online acquisition or combat rule changes. Browser/native-picker/visual/accessibility acceptance remains unverified.
+
 ## Display actual CPU conditions and equipment-adjusted opponent HP
 
 A legal standard-lab64-link board exposed a real discrepancy: the topbar/frame inferred capacity56 and92% speed/overload while the real battle starts with unbounded player capacity and lag1. The shared CPU display projection now follows actual launch rules: standard/audience laboratory player CPU is unbounded, explicit pressure uses15/26/38, and story/legacy uses purchased capacity. A live battle's own capacity, base load, lag and transient work take precedence over previews; no enemy-capacity symmetry is invented outside the pressure rule. An unbounded ratio has no fake meter, and invalid observations remain unknown. Genuine arithmetic-overflow lag is distinguished from unsupported live Infinity. CPU speed is explicitly separate from navigation contention, other per-part timing modifiers and HP.
