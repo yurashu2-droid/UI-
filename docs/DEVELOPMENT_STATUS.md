@@ -1,8 +1,13 @@
 # UI RAID development branch
 
-This continuation of `feat/raid-balance-async` starts from delivery commit `0cb0987ed5ef1a44f2bb62cca803c7a9521ab82f`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
+This continuation of `feat/raid-balance-async` starts from delivery commit `d8cc38db23de38f2a883519bb62868e8c0d7f088`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
 
 ## Latest additions
+
+- Prevent delayed file imports from overwriting a newer import, paid edit, reopened mode, new story or active battle; release only the latest file selection, including successful story imports
+- Give conditional, reversible advice about holding paid bridge UI under overload, preserving ownership and showing why the same choice can hurt after capacity upgrades
+
+## Previous additions
 
 - Recheck accepted save snapshots at the active IndexedDB write-transaction boundary; a delayed older mirror cannot replace newer recovery inventory
 - Add an ordinary $28/CPU9 directional-replay navigation example, with actual paid acquisition, retained-inventory overload and HP-dependent matchup caveats

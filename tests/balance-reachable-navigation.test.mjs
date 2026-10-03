@@ -70,6 +70,8 @@ test("the ordinary navigation example is player-only and its marquee actually re
   assert.equal(resources(build.layout).load, 9);
   assert.ok(build.layout.every(([type]) => !D.PARTS[type].fused));
   assert.match(build.how.join(" "), /\$28/);
+  assert.match(build.how.join(" "), /ゲストブックだけを手札/);
+  assert.match(build.how.join(" "), /容量が増えた後は再検討/);
   const items = board(build.layout, "nav");
   const info = E.analyze(items);
   const marquee = items.find((p) => p.type === "ab_marquee");

@@ -2191,17 +2191,33 @@ function exportFile() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   toast("構成JSONを書き出しました。取得元の画像・外観データは含まれず、別の端末では標準表示になる場合があります。");
 }
+let importRequestId = 0;
 async function importFile(file: File | undefined) {
   if (!file) return;
+  const requestId = ++importRequestId;
+  const sourceRun = run, sourceStory = storySession, sourceStoryMode = storyActive;
+  const sourceSnapshot = JSON.stringify(run);
+  let applying = false;
+  const canApply = () => requestId === importRequestId && run === sourceRun &&
+    storySession === sourceStory && storyActive === sourceStoryMode &&
+    !battle && !pendingStorySettlement && JSON.stringify(run) === sourceSnapshot;
   try {
+    if (battle || pendingStorySettlement) {
+      toast("対戦と結果の保存を終えてから、構成を読み込んでください。"); return;
+    }
     if (file.size > 300000) throw new Error("構成ファイルが大きすぎます。");
-    const parsed: unknown = JSON.parse(await file.text());
+    const text = await file.text();
+    // A file read may finish after another import, navigation, edit or battle.
+    if (!canApply()) return;
+    const parsed: unknown = JSON.parse(text);
     if (storyActive) {
       if (!StorySession.validateStorySession(parsed)) throw new Error("物語専用の保存JSONを選んでください。旧ランの構成は旧ランから読み込めます。");
+      applying = true;
       commitStorySession(parsed); editor.reset(); preview=false; view="self"; render(); openStoryHub(); return;
     }
     if (!R.validateRun(parsed))
       throw new Error("このバージョンの有効な構成JSONではありません。");
+    applying = true;
     save();
     run = parsed;
     labBattleController.reset();
@@ -2212,9 +2228,11 @@ async function importFile(file: File | undefined) {
     render();
     toast("構成を読み込みました。取得外観がこの端末にないUIは標準表示になります。");
   } catch (e) {
-    toast(e instanceof Error ? e.message : "読み込めませんでした。");
+    if (requestId === importRequestId && (applying || canApply()))
+      toast(e instanceof Error ? e.message : "読み込めませんでした。");
+  } finally {
+    if (requestId === importRequestId) $<HTMLInputElement>("#import-file").value = "";
   }
-  $<HTMLInputElement>("#import-file").value = "";
 }
 function switchMode(mode: Mode, fresh = false, tutorial = !tutorialDone()) {
   if (battle) return;

@@ -113,3 +113,38 @@ node --import tsx --test tests/balance-reachable-navigation.test.mjs
 ```
 
 Use `--target=navigation-no-marquee` for the ablation. Append `--search=fixtures/balance/reachable-finalists.json` to use the historical12-finalist comparison. A new search after adding the preset would be a new population, not a replay of this comparison. Raw reports remain in `.verification/balance/reachable-navigation-*`, `reachable-link-defense-*`, and `reachable-navigation-no-marquee-*`. Browser presentation remains unverified under the existing restriction.
+
+## Keeping paid bridge UI in hand after completion
+
+A bounded follow-on replays only the five previously identified overloaded navigation seeds: **103,113,115,126,208**. Every one first completes at round6 with the same eight target outputs plus a paid heading and guestbook: **10 owned items, CPU15/capacity12**. The comparison uses the actual recorded enemy, base HP, administrators and purchased capacity, and first verifies that the untouched board reproduces its original winner and time.
+
+The alternatives call the public editor transaction `R.move(run, id, null, null)` on the non-target heading, guestbook, or both. Every item ID and all item attributes except held coordinates remain unchanged. The exact target geometry, cash, inventory, administrators and capacity are preserved. There is no selling, refund, deletion, resource grant or changed combat rule. “Non-target” does not mean inactive: the heading still attacks and the guestbook still heals.
+
+### The next battle at first completion
+
+| Seed | Actual admins | Keep both: HP / seconds | Hold guestbook only: HP / seconds | Hold both: HP / seconds |
+| --- | --- | ---: | ---: | ---: |
+| 103 | troll | 112.1 / 14.25 | 156.6 / 12.40 | 113.7 / 14.30 |
+| 113 | sakura | 77.3 / 15.65 | 131.9 / 13.60 | 102.2 / 15.05 |
+| 115 | cdn | 113.096 / 15.65 | 161.672 / 13.60 | 135.536 / 15.05 |
+| 126 | backup, moderator | 101.3 / 15.65 | 149.9 / 13.60 | 126.2 / 15.05 |
+| 208 | sakura | 77.3 / 15.65 | 131.9 / 13.60 | 102.2 / 15.05 |
+
+All fifteen displayed battles are wins; this does **not** convert losses into wins. Holding the guestbook alone leaves the heading attacking and reaches **CPU12/capacity12**. It removes the 1.15× overload interval and overload HP loss, leaving **44.5–54.6 more HP** and finishing **1.85–2.05 seconds sooner** than keeping both. Holding both reaches CPU9, but removing the extra attacker gives a smaller HP benefit and does not always finish sooner. Holding only the heading also removes overload but is worse than holding only the guestbook in all five first-completion battles.
+
+### Why this is conditional advice
+
+The same fixed paths contain **12 already-reached completed snapshots** in total. Replaying the later snapshots preserves the original purchases and actual admins; these are separate next-battle counterfactuals, not a replayed alternative campaign. The four primary paths buy capacity before round7 and reach capacity26. In all **six capacity26 snapshots**, holding only the guestbook worsens normalized HP margin: there is no overload left to remove, and its healing is lost. For example, seed115's round8 win falls from127.88 to91.88 remaining HP. Seed208 remains at capacity12 in round7, where holding the guestbook reduces the surviving enemy from223.3 to153.4HP, but still loses.
+
+No winner changes across any of the12 snapshots and three holding policies. No alternative is settled, so this evidence makes no claim about changed income, future offers, survival, campaign-win totals or the canonical15-battle story. It is not a general recommendation to strip completed boards down to their preset or to sell useful spare UI.
+
+**Player guidance:** when a completed board is overloaded, try returning a non-target support to hand while keeping useful attackers. Check the resulting battle; put healing back under consideration after buying capacity. In these five specific round6 inventories, holding the guestbook is better than holding every bridge item.
+
+Reproduce from the existing real-paid harness, with no retained report required:
+
+```sh
+node --import tsx scripts/paid-bridge-cleanup-benchmark.ts
+node --import tsx --test tests/balance-paid-bridge-cleanup.test.mjs tests/balance-reachable-navigation.test.mjs
+```
+
+The script contains only the five fixed seeds and three editor choices, with no search or optimization framework. Its report retains the original paid snapshots, item provenance and alternative boards/results. Browser presentation remains unverified under the existing restriction.
