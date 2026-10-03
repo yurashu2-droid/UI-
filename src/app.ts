@@ -2173,6 +2173,11 @@ function help() {
     `<div class="modal-inner">${modalHead(content.kicker, content.title)}${renderHelpBody(content)}<div class="modal-footer"><button data-close-modal class="primary">わかった</button></div></div>`,
   );
 }
+function canOpenPaidWitness(): boolean {
+  return run.mode === "lab" && run.phase === "build" && view === "self" &&
+    !storyActive && !battle && !preview && !settling && !pendingStorySettlement &&
+    editor.run === run && !editor.drag;
+}
 function menu() {
   const hasCamp = (() => {
     try {
@@ -2199,7 +2204,7 @@ function menu() {
    run.mode === "lab"
      ? `<div class="menu-row"><label>ページのお手本<select id="preset-select" class="select-input"><option value="">選んで読み込む</option><optgroup label="お手本">${Object.entries(D.PRESETS)
          .map(([id, p]) => `<option value="${id}">${esc(p.name)}</option>`)
-         .join("")}</optgroup><optgroup label="完成構成例">${BUILDS.map((b) => `<option value="${b.id}">${esc(b.name)}</option>`).join("")}</optgroup></select></label><button id="m-builds" class="side-btn">構成例図鑑・相性表</button></div>`
+         .join("")}</optgroup><optgroup label="完成構成例">${BUILDS.map((b) => `<option value="${b.id}">${esc(b.name)}</option>`).join("")}</optgroup></select></label><button id="m-builds" class="side-btn">構成例図鑑・相性表</button></div>${!storyActive ? `<div class="menu-row"><button id="m-paid-witness" class="side-btn" ${canOpenPaidWitness() ? "" : "disabled"}>同じ14個の配置を比べる（閲覧専用）</button></div>` : ""}`
      : ""
  }
  <div class="menu-row"><button id="export-button" class="side-btn">構成を書き出す</button><button id="import-button" class="side-btn">読み込む</button></div>
@@ -2375,6 +2380,53 @@ function buildBook() {
     if (!ownsOpenDialog()) { feature.dispose(); return Promise.resolve(); }
     return start();
   };
+  feature.dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    dispose();
+  };
+  modalFeatureDispose = feature.dispose;
+  void feature.start();
+}
+/** Read-only reference evidence; no live Run, editor, save or reward callback enters it. */
+function paidWitnessPanel() {
+  if (!canOpenPaidWitness()) return;
+  const sourceRun = run, sourceEditor = editor;
+  const entry = document.getElementById("m-paid-witness");
+  const followEntry = !!entry && entry.isConnected && document.activeElement === entry;
+  openModal(`<div class="modal-inner" id="paid-witness-heading">${modalHead("READ-ONLY LAB", "同じ14個の配置を比べる")}</div><div id="paid-witness-host"></div>`);
+  $("#modal").classList.add("feature-modal");
+  const host = $("#paid-witness-host");
+  if (followEntry && document.activeElement === document.body)
+    $("#paid-witness-heading").querySelector<HTMLButtonElement>("[data-close-modal]")?.focus({ preventScroll: true });
+  let disposed = false;
+  const isCurrent = (): boolean => {
+    if (disposed) return false;
+    if (modalFeatureDispose === feature.dispose && host.isConnected &&
+        $<HTMLDialogElement>("#modal").open && run === sourceRun &&
+        editor === sourceEditor && canOpenPaidWitness()) return true;
+    // Once observed obsolete, this mount cannot revive if the old Run returns.
+    feature.dispose();
+    return false;
+  };
+  const feature = deferredModalFeature(host, async () => {
+    try {
+      if (!isCurrent()) throw new Error("比較画面の対象が変わりました。");
+      const panel = await import("./paid-witness-panel.js");
+      if (!isCurrent()) return panel;
+      await panel.loadStyles();
+      isCurrent();
+      return panel;
+    } catch (error) {
+      isCurrent();
+      throw error;
+    }
+  }, ({ mountPaidWitnessPanel }) => {
+    if (!isCurrent()) return { dispose() {} };
+    return mountPaidWitnessPanel(host, { isCurrent });
+  }, { loadingHead: $("#paid-witness-heading"), closeSelector: "[data-close-modal]" });
+  const start = feature.start, dispose = feature.dispose;
+  feature.start = () => isCurrent() ? start() : Promise.resolve();
   feature.dispose = () => {
     if (disposed) return;
     disposed = true;
@@ -3337,6 +3389,9 @@ document.addEventListener("click", (e) => {
     case "m-builds":
     case "open-builds":
       buildBook();
+      break;
+    case "m-paid-witness":
+      paidWitnessPanel();
       break;
     case "m-sound":
       audioSettings();

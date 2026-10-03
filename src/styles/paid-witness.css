@@ -1,0 +1,132 @@
+.paid-witness-panel {
+  min-width: 0;
+  color: #283044;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.paid-witness-panel > p,
+.paid-witness-panel p {
+  overflow-wrap: anywhere;
+}
+.paid-witness-panel .paid-witness-status {
+  min-height: 1.65em;
+  font-weight: 600;
+}
+.paid-witness-panel .paid-witness-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+.paid-witness-panel .paid-witness-controls label {
+  display: flex;
+  flex: 1 1 240px;
+  flex-direction: column;
+  gap: 5px;
+  font-weight: 600;
+}
+.paid-witness-panel .paid-witness-controls select {
+  max-width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  font: inherit;
+  color: #283044;
+  background: #fff;
+  border: 1px solid #8992a3;
+  border-radius: 4px;
+}
+.paid-witness-panel .paid-witness-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.paid-witness-panel .paid-witness-actions button {
+  min-height: 36px;
+  padding: 6px 12px;
+  font: inherit;
+  color: #283044;
+  background: #f4f2fb;
+  border: 1px solid #8992a3;
+  border-radius: 5px;
+}
+.paid-witness-panel .paid-witness-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.paid-witness-panel :is(select, button, summary, [tabindex="0"]):focus-visible {
+  outline: 3px solid #4b57c6;
+  outline-offset: 3px;
+}
+.paid-witness-panel .paid-witness-conditions {
+  padding: 4px 12px;
+  background: #f5f5fa;
+  border-radius: 6px;
+}
+.paid-witness-panel .paid-witness-preview,
+.paid-witness-panel .paid-witness-inventory,
+.paid-witness-panel .paid-witness-ledger {
+  margin: 16px 0;
+  border: 1px solid #c4c8d2;
+  border-radius: 6px;
+  padding: 10px;
+}
+.paid-witness-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.paid-witness-panel .paid-witness-board-scroll {
+  max-width: 100%;
+  max-height: 720px;
+  overflow: auto;
+  border: 1px solid #c4c8d2;
+  margin-top: 10px;
+}
+.paid-witness-panel .paid-witness-native {
+  width: 960px;
+  height: 680px;
+  pointer-events: none;
+}
+.paid-witness-panel .paid-witness-native .web-node {
+  outline: 0;
+  cursor: default;
+}
+.paid-witness-panel .paid-witness-native *,
+.paid-witness-panel .paid-witness-native *::before,
+.paid-witness-panel .paid-witness-native *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.paid-witness-panel .paid-witness-results {
+  max-width: 100%;
+  overflow: auto;
+}
+.paid-witness-panel .paid-witness-results table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.paid-witness-panel .paid-witness-results caption {
+  text-align: left;
+  margin-bottom: 8px;
+}
+.paid-witness-panel .paid-witness-results :is(th, td) {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px;
+  border: 1px solid #c4c8d2;
+  min-width: 65px;
+}
+.paid-witness-panel .paid-witness-results td:last-child {
+  min-width: 240px;
+}
+.paid-witness-panel .paid-witness-results ul {
+  padding-left: 16px;
+  margin: 0;
+}
+.paid-witness-panel .paid-witness-inventory li {
+  margin-block: 7px;
+  overflow-wrap: anywhere;
+}
+.paid-witness-panel .paid-witness-limits {
+  color: #505769;
+}

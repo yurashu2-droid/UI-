@@ -1,0 +1,1799 @@
+{
+  "schemaVersion": 1,
+  "seed": 308,
+  "source": "legacy-eight-round-route",
+  "combatVersion": "combat-v4",
+  "initialCash": 10,
+  "itemCount": 14,
+  "stageBaseHp": 460,
+  "priorWins": 7,
+  "lives": 3,
+  "inventoryValue": 57,
+  "acquisitionEventCount": 202,
+  "rearrangementMoveCount": 28,
+  "budget": {
+    "parts": 51,
+    "plans": 12,
+    "rerolls": 13,
+    "total": 76,
+    "rewards": 70,
+    "earnedInventory": 6,
+    "remainingCash": 4
+  },
+  "pins": {
+    "original": "67038ae40eaa04b6c6500cd2032efb6e901cd153f0342c072173ae7e002e125f",
+    "rearranged": "4425ad75cf0aae3ba341f339109047e23302f5051355b1cbb2e2e9b9fe15529e",
+    "sequence": "9ea3f00f9edb095147d7807bf27575dda0d1fe472e4540428cf78870f95a35cb",
+    "catalog": "5ae7f15b99800961281723849d5c74b681c7cff3b6f4d92879f9be6323db6ece",
+    "opponents": "aca70950375815010add344e85f9b2a51009e642bda187760134ee8f13cd12a5"
+  },
+  "options": {
+    "foeIds": [
+      "s3-candidate-1100144",
+      "s0-candidate-432"
+    ],
+    "commonBaseHp": [
+      396,
+      440,
+      460,
+      484
+    ],
+    "phaseSeconds": [
+      -0.5,
+      0,
+      0.5
+    ],
+    "step": 0.05,
+    "maxTicks": 2400
+  },
+  "original": {
+    "version": 3,
+    "mode": "campaign",
+    "cash": 4,
+    "stage": 7,
+    "lives": 3,
+    "wins": 7,
+    "nextId": 15,
+    "seed": 308,
+    "rerolls": 3,
+    "phase": "build",
+    "owned": [
+      {
+        "id": "p1",
+        "type": "ab_link",
+        "x": 32,
+        "y": 112,
+        "w": 96,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p2",
+        "type": "ab_hr",
+        "x": 32,
+        "y": 224,
+        "w": 864,
+        "h": 8,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p3",
+        "type": "ab_link",
+        "x": 128,
+        "y": 112,
+        "w": 96,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p4",
+        "type": "ab_nav",
+        "x": 608,
+        "y": 80,
+        "w": 112,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p5",
+        "type": "ab_nav",
+        "x": 720,
+        "y": 80,
+        "w": 112,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p6",
+        "type": "ab_heading",
+        "x": 608,
+        "y": 160,
+        "w": 224,
+        "h": 42,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p7",
+        "type": "ab_link",
+        "x": 224,
+        "y": 112,
+        "w": 96,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p8",
+        "type": "ab_guestbook",
+        "x": 32,
+        "y": 256,
+        "w": 240,
+        "h": 96,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p9",
+        "type": "go_suggest",
+        "x": 32,
+        "y": 160,
+        "w": 576,
+        "h": 56,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p10",
+        "type": "ab_link",
+        "x": 320,
+        "y": 112,
+        "w": 96,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p11",
+        "type": "gov_form",
+        "x": 16,
+        "y": 16,
+        "w": 920,
+        "h": 240,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p12",
+        "type": "ab_link",
+        "x": 416,
+        "y": 112,
+        "w": 96,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p13",
+        "type": "gov_pdf",
+        "x": 512,
+        "y": 112,
+        "w": 184,
+        "h": 40,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p14",
+        "type": "gov_font",
+        "x": 32,
+        "y": 72,
+        "w": 576,
+        "h": 32,
+        "shape": "source",
+        "label": ""
+      }
+    ],
+    "shop": [
+      {
+        "type": "yt_ad",
+        "sold": false
+      },
+      {
+        "type": "yt_sub",
+        "sold": false
+      },
+      {
+        "type": "ab_guestbook",
+        "sold": false
+      },
+      {
+        "type": "ab_heading",
+        "sold": false
+      },
+      {
+        "type": "gov_font",
+        "sold": true
+      }
+    ],
+    "pending": null,
+    "history": [
+      {
+        "winner": "player",
+        "time": 10.25,
+        "enemy": "阿部寛のホームページ",
+        "round": 1,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 0,
+        "damage": 112,
+        "hp": 74,
+        "maxHp": 180,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 56,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 8
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 56,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 8
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 10,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.200000000000001,
+        "enemy": "総合行政サービス",
+        "round": 2,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 1,
+        "damage": 154,
+        "hp": 140,
+        "maxHp": 220,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 42,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 42,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 10,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.85,
+        "enemy": "Google",
+        "round": 3,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 2,
+        "damage": 196,
+        "hp": 145,
+        "maxHp": 260,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 49,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 49,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 28,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 12,
+            "fires": 2
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 10,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.85,
+        "enemy": "amazon.ui",
+        "round": 4,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 3,
+        "damage": 246,
+        "hp": 238,
+        "maxHp": 300,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 69,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 69,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 39,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 12,
+            "fires": 2
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 14,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 13.55,
+        "enemy": "阿部寛のホームページ",
+        "round": 5,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 4,
+        "damage": 500,
+        "hp": 124,
+        "maxHp": 340,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 118,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 118,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 67,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_link",
+            "id": "p10",
+            "damage": 67,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 45,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 9
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 45,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 9
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 40,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "gov_form",
+            "id": "p11",
+            "damage": 0,
+            "earned": 0,
+            "shield": 21,
+            "heal": 0,
+            "fires": 3
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 18,
+            "fires": 3
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 28,
+            "heal": 0,
+            "fires": 4
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.1,
+        "enemy": "YouTube",
+        "round": 6,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 5,
+        "damage": 337,
+        "hp": 263,
+        "maxHp": 380,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 59,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 59,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "gov_pdf",
+            "id": "p13",
+            "damage": 50,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 34,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p10",
+            "damage": 34,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p12",
+            "damage": 34,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 28,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "gov_form",
+            "id": "p11",
+            "damage": 0,
+            "earned": 0,
+            "shield": 14,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 14,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 12,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 16.1,
+        "enemy": "総合行政サービス",
+        "round": 7,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 6,
+        "damage": 780,
+        "hp": 145,
+        "maxHp": 420,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 137,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 137,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "gov_pdf",
+            "id": "p13",
+            "damage": 101,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 78,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_link",
+            "id": "p10",
+            "damage": 78,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_link",
+            "id": "p12",
+            "damage": 78,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 70,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 50,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 10
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 50,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 10
+          },
+          {
+            "type": "gov_form",
+            "id": "p11",
+            "damage": 0,
+            "earned": 0,
+            "shield": 28,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 28,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 24,
+            "fires": 4
+          }
+        ]
+      }
+    ],
+    "page": {
+      "name": "ぼくのホームページ",
+      "theme": "mixed"
+    },
+    "admin": [
+      "backup"
+    ],
+    "tutorial": 0,
+    "tutorialAck": false,
+    "capacity": 31
+  },
+  "rearranged": {
+    "version": 3,
+    "mode": "campaign",
+    "cash": 4,
+    "stage": 7,
+    "lives": 3,
+    "wins": 7,
+    "nextId": 15,
+    "seed": 308,
+    "rerolls": 3,
+    "phase": "build",
+    "owned": [
+      {
+        "id": "p1",
+        "type": "ab_link",
+        "x": 248,
+        "y": 72,
+        "w": 224,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p2",
+        "type": "ab_hr",
+        "x": 32,
+        "y": 330,
+        "w": 640,
+        "h": 8,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p3",
+        "type": "ab_link",
+        "x": 248,
+        "y": 96,
+        "w": 224,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p4",
+        "type": "ab_nav",
+        "x": 248,
+        "y": 192,
+        "w": 224,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p5",
+        "type": "ab_nav",
+        "x": 248,
+        "y": 216,
+        "w": 224,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p6",
+        "type": "ab_heading",
+        "x": 248,
+        "y": 240,
+        "w": 224,
+        "h": 42,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p7",
+        "type": "ab_link",
+        "x": 248,
+        "y": 120,
+        "w": 224,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p8",
+        "type": "ab_guestbook",
+        "x": 32,
+        "y": 354,
+        "w": 240,
+        "h": 96,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p9",
+        "type": "go_suggest",
+        "x": 480,
+        "y": 72,
+        "w": 192,
+        "h": 250,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p10",
+        "type": "ab_link",
+        "x": 248,
+        "y": 144,
+        "w": 224,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p11",
+        "type": "gov_form",
+        "x": 16,
+        "y": 16,
+        "w": 672,
+        "h": 338,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p12",
+        "type": "ab_link",
+        "x": 248,
+        "y": 168,
+        "w": 224,
+        "h": 24,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p13",
+        "type": "gov_pdf",
+        "x": 248,
+        "y": 282,
+        "w": 224,
+        "h": 40,
+        "shape": "source",
+        "label": ""
+      },
+      {
+        "id": "p14",
+        "type": "gov_font",
+        "x": 32,
+        "y": 72,
+        "w": 208,
+        "h": 250,
+        "shape": "source",
+        "label": ""
+      }
+    ],
+    "shop": [
+      {
+        "type": "yt_ad",
+        "sold": false
+      },
+      {
+        "type": "yt_sub",
+        "sold": false
+      },
+      {
+        "type": "ab_guestbook",
+        "sold": false
+      },
+      {
+        "type": "ab_heading",
+        "sold": false
+      },
+      {
+        "type": "gov_font",
+        "sold": true
+      }
+    ],
+    "pending": null,
+    "history": [
+      {
+        "winner": "player",
+        "time": 10.25,
+        "enemy": "阿部寛のホームページ",
+        "round": 1,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 0,
+        "damage": 112,
+        "hp": 74,
+        "maxHp": 180,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 56,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 8
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 56,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 8
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 10,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.200000000000001,
+        "enemy": "総合行政サービス",
+        "round": 2,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 1,
+        "damage": 154,
+        "hp": 140,
+        "maxHp": 220,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 42,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 42,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 10,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.85,
+        "enemy": "Google",
+        "round": 3,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 2,
+        "damage": 196,
+        "hp": 145,
+        "maxHp": 260,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 49,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 49,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 28,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 12,
+            "fires": 2
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 10,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.85,
+        "enemy": "amazon.ui",
+        "round": 4,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 3,
+        "damage": 246,
+        "hp": 238,
+        "maxHp": 300,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 69,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 69,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 39,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 7
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 25,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 12,
+            "fires": 2
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 14,
+            "heal": 0,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 13.55,
+        "enemy": "阿部寛のホームページ",
+        "round": 5,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 4,
+        "damage": 500,
+        "hp": 124,
+        "maxHp": 340,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 118,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 118,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 67,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_link",
+            "id": "p10",
+            "damage": 67,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 12
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 45,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 9
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 45,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 9
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 40,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "gov_form",
+            "id": "p11",
+            "damage": 0,
+            "earned": 0,
+            "shield": 21,
+            "heal": 0,
+            "fires": 3
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 18,
+            "fires": 3
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 28,
+            "heal": 0,
+            "fires": 4
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 8.1,
+        "enemy": "YouTube",
+        "round": 6,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 5,
+        "damage": 337,
+        "hp": 263,
+        "maxHp": 380,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 59,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 59,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "gov_pdf",
+            "id": "p13",
+            "damage": 50,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 34,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p10",
+            "damage": 34,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_link",
+            "id": "p12",
+            "damage": 34,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 6
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 28,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 20,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "gov_form",
+            "id": "p11",
+            "damage": 0,
+            "earned": 0,
+            "shield": 14,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 14,
+            "heal": 0,
+            "fires": 2
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 12,
+            "fires": 2
+          }
+        ]
+      },
+      {
+        "winner": "player",
+        "time": 16.1,
+        "enemy": "総合行政サービス",
+        "round": 7,
+        "base": 6,
+        "bonus": 4,
+        "income": 0,
+        "rawIncome": 0,
+        "total": 10,
+        "stage": 6,
+        "damage": 780,
+        "hp": 145,
+        "maxHp": 420,
+        "stats": [
+          {
+            "type": "ab_link",
+            "id": "p1",
+            "damage": 137,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_link",
+            "id": "p3",
+            "damage": 137,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "gov_pdf",
+            "id": "p13",
+            "damage": 101,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "ab_link",
+            "id": "p7",
+            "damage": 78,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_link",
+            "id": "p10",
+            "damage": 78,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_link",
+            "id": "p12",
+            "damage": 78,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 14
+          },
+          {
+            "type": "ab_heading",
+            "id": "p6",
+            "damage": 70,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 5
+          },
+          {
+            "type": "ab_nav",
+            "id": "p4",
+            "damage": 50,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 10
+          },
+          {
+            "type": "ab_nav",
+            "id": "p5",
+            "damage": 50,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 10
+          },
+          {
+            "type": "gov_form",
+            "id": "p11",
+            "damage": 0,
+            "earned": 0,
+            "shield": 28,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "go_suggest",
+            "id": "p9",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 0,
+            "fires": 0
+          },
+          {
+            "type": "ab_hr",
+            "id": "p2",
+            "damage": 0,
+            "earned": 0,
+            "shield": 28,
+            "heal": 0,
+            "fires": 4
+          },
+          {
+            "type": "ab_guestbook",
+            "id": "p8",
+            "damage": 0,
+            "earned": 0,
+            "shield": 0,
+            "heal": 24,
+            "fires": 4
+          }
+        ]
+      }
+    ],
+    "page": {
+      "name": "ぼくのホームページ",
+      "theme": "mixed"
+    },
+    "admin": [
+      "backup"
+    ],
+    "tutorial": 0,
+    "tutorialAck": false,
+    "capacity": 31
+  }
+}
