@@ -27,6 +27,7 @@ import { createRunPersistence, selectRecoveredRun } from "./persistence.js";
 import { createProfileStore } from "./profile-store.js";
 import { prepareRaidChallenge } from "./raid-challenge.js";
 import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
+import { targetCaption } from "./catalog/target-caption.js";
 import { previewCatalogueAction } from "./catalog/preview.js";
 import { VIDEO_SPEED_HELP, INSTANT_SEARCH_HELP, instantSearchSupport, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
 import { navigationGuidance, renderNavigationGuidance } from "./navigation-guidance.js";
@@ -1747,7 +1748,7 @@ async function playRaidChallenge(host: HTMLElement, blueprint: RaidBlueprint, si
         const state = challenge.states[side.name].get(part.id);
         const targetSide = part.type === "ad_popup" ? (side.name === "player" ? challenge.enemy : challenge.player) : side;
         const target = targetSide.parts.find(p => p.id === state?.target);
-        applyCombatFeedback(node, combatFeedback(part.type, part.charge, challenge.ticks, state, target ? P[target.type].name : "", side.shield));
+        applyCombatFeedback(node, combatFeedback(part.type, part.charge, challenge.ticks, state, targetCaption(target), side.shield));
       }
       if (!challenge.result) { raf = requestAnimationFrame(tick); return; }
       finished = true;

@@ -125,7 +125,7 @@
 .native-quote blockquote header span { color: #7b8891; }
 .quote-avatar { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #e7d9c8; color: #977b56; font: 10px Georgia, serif; }
 .native-quote blockquote p { margin: 5px 0 2px; font-size: 11px; }
-.quote-state { color: #82909b; font-size: 9px; }
+.quote-state { display: block; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #82909b; font-size: 9px; line-height: 12px; }
 .native-community-note { box-sizing: border-box; height: 100%; padding: 10px 12px; border-top: 1px solid #d7e1e7; border-bottom: 1px solid #d7e1e7; background: #f1f6f9; color: #314452; font: 11px/1.4 Arial, sans-serif; }
 .native-community-note header { display: flex; gap: 8px; align-items: center; font-size: 11px; }
 .native-community-note header > b { color: #648dab; }

@@ -1,4 +1,4 @@
-import D from "../data.js";
+import { targetCaption } from "../catalog/target-caption.js";
 import E, { type Battle } from "../engine.js";
 import { isSupportedCombatVersion } from "../combat-rules.js";
 import { arenaCatalogDefinition, fingerprintJson } from "./catalog.js";
@@ -29,7 +29,7 @@ export function onlineReplayState(battle: Battle) {
           part.charge,
           battle.ticks,
           runtime,
-          target ? (D.PARTS[target.type]?.name ?? target.type) : "",
+          targetCaption(target),
           side.shield,
         ),
         progress: part.period
@@ -72,16 +72,18 @@ export function onlineEventText(event: BattleEvent, battle: Battle): string {
   if (event.kind !== "control") return "";
   const who = event.target === "player" ? "あなた" : "相手";
   const part = battle[event.target].parts.find((p) => p.id === event.to),
-    name = part ? (D.PARTS[part.type]?.name ?? part.type) : "UI";
+    name = targetCaption(part) || "UI";
   const prefix = `${event.time.toFixed(1)}秒 · `;
   if (event.action === "cover")
     return `${prefix}${who}の${name}が広告で覆われました`;
   if (event.action === "blocked")
-    return `${prefix}${who}のキャッシュが妨害を防ぎました`;
+    return `${prefix}${who}のキャッシュが${name}への妨害を防ぎました`;
   if (event.action === "release")
     return `${prefix}${who}の${name}が再開しました`;
   if (event.action === "cache-ready")
-    return `${prefix}${who}のキャッシュが再充填されました`;
+    return part && part.id !== event.id
+      ? `${prefix}${who}の${name}を保護するキャッシュが再充填されました`
+      : `${prefix}${who}のキャッシュが再充填されました`;
   return "";
 }
 

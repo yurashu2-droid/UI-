@@ -11,6 +11,7 @@ import type {
 } from "./types.js";
 import type { Battle } from "./engine.js";
 import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
+import { targetCaption } from "./catalog/target-caption.js";
 import { applyAudienceFeedback } from "./catalog/audience-feedback.js";
 import { applyHistoryFeedback, historyFeedback } from "./catalog/history-render.js";
 
@@ -532,11 +533,12 @@ class Effects {
           this.lines[side].join("");
     }
   }
-  name(type?: string) {
-    const d = type ? parts[type] : undefined;
+  name(type?: string, label = "") {
+    const d = type && Object.hasOwn(parts, type) ? parts[type] : undefined;
+    const caption = type ? targetCaption({ type, label }) : "UI";
     return d
-      ? `<b style="color:${factions[d.faction]?.color ?? "#777"}">${esc(d.name)}</b>`
-      : "UI";
+      ? `<b style="color:${factions[d.faction]?.color ?? "#777"}">${esc(caption)}</b>`
+      : esc(caption);
   }
   tone(kind: "income" | "damage") {
     if (!this.sound || performance.now() - this.lastTone < 85) return;
@@ -631,11 +633,11 @@ class Effects {
       const to = this.part(event.target, event.to);
       if (event.action === "blocked") {
         this.pulse(to, "cache-protected", 500);
-        this.log(event.target, `${this.name(targetPart?.type)} はキャッシュから表示 <em class="shd">広告を回避</em>`, t);
+        this.log(event.target, `${this.name(targetPart?.type, targetPart?.label)} はキャッシュから表示 <em class="shd">広告を回避</em>`, t);
       } else if (event.action === "cover") {
-        this.log(event.side, `${this.name(src?.type)} <span class="arrow">⇢</span> ${this.name(targetPart?.type)} を一時停止`, t);
+        this.log(event.side, `${this.name(src?.type)} <span class="arrow">⇢</span> ${this.name(targetPart?.type, targetPart?.label)} を一時停止`, t);
       } else if (event.action === "release") {
-        this.log(event.target, `${this.name(targetPart?.type)} <em class="heal">表示再開</em>`, t);
+        this.log(event.target, `${this.name(targetPart?.type, targetPart?.label)} <em class="heal">表示再開</em>`, t);
       } else if (event.action === "cache-ready") {
         this.pulse(el, "cache-protected", 420);
       }
@@ -778,10 +780,16 @@ class Effects {
         const input = el?.querySelector<HTMLInputElement>("input");
         if (input) input.value = src.label || "コメントを再生しました";
       }
-      const quoteState = el?.querySelector(".quote-state");
-      if (quoteState) quoteState.textContent = `${parts[tp?.type ?? ""]?.name ?? "原本"} を引用しました`;
-      const referenceState = el?.querySelector(".reference-state");
-      if (referenceState) referenceState.textContent = `${parts[tp?.type ?? ""]?.name ?? "原本"} を参照`;
+      const quoteState = el?.querySelector<HTMLElement>(".quote-state");
+      if (quoteState) {
+        quoteState.textContent = `${targetCaption(tp) || "原本"} を引用しました`;
+        quoteState.title = quoteState.textContent;
+      }
+      const referenceState = el?.querySelector<HTMLElement>(".reference-state");
+      if (referenceState) {
+        referenceState.textContent = `${targetCaption(tp) || "原本"} を参照`;
+        referenceState.title = referenceState.textContent;
+      }
       const commitState = el?.querySelector(".commit-state");
       if (commitState) commitState.textContent = "最後の通常発動を再適用";
       if (el && to && !this.reduced) {
@@ -802,7 +810,7 @@ class Effects {
       this.float(el, "もう一度", "echo");
       this.log(
         event.side,
-        `${this.name(src?.type)} <span class="arrow">↻</span> ${this.name(tp?.type)} を再発動`,
+        `${this.name(src?.type)} <span class="arrow">↻</span> ${this.name(tp?.type, tp?.label)} を再発動`,
         t,
       );
       return;
@@ -884,7 +892,7 @@ class Effects {
         const runtime = battle.states[side.name].get(p.id);
         const targetSide = p.type === "ad_popup" ? battle[side.name === "player" ? "enemy" : "player"] : side;
         const boundTarget = targetSide.parts.find((q) => q.id === runtime?.target);
-        applyCombatFeedback(el, combatFeedback(p.type, p.charge, battle.ticks, runtime, boundTarget ? parts[boundTarget.type].name : "", side.shield, { budget: battle.rateBudget[side.name], limited: battle.metrics[side.name].rateLimited }));
+        applyCombatFeedback(el, combatFeedback(p.type, p.charge, battle.ticks, runtime, targetCaption(boundTarget), side.shield, { budget: battle.rateBudget[side.name], limited: battle.metrics[side.name].rateLimited }));
         el.style.setProperty(
           "--progress",
           String(p.period ? Math.max(0, 1 - p.remaining / p.period) : 0),
