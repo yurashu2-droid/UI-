@@ -41,7 +41,7 @@ Both moves use `R.move` and `updateStoryBuild`; trying the second move first is 
 
 The next attempt wins `permission-proof` in 19.75 seconds with 29/380 HP. Keep this board through the rest of the story. Claim the first offered reward each time and leave those new parts in inventory: breadcrumb, form, form, search. With no further purchases, rerolls or board edits, the route wins `hidden-boundary` (328 HP), `hidden-relay` (304 HP), and WHITEOUT (182 HP), obtains all eight records, restores the archive, places the ending link and performs the first restored-page visit. That is the same fifteen canonical victories across eight stages, plus the one retained loss, not a shortened plot.
 
-The ending has $199, reconciled as `11 - 76 purchases - 19 rerolls + 283 actual battle earnings`; capacity stays 49 and admins remain empty. Normal stage transitions restore lives to three. No enemy, item definition, combat rule, story content or production code was changed for this witness. The default mixed policy remains 29/30 endings; the opt-in recovery is a separate bounded continuation, not an upgraded baseline rate.
+The ending has $199, reconciled as `11 - 76 purchases - 19 rerolls + 283 actual battle earnings`; capacity stays 49 and admins remain empty. Stage advancement restores one life, capped at three; this particular continuation therefore returns from two to three lives. No enemy, item definition, combat rule, story content or production code was changed for this witness. The default mixed policy remains 29/30 endings; the opt-in recovery is a separate bounded continuation, not an upgraded baseline rate.
 
 ### Controls and available paid alternatives
 

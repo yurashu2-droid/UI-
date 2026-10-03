@@ -30,6 +30,7 @@ import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.j
 import { previewCatalogueAction } from "./catalog/preview.js";
 import { VIDEO_SPEED_HELP, INSTANT_SEARCH_HELP, instantSearchSupport, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
 import { navigationGuidance, renderNavigationGuidance } from "./navigation-guidance.js";
+import { getHelpContent, renderHelpBody } from "./help-content.js";
 import { createDeferredMount } from "./feature-loader.js";
 import { createRaidEnemy } from "./raid/blueprint.js";
 import { registerRaidBlueprint } from "./raid/registry.js";
@@ -1853,8 +1854,9 @@ function modalHead(kicker: string, title: string) {
   return `<div class="modal-head"><div><div class="modal-kicker">${esc(kicker)}</div><h2>${esc(title)}</h2></div><button data-close-modal aria-label="閉じる">×</button></div>`;
 }
 function help() {
+  const content = getHelpContent({ storyActive, mode: run.mode });
   openModal(
-    `<div class="modal-inner">${modalHead("HOW TO PLAY", "遊び方")}<div class="howto"><div><b>1</b><p><strong>他のサイトからUIを移植する</strong>左の「巡回先のサイト」からUIをドラッグして、自分のページへコピー。移植には資金がかかり、資金は対戦中の収益で増えます。</p></div><div><b>2</b><p><strong>くっつけて連結する</strong>ボタン同士、検索窓＋ボタン、動画＋シークバー。連結すると強くなります。</p></div><div><b>3</b><p><strong>同じサイトのUIを3つ</strong>YouTube・Amazonなど、同じサイト文化のUIを3つ置くとセット効果。右の「シナジー」で確認。</p></div><div><b>4</b><p><strong>公開して対戦</strong>相手のサイトと閲覧者を奪い合います。勝つと相手のUIを奪えます。</p></div><div><b>5</b><p><strong>重さと処理能力</strong>UIを置くほどページは重くなります。サーバーの処理能力を超えると表示が遅くなり、閲覧者が待ちきれずに離れていく。巡回先にたまに出る「レンタルサーバー」で処理能力を増やそう。</p></div><div><b>6</b><p><strong>8つのサイトに挑む</strong>負けるとライフが1つ減ります（3つ）。</p></div></div><p class="muted">操作：Shift＋クリックで複数選択 / G：まとまりを選択 / Alt：くっつき無効 / Delete：手持ちへ / Ctrl+Z：元に戻す</p><div class="modal-footer"><button data-close-modal class="primary">わかった</button></div></div>`,
+    `<div class="modal-inner">${modalHead(content.kicker, content.title)}${renderHelpBody(content)}<div class="modal-footer"><button data-close-modal class="primary">わかった</button></div></div>`,
   );
 }
 function menu() {
