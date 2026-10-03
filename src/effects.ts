@@ -15,6 +15,7 @@ import { targetCaption } from "./catalog/target-caption.js";
 import { advancePagination } from "./catalog/pagination.js";
 import { setSubscriptionState } from "./catalog/subscription-state.js";
 import { setFollowState } from "./catalog/follow-state.js";
+import { setNativeToggleState } from "./catalog/toggle-state.js";
 import { applyAudienceFeedback } from "./catalog/audience-feedback.js";
 import { applyHistoryFeedback, historyFeedback } from "./catalog/history-render.js";
 
@@ -338,14 +339,20 @@ class Effects {
         break;
       }
       case "yt_like":
-      case "yt_caption":
-      case "am_wish":
         q(".native-button")?.classList.add("is-on");
         break;
-      case "yt_notify":
-        q(".native-button")?.classList.add("is-on");
+      case "yt_caption":
+      case "am_wish": {
+        const b = q(".native-button");
+        if (b) setNativeToggleState(b, true);
+        break;
+      }
+      case "yt_notify": {
+        const b = q(".native-button");
+        if (b) setNativeToggleState(b, true);
         this.toastAt(el, NOTES[this.notes++ % NOTES.length]);
         break;
+      }
       case "yt_ad":
         this.flag(el, "is-expanded", 1300);
         break;

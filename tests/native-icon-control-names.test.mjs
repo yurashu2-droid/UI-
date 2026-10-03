@@ -82,6 +82,7 @@ for (const spec of cases) {
     assert.equal(attr(button, "title"), spec.title);
     assert.deepEqual(Object.fromEntries(button.attrs.map(({ name, value }) => [name, value])), {
       type: "button", class: spec.classes, "data-ui": spec.action,
+      ...(spec.type === "yt_notify" ? { "aria-pressed": "false" } : {}),
       "aria-label": spec.name, title: spec.title,
     });
     assert.equal(visibleText(button), "", "the control remains icon-only");
@@ -122,7 +123,9 @@ for (const spec of cases) {
       assert.equal(f.node.classList.contains("is-listening"), false, "preview does not start the battle-only listening animation");
       assert.equal(f.layer.childElementCount, 0, "preview does not create game notification toasts");
       assert.deepEqual(f.button.children, children);
-      assert.deepEqual([...f.button.attrs], attrs);
+      assert.deepEqual([...f.button.attrs], attrs.map(([key, value]) => [
+        key, spec.type === "yt_notify" && key === "aria-pressed" ? String(on) : value,
+      ]));
       t.mock.timers.tick(520);
       assert.equal(f.node.classList.contains("is-firing"), false);
     }
@@ -162,7 +165,9 @@ for (const spec of cases) {
         t.mock.timers.tick(700);
         assert.equal(f.layer.childElementCount, 0);
         assert.deepEqual(f.button.children, children);
-        assert.deepEqual([...f.button.attrs], attrs);
+        assert.deepEqual([...f.button.attrs], attrs.map(([key, value]) => [
+          key, spec.type === "yt_notify" && key === "aria-pressed" ? "true" : value,
+        ]));
       }
       assert.deepEqual(f.item, before);
     });

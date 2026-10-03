@@ -85,8 +85,8 @@ function videoCopy(p: Item, kicker: string, fallback: [string, string]) {
     : `<strong>${fallback.map(esc).join("<br>")}</strong>`;
   return `<div class="video-copy${custom ? " has-custom-title" : ""}"><small>${esc(kicker)}</small>${title}</div>`;
 }
-function button(content: string, cls = "", action = "press") {
-  return `<button type="button" class="native-button ${cls}" data-ui="${action}">${content}</button>`;
+function button(content: string, cls = "", action = "press", pressed?: boolean) {
+  return `<button type="button" class="native-button ${cls}" data-ui="${action}"${pressed === undefined ? "" : ` aria-pressed="${pressed}"`}>${content}</button>`;
 }
 function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
   const t = p.type;
@@ -115,11 +115,12 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
         '<b class="cc-icon">CC</b>',
         "yt-button caption-button",
         "caption",
+        false,
       );
     case "yt_autoplay":
       return `<label class="native-toggle"><span>自動再生</span><input type="checkbox" checked aria-label="自動再生"><i><b>▶</b></i></label>`;
     case "yt_notify":
-      return `<button type="button" class="native-button yt-button notify-button" data-ui="notify" aria-label="通知ベルの表示を切り替える（プレビュー）" title="ページ内の表示プレビューです。端末への通知は送りません。">${icon("bell")}<i class="notification-dot"></i></button>`;
+      return `<button type="button" class="native-button yt-button notify-button" data-ui="notify" aria-pressed="false" aria-label="通知ベルの表示を切り替える（プレビュー）" title="ページ内の表示プレビューです。端末への通知は送りません。">${icon("bell")}<i class="notification-dot"></i></button>`;
     case "am_buy":
       return button(text(p, "カートに入れる"), "buy-button", "buy");
     case "am_cart":
@@ -141,6 +142,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
         `${icon("heart")}${text(p, "ほしい物リストに追加")}`,
         "wish-button",
         "wish",
+        false,
       );
     case "go_search":
       return `<form class="native-search" data-ui="search">${icon("search")}<input type="search" aria-label="検索キーワード" placeholder="インターネットのつなぎ方" value="${p.label ? esc(p.label) : ""}" autocomplete="off"><span class="search-spark">✦</span></form>`;

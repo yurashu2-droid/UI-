@@ -3400,8 +3400,50 @@ document.addEventListener("submit", (e) => {
 });
 document.addEventListener("keydown", (e) => {
   if (!(e.target instanceof HTMLElement)) return;
-  if (e.key === "Enter" && e.target.matches?.("[data-palette-type]"))
-    editor.add(e.target.dataset.paletteType!);
+  if (
+    (e.key === "Enter" || e.key === " ") &&
+    !e.defaultPrevented && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && !e.isComposing &&
+    e.target === document.activeElement &&
+    e.target.isConnected &&
+    e.target.matches('.shop-card[data-palette-type][role="button"], .hs-el[data-palette-type][role="button"]') &&
+    $("#library-list").contains(e.target) &&
+    !e.target.isContentEditable &&
+    !e.target.closest('input,button,select,textarea,[hidden],[inert],[aria-hidden="true"],[aria-disabled="true"]') &&
+    !document.querySelector("dialog[open]") &&
+    !editor.drag && editor.o.enabled()
+  ) {
+    // These wrappers are buttons; native children keep their own key defaults.
+    // Held Space must not scroll the library or create repeated purchases.
+    e.preventDefault();
+    if (e.repeat) return;
+    const source = e.target, library = $("#library-list"), originalRun = run,
+      mode = run.mode, stage = run.stage, storyMode = storyActive,
+      type = source.dataset.paletteType!, shopIndex = source.dataset.shopIndex,
+      stock = shopIndex === undefined ? undefined : run.shop[Number(shopIndex)],
+      selector = source.matches(".shop-card") ? '.shop-card[data-palette-type][role="button"]'
+        : '.hs-el[data-palette-type][role="button"]',
+      owned = new Set(run.owned.map(item => item.id));
+    editor.add(type);
+    // add() returns void; follow only an actual new, still-selected purchase.
+    // Repainting alone (including a rejected transaction's toast) is not success.
+    const added = run.owned.filter(item => !owned.has(item.id));
+    if (run !== originalRun || editor.run !== originalRun || run.mode !== mode || run.stage !== stage ||
+      storyActive !== storyMode || run.owned.length !== owned.size + 1 || added.length !== 1 ||
+      added[0].type !== type || editor.selection.size !== 1 || !editor.selection.has(added[0].id) ||
+      source.isConnected || !library.isConnected || document.querySelector("#library-list") !== library ||
+      editor.drag || !editor.o.enabled() || document.querySelector("dialog[open]") ||
+      (document.activeElement !== document.body && document.activeElement !== null)) return;
+    // Campaign stock has slot identity: a sold source must not jump to another
+    // same-type offer, even when that offer survives the synchronous redraw.
+    if (mode === "campaign" && (!stock || stock.type !== type || stock.sold ||
+      run.shop[Number(shopIndex)] !== stock)) return;
+    const replacement = [...library.querySelectorAll<HTMLElement>(selector)].find(card =>
+      card.dataset.paletteType === type && (mode === "lab" || card.dataset.shopIndex === shopIndex));
+    if (replacement?.isConnected && replacement.tabIndex === 0 && !replacement.isContentEditable &&
+      !replacement.closest('input,button,select,textarea,[hidden],[inert],[aria-hidden="true"],[aria-disabled="true"]'))
+      replacement.focus({ preventScroll: true });
+    return;
+  }
   if (e.key === "Enter" && e.target.matches?.("#enemy-thumbnail") && !battle) {
     view = "enemy";
     render();
