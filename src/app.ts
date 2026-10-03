@@ -1177,7 +1177,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
  ${d.kind === "attack" && d.tags.includes("navigation") ? `<details class="sel-more"><summary>このUIの余白加算</summary>${renderNavigationGuidance(navigationGuidance(info, p))}</details>` : ""}
  <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>
  ${p.appearanceId ? '<p class="muted">取得元の外観を使用中。合成後は標準表示になりますが、元の外観と由来はコレクションに残ります。</p>' : ""}
- <details class="sel-more"><summary>見た目（時代）・表示テキストを変える</summary>${skinPicker(p)}<label class="field-label">表示テキスト<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="元のテキストを使用"></label></details>
+ <details class="sel-more"><summary>見た目（時代）・部品ラベルを変える</summary>${skinPicker(p)}<label class="field-label">部品ラベル<input id="part-label" class="text-input" maxlength="80" value="${esc(p.label)}" placeholder="標準の名前・表示を使用"></label><p class="muted">部品の識別に使うラベルです。対応するUIの標準表示では、ページ上の文字も変わります。</p></details>
  <div class="sel-actions"><button data-editor-action="stash">手持ちに戻す</button><button data-editor-action="remove" class="sell">${run.mode === "lab" ? "削除" : `売る +$${R.sellValue(run, p.type)}`}</button></div></section>`;
 }
 // Each site culture gets a tiny favicon so it is recognisable at a glance, not only by colour.

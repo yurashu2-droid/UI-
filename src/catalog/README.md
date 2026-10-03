@@ -20,6 +20,8 @@ Target captions now combine each target’s editable label with its canonical UI
 
 Ordinary and fused video now honor edited titles in their native artwork. Empty labels keep byte-identical original default markup; whitespace-only labels choose that default without rewriting saved data. The custom-only stylesheet limits title text to a two-line region and retains the full text/title value. Existing play, time, seek and caption hooks keep working, and acquired appearances still hide the original video-copy layer. Renderer/editor/persistence/preview/Effects tests and source-level compact geometry/cascade checks pass; actual browser typography, clipping and assistive-technology behavior remain unverified. No combat, fusion lineage or save format changes are involved.
 
+Placed part wrappers now use that same target caption for their `aria-label` and `title`, so differently labeled duplicates retain their chosen identity through render, edit/save, undo/redo and acquired-appearance refresh. Inner native controls keep their existing action labels and interactions; icon/state artwork is not replaced by the label. The inspector calls the field “部品ラベル” and explicitly limits page-text changes to the standard appearance of supporting UIs. Blank/equal-to-canonical fallback, display-only cleanup and stored values retain the shared caption contract. App-host/DOM-adapter tests cover nested keyboard selection and preview gates, but actual hover tooltips, browser Tab order and screen-reader acceptance remain unverified.
+
 ## Template design distinctions
 
 | Template | Structural identity | Mechanical purpose | Surrendered opportunity |

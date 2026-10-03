@@ -1,4 +1,5 @@
 import { RATE_LIMIT } from "./combat-rules.js";
+import { targetCaption } from "./catalog/target-caption.js";
 import { jobTableMarkup } from "./catalog/server-pressure-render.js";
 import { serviceFormHeader, serviceFormDecor } from "./catalog/service-form-render.js";
 import { projectBoardHeader, projectBoardDecor } from "./catalog/project-board-render.js";
@@ -411,7 +412,9 @@ function create(
   el.dataset.type = p.type;
   el.dataset.side = side;
   el.dataset.kind = d.kind;
-  el.setAttribute("aria-label", d.name);
+  const caption = targetCaption(p);
+  el.setAttribute("aria-label", caption);
+  el.setAttribute("title", caption);
   el.dataset.tag = TAGS[p.type] || "<div>";
   el.style.setProperty("--node-color", D.FACTIONS[d.faction].color);
   el.innerHTML =
