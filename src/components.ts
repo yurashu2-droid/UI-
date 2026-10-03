@@ -4,6 +4,7 @@ import { jobTableMarkup } from "./catalog/server-pressure-render.js";
 import { serviceFormHeader, serviceFormDecor } from "./catalog/service-form-render.js";
 import { projectBoardHeader, projectBoardDecor } from "./catalog/project-board-render.js";
 import { mailHeader, mailDecor } from "./catalog/mail-render.js";
+import { calendarHeader, calendarDecor } from "./catalog/calendar-render.js";
 import { musicShopHeader, musicShopDecor } from "./catalog/music-shop-render.js";
 import { personalWebHeader, personalWebDecor } from "./catalog/personal-web-render.js";
 import { mapSearchHeader, mapSearchDecor } from "./catalog/map-search-render.js";
@@ -384,7 +385,7 @@ function decorMarkup(kind: string) {
     case "gov-contact":
       return `<div class="d-gov-contact"><b>このページに関するお問い合わせ</b><p>総務部 デジタル推進課　電話：000-000-0000（平日 8:30〜17:15）</p><small>ページ番号 1024-0098　更新日 2026年9月1日</small></div>`;
     default:
-      return socialDecor(kind) || knowledgeDecor(kind) || communityDecor(kind) || discoveryDecor(kind) || timeMediaDecor(kind) || documentsDecor(kind) || audioDecor(kind) || qandaDecor(kind) || feedreaderDecor(kind) || marketplaceDecor(kind) || releasesDecor(kind) || rankedNewsDecor(kind) || mapSearchDecor(kind) || personalWebDecor(kind) || musicShopDecor(kind) || serviceFormDecor(kind) || projectBoardDecor(kind) || mailDecor(kind);
+      return socialDecor(kind) || knowledgeDecor(kind) || communityDecor(kind) || discoveryDecor(kind) || timeMediaDecor(kind) || documentsDecor(kind) || audioDecor(kind) || qandaDecor(kind) || feedreaderDecor(kind) || marketplaceDecor(kind) || releasesDecor(kind) || rankedNewsDecor(kind) || mapSearchDecor(kind) || personalWebDecor(kind) || musicShopDecor(kind) || serviceFormDecor(kind) || projectBoardDecor(kind) || mailDecor(kind) || calendarDecor(kind);
   }
 }
 export interface CreateOptions {
@@ -442,6 +443,7 @@ function header(theme: string, name?: string) {
   if (theme === "serviceform") return serviceFormHeader();
   if (theme === "projectboard") return projectBoardHeader();
   if (theme === "mailroom") return mailHeader();
+  if (theme === "calendar") return calendarHeader();
   const avatar = '<span class="site-avatar">u</span>';
   if (theme === "twitter" || theme === "x") return socialHeader(theme);
   if (theme === "wiki" || theme === "forge") return knowledgeHeader(theme);

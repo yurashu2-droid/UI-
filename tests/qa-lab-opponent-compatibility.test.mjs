@@ -22,12 +22,12 @@ const existingIds = [
   "site_github_releases", "site_hacker_news", "site_google_maps", "site_geocities", "site_bandcamp", "site_govuk",
 ];
 
-test("QA: all 36 established laboratory opponent indices preserve saved meaning with only the reviewed mail template appended", () => {
-  const reviewedIds=[...existingIds,"site_trello"];
+test("QA: all 37 established laboratory opponent indices preserve saved meaning with only the reviewed calendar template appended", () => {
+  const reviewedIds=[...existingIds,"site_trello","site_gmail"];
   const currentIds=R.labEnemies().map(enemy=>enemy.id);
   assert.deepEqual(currentIds.slice(0,reviewedIds.length),reviewedIds);
-  assert.deepEqual(currentIds.slice(reviewedIds.length),["site_gmail"]);
-  for (const [index,id] of [...reviewedIds,"site_gmail"].entries()) {
+  assert.deepEqual(currentIds.slice(reviewedIds.length),["site_calendar"]);
+  for (const [index,id] of [...reviewedIds,"site_calendar"].entries()) {
     const run=R.newRun("lab");run.stage=index;
     const restored=JSON.parse(JSON.stringify(run));
     assert.equal(R.validateRun(restored),true);

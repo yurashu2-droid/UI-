@@ -81,6 +81,10 @@ const FACTIONS: Record<
     name: "Trello風", short: "BOARD", color: "#216d99", era: "PROJECT BOARD",
     set: "テンプレート専用：既存UIで構成・追加補正なし",
   },
+  calendar: {
+    name: "Google Calendar風", short: "DAY", color: "#5f83bc", era: "CUSTOM CALENDAR",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
   mailroom: {
     name: "Gmail風", short: "MAIL", color: "#6c7d94", era: "MAIL INBOX",
     set: "テンプレート専用：既存UIで構成・追加補正なし",

@@ -7,7 +7,7 @@ Ongoing development is delivered on `feat/raid-balance-async`. See [the current 
 - `npm run dev:local` starts the existing local client and arena together, checks both health paths and cleans up only its own child processes
 - Mode-aware help distinguishes the canonical story, legacy campaign and laboratory; paid transactions and save recovery preserve inventory and editor-history boundaries
 - Placed parts support keyboard selection and retain focus through keyboard move/undo/redo repaints when the same part remains available; edited labels identify wrappers and combat targets, and ordinary/fused native video titles reflect their labels. Inspector guidance limits visible-text changes to supporting standard artwork
-- The laboratory catalogue contains twenty-three fictional, original-code templates and twenty-eight experimental UI definitions. PATCHBOARD and POSTROOM reuse existing mechanics; template order and normal acquisition exclusions remain protected
+- The laboratory catalogue contains twenty-four fictional, original-code templates and twenty-eight experimental UI definitions. PATCHBOARD, POSTROOM and WEEKGRID reuse existing mechanics; template order and normal acquisition exclusions remain protected
 - Reviewed source CSS follows actual document order, and uncertain arena operations retain command identity through explicit retryable HTTP 408/429 recovery within the open panel
 - Paid-reachable navigation and supported-link examples document inventory value, cumulative spending, CPU limits, finite recovery paths and losing controls rather than universal balance guarantees
 
