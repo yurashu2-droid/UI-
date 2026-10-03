@@ -191,3 +191,28 @@ test("previous code-approximation manifests still verify without new CSS metadat
   const frozen = await sealRaidBlueprint(old);
   assert.equal((await verifyRaidBlueprint(frozen)).ok, true);
 });
+
+test("embedded styles ignore print-only, conditional and non-CSS blocks during screen approximation", async () => {
+  const { analyzeStaticCode } = await import('../server/site-ingest/code.js');
+  for (const attributes of ['media="print"', 'media="screen and (max-width: 1px)"', 'type="text/plain"']) {
+    const parsed = analyzeStaticCode(`<style ${attributes}>h1{display:none}</style><h1>Visible screen heading</h1>`);
+    assert.equal(parsed.candidates.filter(c => c.kind === 'heading').length, 1, attributes);
+  }
+  for (const attributes of ['', 'media="ALL"', 'media=" screen "', 'type="text/css"']) {
+    const parsed = analyzeStaticCode(`<style ${attributes}>h1{color:#2468ac}</style><h1>Screen heading</h1>`);
+    assert.equal(parsed.candidates.find(c => c.kind === 'heading').style.color, '#2468ac', attributes);
+  }
+});
+
+test("reviewed external CSS uses the same normalized unconditional screen eligibility", async () => {
+  for (const attributes of ['media="SCREEN"', 'media=" all "']) {
+    const calls = [];
+    const html = `<link rel="stylesheet" ${attributes} href="static/oscar/css/styles.css"><h1>Visible heading</h1>`;
+    const service = createStaticIngestService({ transport: async url => {
+      calls.push(url);
+      return new Response(url === CSS_URL ? 'h1{color:#2468ac}' : html, { headers: { 'content-type': url === CSS_URL ? 'text/css' : 'text/html' } });
+    }});
+    assert.equal((await service.reconstruct(URL)).ok, true);
+    assert.deepEqual(calls, [URL, CSS_URL]);
+  }
+});

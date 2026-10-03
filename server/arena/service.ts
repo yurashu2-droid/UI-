@@ -526,9 +526,10 @@ export class ArenaService {
           return ok("MATCH_READY", "確定済みの対戦を復元しました。");
         requireBuild();
         const player = this.publish(data, online);
-        const candidates = Object.values(data.snapshots).filter(
+        const snapshots = Object.values(data.snapshots).filter(
           (s) =>
             s.ownerRunId !== online.id &&
+            !!data.runs[s.ownerRunId]?.owner &&
             data.runs[s.ownerRunId]?.owner !== online.owner &&
             s.rulesVersion === online.rules.version &&
             s.combatVersion === online.combatVersion &&
@@ -537,22 +538,35 @@ export class ArenaService {
             s.resourceTier === player.resourceTier &&
             Date.now() - s.createdAt <= online.rules.snapshotMaxAgeMs,
         );
-        if (!candidates.length)
+        if (!snapshots.length)
           return ok(
             "NO_OPPONENT",
             "同じラウンドの保存ビルドがまだありません。公開は完了しました。資金・残機は減りません。",
           );
-        const fresh = candidates.filter(
-          (s) => !online.recentOpponents.includes(s.ownerRunId),
-        );
-        const pool = fresh.length ? fresh : candidates;
-        pool.sort(
+        snapshots.sort(
           (a, b) =>
             Math.abs(a.wins - run.wins) - Math.abs(b.wins - run.wins) ||
             Math.abs(a.rating - online.rating) -
               Math.abs(b.rating - online.rating) ||
             b.createdAt - a.createdAt,
         );
+        // A guest's previous runs must not buy additional lottery slots or crowd
+        // other guests out of the shortlist. Keep that owner's closest snapshot.
+        const byOwner = new Map<string, BuildSnapshot>();
+        for (const snapshot of snapshots) {
+          const owner = data.runs[snapshot.ownerRunId].owner;
+          if (!byOwner.has(owner)) byOwner.set(owner, snapshot);
+        }
+        const candidates = [...byOwner.values()];
+        // Keep stored run IDs compatible with older saves, but resolve recency
+        // at the guest-owner level so a new run does not bypass it.
+        const recentOwners = new Set(
+          online.recentOpponents.map((id) => data.runs[id]?.owner),
+        );
+        const fresh = candidates.filter(
+          (s) => !recentOwners.has(data.runs[s.ownerRunId].owner),
+        );
+        const pool = fresh.length ? fresh : candidates;
         const best = pool[0],
           near = pool
             .filter(

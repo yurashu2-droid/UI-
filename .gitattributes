@@ -1,0 +1,2 @@
+# Exact, hash-pinned upstream input: preserve original whitespace for reconstruction tests.
+fixtures/raid/public-source/books.html -whitespace

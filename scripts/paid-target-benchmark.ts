@@ -15,8 +15,19 @@ import { BATTLE_RULES_VERSION } from "../src/combat-rules.js";
 import { RECIPES } from "../src/fusion.js";
 import type { Item, LayoutEntry, Run } from "../src/types.js";
 import type { Entrant } from "../src/buildlab.js";
+import {
+  arrangeComposition,
+  compositionProgress,
+  validateCompositionTarget,
+} from "./paid-composition.js";
 export type TargetPolicy =
-  "cart" | "cart-fused" | "fortress" | "documents" | "onestop" | "native-links" | "oneclick-battery";
+  | "cart"
+  | "cart-fused"
+  | "fortress"
+  | "documents"
+  | "onestop"
+  | "native-links"
+  | "oneclick-battery";
 const base = (id: string): Entrant => ({
   ...BUILDS.find((b) => b.id === id)!,
   build: true,
@@ -215,12 +226,15 @@ function arrange(run: Run, target: Entrant, fuse: boolean) {
 export function simulateTargetPath(
   seed: number,
   policy: TargetPolicy,
-  options: { preferredAdmins?: string[] } = {},
+  options: { preferredAdmins?: string[]; composition?: Entrant } = {},
 ) {
+  const composition = options.composition
+    ? validateCompositionTarget(options.composition)
+    : undefined;
   const run = R.newRun("campaign");
   run.seed = seed;
   run.shop = R.market(run);
-  const target = targetFor(policy),
+  const target = composition ?? targetFor(policy),
     demand = counts(
       target.layout.map((r, i) =>
         C.makeItem(r[0], "goal" + i, r[1], r[2], r[3], r[4]),
@@ -234,6 +248,8 @@ export function simulateTargetPath(
     cash: number;
     offered: string[];
     from?: string[];
+    inputIds?: string[];
+    outputId?: string;
   }[] = [];
   const rounds: {
     round: number;
@@ -250,6 +266,10 @@ export function simulateTargetPath(
     targetTotal: number;
     missing: { type: string; count: number }[];
     held: number;
+    outputsTotal: number;
+    outputsOwned: number;
+    outputsPlaced: number;
+    targetLayoutComplete: boolean;
   }[] = [];
   let partSpend = 0,
     serverSpend = 0,
@@ -272,8 +292,13 @@ export function simulateTargetPath(
     if ((owned[type] ?? 0) < (demand[type] ?? 0)) {
       if (d.kind === "attack") return 100 - (owned[type] ?? 0) * 2;
       if (
+        !options.composition &&
         ["gov_font", "go_suggest", "ab_table", "gov_form"].includes(type) &&
-        !(policy === "onestop" ? (owned.gov_submit ?? 0) : policy === "native-links" ? (owned.ab_link ?? 0) : (owned.gov_pdf ?? 0))
+        !(policy === "onestop"
+          ? (owned.gov_submit ?? 0)
+          : policy === "native-links"
+            ? (owned.ab_link ?? 0)
+            : (owned.gov_pdf ?? 0))
       )
         return -100;
       return attacks ? 70 - (owned[type] ?? 0) * 2 : -100;
@@ -344,7 +369,10 @@ export function simulateTargetPath(
       }
       break;
     }
-    arrange(run, target, policy === "cart-fused");
+    const compositionPairs = options.composition
+      ? arrangeComposition(run, target)
+      : [];
+    if (!options.composition) arrange(run, target, policy === "cart-fused");
     if (C.analyze(run.owned).load > R.capacity(run)) {
       const plan = run.shop.find((s) => !s.sold && s.type.startsWith("plan:"));
       if (plan) buy(plan.type);
@@ -373,6 +401,7 @@ export function simulateTargetPath(
       targetTotal,
       missing,
       held: run.owned.filter((p) => !C.placed(p)).length,
+      ...compositionProgress(run.owned, target),
     };
     assert.equal(state.legal, true);
     const started = R.startBattle(run);
@@ -392,7 +421,23 @@ export function simulateTargetPath(
       winner: settled.summary.winner,
       time: settled.summary.time,
     });
+    if (options.composition && (run.phase as string) !== "gameover") {
+      for (const pair of compositionPairs)
+        for (const f of R.fuse(run, { pair }))
+          transactions.push({
+            kind: "fusion",
+            round: state.round,
+            type: f.recipe.into,
+            cost: 0,
+            cash: run.cash,
+            offered: [],
+            from: f.from,
+            inputIds: [...pair],
+            outputId: f.item.id,
+          });
+    }
     if (
+      !options.composition &&
       ["cart-fused", "onestop", "oneclick-battery"].includes(policy) &&
       (run.phase as string) !== "gameover"
     ) {
@@ -438,6 +483,9 @@ export function simulateTargetPath(
     preferredAdmins: options.preferredAdmins ?? null,
     seed,
     policy,
+    ...(options.composition
+      ? { target: clone(target), pursuit: "composition" as const }
+      : {}),
     cash: run.cash,
     wins: run.wins,
     lives: run.lives,
@@ -449,6 +497,21 @@ export function simulateTargetPath(
     blocked,
     transactions,
     rounds,
+  };
+}
+/** Any legal production composition can be pursued; the original policy cohorts stay unchanged. */
+export function simulateCompositionPath(
+  seed: number,
+  target: Entrant,
+  options: { preferredAdmins?: string[] } = {},
+) {
+  return {
+    ...simulateTargetPath(seed, "documents", {
+      ...options,
+      composition: target,
+    }),
+    policy: "composition" as const,
+    target: validateCompositionTarget(target),
   };
 }
 export function comparePaidTargets(firstSeed = 101, seeds = 30) {

@@ -23,6 +23,8 @@ export interface BuildDef {
   /** What beats it. */
   weakness: string;
   admin: string[];
+  /** False keeps a new player preset out of the legacy numeric opponent list. */
+  labOpponent?: boolean;
   layout: LayoutEntry[];
 }
 
@@ -305,3 +307,31 @@ BUILDS.push(
     layout: videoCheckoutCandidate(exampleBase("b_video")).layout,
   },
 );
+
+
+// A small paid-route witness, not another full-budget archetype or a guaranteed shop result.
+BUILDS.push({
+  id: "b_search_documents",
+  name: "【小さな構成例】検索と資料",
+  faction: "google",
+  theme: "google",
+  pageName: "検索から読む資料室",
+  address: "archive://build/compact-search-documents",
+  concept: "検索を1回統合し、文字サイズ・検索タブ・PDFを実際につなぐ、5個の小さな構成。",
+  how: [
+    "素材の額面合計$34・CPU11。インスタント検索の検索窓＋候補パネルを含む6素材で、初期CPU12に収まる。購入途中の補助UI・再抽選・設備代は別",
+    "検索窓とサジェストを隣接させて対戦し、インスタント検索へ統合。その後、検索の直下に文字サイズとPDF、右隣に検索結果を置く",
+    "インスタント検索とPDFは文字サイズと内蔵候補で威力2.175倍。検索結果には内蔵候補の1.45倍、検索と結果にはタブの速度+20%が実際に届く",
+    "現行ルールの実購入・報酬・合成を通して完成した検証例がある。ショップの出現や管理設備の入手を保証する構成ではなく、途中の余剰UIもCPUを使う",
+  ],
+  weakness: "自前の回復とシールドがなく、素早いリンクの手数に押される条件がある。Googleの素材が店に並ぶ時期と統合待ちも必要。額面$34だけで、途中の買い物や完成後の勝利まで保証されるわけではない。",
+  admin: [],
+  labOpponent: false,
+  layout: [
+    ["go_tabs", 24, 0, 440, 36],
+    ["go_instant", 24, 40, 420, 44],
+    ["gov_font", 24, 92, 232, 36],
+    ["gov_pdf", 264, 92, 184, 48],
+    ["go_result", 452, 40, 480, 96],
+  ],
+});

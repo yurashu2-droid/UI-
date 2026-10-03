@@ -32,10 +32,16 @@
 .native-cache { position: relative; box-sizing: border-box; height: 100%; padding: 3px 24px 3px 2px; font: 13px/1.4 Arial, sans-serif; color: #44566c; }
 .native-cache a { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1856a3; text-decoration: underline; }
 .native-cache small { display: block; overflow: hidden; text-overflow: ellipsis; color: #687588; font-size: 10px; white-space: nowrap; }
+.native-cache .cache-meta { display: flex; align-items: baseline; gap: 6px; }
+.cache-state { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.cache-target { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .cache-copy-icon { position: absolute; right: 6px; top: 3px; color: #587aa6; font-size: 20px; }
 .native-support { box-sizing: border-box; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid #cab0d8; border-radius: 22px; background: #f2e7f7; color: #603875; font: 600 12px Arial, sans-serif; }
 .native-support .icon { flex: 0 0 16px; width: 16px; height: 16px; }
 .native-support > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.native-support .support-copy { display: flex; flex-direction: column; text-align: left; line-height: 14px; }
+.support-copy > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.support-feedback { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; font-weight: 400; line-height: 12px; color: #704783; }
 .support-state { flex: 0 0 auto; padding-left: 7px; border-left: 1px solid #cfb9d9; font: 10px/1.2 Arial, sans-serif; white-space: nowrap; }
 .native-support[data-supported="true"] { background: #e3d0ed; }
 .native-cache a:focus-visible, .native-popup-ad button:focus-visible, .native-support:focus-visible { outline: 2px solid #116ad7; outline-offset: 2px; }
@@ -182,12 +188,14 @@
 @keyframes popup-cover-open { from { clip-path: inset(0 0 96% 0); } to { clip-path: inset(0); } }
 @media (prefers-reduced-motion: reduce) { .native-popup-cover { animation: none; } }
 
-.native-rate-limit { box-sizing: border-box; height: 100%; padding: 9px 12px; background: #f6f5ef; border-top: 2px solid #b29b63; color: #4e4c3d; font: 11px/1.35 Arial, sans-serif; }
-.native-rate-limit header { display: flex; gap: 9px; align-items: center; }
+.native-rate-limit { box-sizing: border-box; height: 100%; padding: 6px 10px; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; background: #f6f5ef; border-top: 2px solid #b29b63; color: #4e4c3d; font: 11px/1.35 Arial, sans-serif; }
+.native-rate-limit header { display: flex; flex: 0 0 19px; min-width: 0; gap: 9px; align-items: center; }
 .native-rate-limit code { padding: 2px 4px; border: 1px solid #cfc4a4; background: #fffdf5; color: #786642; font: 700 13px/1.2 Consolas, monospace; }
-.native-rate-limit strong { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.native-rate-limit p { margin: 6px 0; font-size: 9px; color: #8b8778; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.native-rate-limit footer { display: flex; justify-content: space-between; font-size: 9px; color: #7b7768; font-variant-numeric: tabular-nums; }
+.native-rate-limit strong { min-width: 0; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.native-rate-limit p { margin: 0; line-height: 12px; font-size: 9px; color: #8b8778; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rate-budget-meter { display: block; flex: 0 0 6px; width: 100%; height: 6px; border: 0; accent-color: #70886c; }
+.rate-budget-meter[hidden] { display: none; }
+.native-rate-limit footer { display: flex; gap: 8px; white-space: nowrap; line-height: 12px; justify-content: space-between; font-size: 9px; color: #7b7768; font-variant-numeric: tabular-nums; }
 .native-rate-limit footer b { color: #5c6e60; }
 .web-node.is-rate-limited .native-rate-limit { border-top-color: #b17a39; background: #faf1df; }
 

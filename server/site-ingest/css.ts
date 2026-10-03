@@ -7,6 +7,11 @@ export const CSS_LIMITS = Object.freeze({
   declarations: 64,
   selectorParts: 4,
 });
+/** No viewport is measured; only unconditional screen/all CSS is eligible. */
+export function isScreenStylesheet(media?: string, type?: string): boolean {
+  return ["", "all", "screen"].includes((media ?? "").trim().toLowerCase()) &&
+    ["", "text/css"].includes((type ?? "").trim().toLowerCase());
+}
 export type SafeStyle = {
   color?: string;
   background?: string;

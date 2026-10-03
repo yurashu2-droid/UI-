@@ -119,7 +119,7 @@ function market(run: Run): Run["shop"] {
   return out;
 }
 // The lab can also fight the archetype builds (after the five campaign sites).
-const BUILD_ENEMIES: EnemyDefinition[] = BUILDS.map((b) => ({
+const BUILD_ENEMIES: EnemyDefinition[] = BUILDS.filter((b) => b.labOpponent !== false).map((b) => ({
   id: b.id,
   faction: b.faction,
   name: b.name,

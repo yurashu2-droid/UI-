@@ -4,11 +4,15 @@ This catalogue uses original, fictional page content and hand-authored native co
 
 ## Current review state
 
-- Twenty-seven added UI definitions are marked `experimental`, including the support-button fusion. They are visible in the laboratory and remain outside the regular campaign and authoritative online acquisition pools.
+- Twenty-eight added UI definitions are marked `experimental`, including the support-button fusion. They are visible in the laboratory and remain outside the regular campaign and authoritative online acquisition pools.
 - Twenty-one experimental templates are registered through `SITE_TEMPLATES`: old Twitter, X, Wikipedia, GitHub, Niconico, Reddit, Yahoo! JAPAN, Steam, Wayback Machine, Twitch, Google Docs, SoundCloud, Stack Overflow, Google Reader, Rakuten Ichiba, a separate GitHub Releases-inspired page, Hacker News, Google Maps, a GeoCities-inspired personal homepage, Bandcamp, and a GOV.UK-inspired service form.
 - Portal, storefront, web archive, live channel, collaborative documents, Q&A, feed reader, marketplace, ranked news, map search, personal homepage, music shop and service form are page themes only. They reuse existing combat definitions, add no shop entries, and must not appear as empty combat-family filters.
 - Automated tests cover canonical IDs, geometry, real advertised connections, label escaping, native controls, and selected state transitions. Independent source review has checked all twenty-one template designs and the audience feedback. Audio, Q&A and feed-reader registration also passed independent integration review. The two-lane marketplace also passed independent source/runtime review; the registered ZIP transfer host seam also passed independent review. The Releases composition also passed independent save/runtime/source review. Docs registration includes exact connection/modifier and save/opponent round-trip tests. Service-form registration passed independent exact-prefix opponent, theme/decor, fusion lineage, stashed-parent ownership and local-preview verification. Pixel layout and actual browser clicks still require supported browser verification.
 - The current combat-v4 engine inherits combat-v3 navigation and adds pagewide natural-cadence contention only when more than two 1-Click parts are placed. This is a game abstraction; CPU load and charge conversion are unchanged. Catalogue text reflects the page-wide two-link whitespace allocation and diminishing attention beyond six navigation attacks. Advertising churn and subscriber retention remain explicitly selected laboratory rules.
+
+## Native control readability checkpoint
+
+Cache now shows its actual single protected target beside readiness, support shows charge/full-shield waiting inside its existing button, and HTTP 429 displays a native meter for the one page-shared budget. Values come from the existing fixed-tick feedback seam; duplicate 429 panels never own separate budgets. Missing/nonfinite rate telemetry is shown as unknown with the meter hidden, rather than inventing zero or a refilled budget. Support preview reports its local-only/no-payment meaning and the next battle update replaces it. Canonical combat definitions, template order and acquisition pools are unchanged. Source/DOM-adapter checks pass; browser pixel and actual-click review remains blocked.
 
 ## Template design distinctions
 

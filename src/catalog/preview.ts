@@ -40,6 +40,8 @@ export function previewCatalogueAction(control: HTMLElement, node: HTMLElement |
     return true;
   }
   if (kind === 'support') {
+    const state = node?.querySelector('.support-feedback');
+    if (state) state.textContent = '応援のプレビュー · 決済なし';
     control.setAttribute('title', '応援のプレビュー · 実際の決済なし');
     control.setAttribute('data-supported', 'true');
     return true;

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 import { reconstructStaticCode } from "./code.js";
-import { CSS_LIMITS } from "./css.js";
+import { CSS_LIMITS, isScreenStylesheet } from "./css.js";
 import type { RaidBlueprint } from "../../src/raid/types.js";
 import {
   DEFAULT_PUBLIC_SOURCES,
@@ -271,7 +271,7 @@ export function createStaticIngestService(
             rel.includes("stylesheet") &&
             !rel.includes("alternate") &&
             attr(n, "disabled") === undefined &&
-            [undefined, "", "all", "screen"].includes(attr(n, "media"))
+            isScreenStylesheet(attr(n, "media"), attr(n, "type"))
           ) {
             try {
               if (new URL(attr(n, "href") ?? "", input).href === allowed)

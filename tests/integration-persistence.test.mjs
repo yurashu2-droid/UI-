@@ -49,3 +49,39 @@ test('a synchronous recovery journal wins over an older asynchronous profile mir
   assert.deepEqual(P.selectRecoveredRun({status:'loaded',run:latest},older),latest);
   assert.deepEqual(P.selectRecoveredRun({status:'empty'},older),older);
 });
+
+test('two empty journals cannot both claim first ownership of a save', () => {
+  const storage = memoryStorage();
+  const first = P.createRunPersistence(storage, 'v3-');
+  const second = P.createRunPersistence(storage, 'v3-');
+  first.load('campaign'); second.load('campaign');
+  const current = R.newRun('campaign'); current.page.name = 'Newer journey';
+  assert.equal(first.save(current).ok, true);
+  assert.equal(second.save(R.newRun('campaign')).ok, false);
+  assert.equal(JSON.parse(storage.entries.get('v3-campaign')).page.name, 'Newer journey');
+});
+
+test('an interrupted mode-pointer write permits retrying the already committed run', () => {
+  const storage = memoryStorage();
+  let fail = true;
+  const store = P.createRunPersistence({ getItem: storage.getItem, setItem(key, value) {
+    if (key === 'v3-mode' && fail) throw new Error('mode quota');
+    storage.setItem(key, value);
+  } }, 'v3-');
+  const run = R.newRun('campaign');
+  assert.equal(store.save(run).ok, false);
+  fail = false;
+  run.page.name = 'Retry after a partial write';
+  assert.equal(store.save(run).ok, true);
+  assert.equal(JSON.parse(storage.entries.get('v3-campaign')).page.name, run.page.name);
+});
+
+test('recovery cannot back up obsolete corrupt bytes over a newer tab save', () => {
+  const storage = memoryStorage({ 'v3-campaign': '{old damaged' });
+  const old = P.createRunPersistence(storage, 'v3-');
+  old.load('campaign');
+  const newer = R.newRun('campaign'); newer.page.name = 'Recovered elsewhere';
+  const raw = JSON.stringify(newer); storage.entries.set('v3-campaign', raw);
+  assert.equal(old.recover(R.newRun('campaign')).ok, false);
+  assert.equal(storage.entries.get('v3-campaign'), raw);
+});

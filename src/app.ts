@@ -29,8 +29,10 @@ import { prepareRaidChallenge } from "./raid-challenge.js";
 import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
 import { previewCatalogueAction } from "./catalog/preview.js";
 import { VIDEO_SPEED_HELP, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
-import { mountOnlinePanel } from "./online/index.js";
-import { mountRaidPanel, createRaidEnemy, registerRaidBlueprint, applyRaidAppearance, renderRaidAppearance } from "./raid/index.js";
+import { createDeferredMount } from "./feature-loader.js";
+import { createRaidEnemy } from "./raid/blueprint.js";
+import { registerRaidBlueprint } from "./raid/registry.js";
+import { applyRaidAppearance, renderRaidAppearance } from "./raid/render.js";
 import type { RaidBlueprint, RaidInitialRequest } from "./raid/types.js";
 import * as Story from "./story/index.js";
 import * as StorySession from "./story/session.js";
@@ -144,7 +146,7 @@ function save() {
   const result = runPersistence.save(run);
   saveOK = result.ok;
   saveProblem = result.ok ? "" : result.error;
-  if (profileStore) {
+  if (result.ok && profileStore) {
     const snapshot = clone(run), store = profileStore;
     profileWrites = profileWrites.then(() => store.saveRun(snapshot)).then(() => {
       profileProblem = ""; renderStorageNotice();
@@ -180,6 +182,25 @@ function renderStorageNotice() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   notice.append(backup);
+  if (!storyActive && !saveOK) {
+    const reload = document.createElement("button");
+    reload.textContent = "最新の保存を読み直す";
+    reload.disabled = !!battle;
+    reload.onclick = () => {
+      if (battle || !window.confirm("今の未保存の編集は置き換わります。必要なら先に書き出してください。最新の保存を読み直しますか？")) return;
+      const result = runPersistence.load(run.mode);
+      if (result.status !== "loaded") {
+        saveProblem = result.status === "empty" ? "読み直せる保存がありません。今の構成はそのまま残しています。" : result.error;
+        renderStorageNotice(); return;
+      }
+      run = clone(result.run); memory[run.mode] = clone(run);
+      saveOK = true; saveProblem = "";
+      editor.reset(); preview = false; view = "self";
+      render(); renderStorageNotice();
+      toast("最新の保存を読み込みました。");
+    };
+    notice.append(reload);
+  }
   const recover = document.createElement("button");
   recover.textContent = "この構成で保存を再開";
   recover.onclick = () => {
@@ -1522,7 +1543,11 @@ function closeModal() {
   modalFeatureDispose?.(); modalFeatureDispose = undefined;
   $<HTMLDialogElement>("#modal").close();
 }
-$("#modal").addEventListener("close", () => { modalFeatureDispose?.(); modalFeatureDispose = undefined; });
+$("#modal").addEventListener("close", () => {
+  // A queued close from the previous panel may arrive after a story hub reopens.
+  if ($<HTMLDialogElement>("#modal").open) return;
+  modalFeatureDispose?.(); modalFeatureDispose = undefined;
+});
 /* ---------- Isolated story profile and actual editor/battle bridge ---------- */
 function commitStorySession(next: StorySession.StorySession) {
   const stored=storyPersistence.save(next);
@@ -1627,11 +1652,42 @@ async function finishStoryBattle() {
   $("#story-result-editor").onclick=()=>leaveBattle();
 }
 
+function deferredModalFeature<T>(host: HTMLElement, load: () => Promise<T>, mount: (value: T) => { dispose(): void }) {
+  const feature = createDeferredMount({
+    load,
+    mount,
+    onLoading: () => {
+      host.replaceChildren();
+      const status = document.createElement("p");
+      status.setAttribute("role", "status");
+      status.textContent = "画面を読み込んでいます…";
+      host.append(status);
+    },
+    onError: error => {
+      host.replaceChildren();
+      const notice = document.createElement("p");
+      notice.setAttribute("role", "alert");
+      notice.textContent = "画面を読み込めませんでした。" + (error instanceof Error ? " " + error.message : "");
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.textContent = "画面をもう一度読み込む";
+      retry.onclick = () => { void feature.start(); };
+      host.append(notice, retry);
+    },
+  });
+  return feature;
+}
 function onlinePanel() {
-  openModal('<div id="online-feature-host"></div>');
+  openModal(`<div class="modal-inner" id="online-loading-head">${modalHead("ONLINE", "非同期オンライン")}</div><div id="online-feature-host"></div>`);
   $("#modal").classList.add("feature-modal");
-  const panel = mountOnlinePanel($("#online-feature-host"), { baseUrl: "/api/arena", onClose: closeModal });
-  modalFeatureDispose = panel.dispose;
+  const host = $("#online-feature-host");
+  const feature = deferredModalFeature(host, () => import("./online/panel.js"), ({ mountOnlinePanel }) => {
+    const panel = mountOnlinePanel(host, { baseUrl: "/api/arena", onClose: closeModal });
+    $("#online-loading-head").remove();
+    return panel;
+  });
+  modalFeatureDispose = feature.dispose;
+  void feature.start();
 }
 async function playRaidChallenge(host: HTMLElement, blueprint: RaidBlueprint, signal: AbortSignal) {
   const prepared = prepareRaidChallenge(run, blueprint), challenge = prepared.battle;
@@ -1694,11 +1750,9 @@ async function raidPanel(initialRequest?: RaidInitialRequest) {
   openModal(`<div class="modal-inner">${modalHead("URL RAID", "ページを巡回する")}<div id="raid-feature-host">保存された報酬を確認しています…</div></div>`);
   $("#modal").classList.add("feature-modal");
   const host = $("#raid-feature-host"), controller = new AbortController();
-  modalFeatureDispose = () => controller.abort();
-  try {
-    const pending = await store.listPendingRaids();
-    if (controller.signal.aborted) return;
-    const panel = mountRaidPanel(host, {
+  const feature = deferredModalFeature(host,
+    () => Promise.all([import("./raid/panel.js"), store.listPendingRaids()]),
+    ([{ mountRaidPanel }, pending]) => mountRaidPanel(host, {
       onCaptured: async (blueprint,kind) => {
         if(!storyActive||!storySession)return;
         const sourceSession=storySession;
@@ -1719,9 +1773,9 @@ async function raidPanel(initialRequest?: RaidInitialRequest) {
         } catch (error) { return { ok: false as const, error: error instanceof Error ? error.message : "保存できませんでした。" }; }
       },
       onDiscard: async battleId => { try { await store.discardRaidVictory(battleId); return { ok: true as const }; } catch { return { ok: false as const, error: "報酬の状態を保存できません。" }; } },
-    }, pending[0], initialRequest);
-    modalFeatureDispose = () => { controller.abort(); panel.dispose(); };
-  } catch (error) { if (!controller.signal.aborted) host.textContent = error instanceof Error ? error.message : "保存領域を読み込めません。"; }
+    }, pending[0], initialRequest));
+  modalFeatureDispose = () => { controller.abort(); feature.dispose(); };
+  await feature.start();
 }
 async function collectionPanel() {
   if (!profileStore) { toast("コレクションを読み込めません。"); return; }
@@ -1832,10 +1886,12 @@ function enemyOptions(selected: number) {
 }
 function loadBuild(asPage?: string, asFoe?: string) {
   if (battle) return;
-  if (run.mode !== "lab") switchMode("lab");
   if (asFoe) {
     const list = R.labEnemies();
-    run.stage = Math.max(0, list.findIndex((e) => e.id === asFoe));
+    const index = list.findIndex((e) => e.id === asFoe);
+    if (index < 0) { toast("この構成は対戦相手には選べません。"); return; }
+    if (run.mode !== "lab") switchMode("lab");
+    run.stage = index;
     closeModal();
     save();
     render();
@@ -1844,6 +1900,7 @@ function loadBuild(asPage?: string, asFoe?: string) {
   }
   const b = BUILDS.find((q) => q.id === asPage);
   if (!b) return;
+  if (run.mode !== "lab") switchMode("lab");
   closeModal();
   editor.commit(() => {
     const stage = run.stage,
@@ -1866,11 +1923,11 @@ function buildBook() {
       <ol class="bd-how">${b.how.map((h) => `<li>${esc(h)}</li>`).join("")}</ol>
       <p class="bd-weak"><b>弱点</b>${esc(b.weakness)}</p>
       <div class="bd-meta"><span>重さ ${info.load}</span><span>余白 ${Math.round(info.free * 100)}%</span>${info.groups.map((g) => `<span class="bd-g">${esc(g)}</span>`).join("")}${info.sets.map((x) => `<span class="bd-s">${esc(x)}</span>`).join("")}<span>管理画面：${b.admin.map((a) => esc(D.ADMIN[a]?.name ?? a)).join("・")}</span></div>
-      <div class="bd-actions"><button data-build-load="${b.id}" class="side-btn bd-primary">自分のページに読み込む</button><button data-build-foe="${b.id}" class="side-btn">対戦相手にする</button></div>
+      <div class="bd-actions"><button data-build-load="${b.id}" class="side-btn bd-primary">自分のページに読み込む</button>${b.labOpponent === false ? '<span class="muted">自分のページ用のお手本</span>' : `<button data-build-foe="${b.id}" class="side-btn">対戦相手にする</button>`}</div>
     </article>`;
   }).join("");
   openModal(`<div class="modal-inner bd">${modalHead("BUILD BOOK", "構成例図鑑")}
-    <p class="muted">配置と相性を調べるための完成構成例です。入手費用・必要な処理能力・弱点を確認して使ってください。実験室では読み込んで中身を触ることも、相手にして戦うこともできます。</p>
+    <p class="muted">配置と相性を調べるための完成構成例です。入手費用・必要な処理能力・弱点を確認して使ってください。実験室では読み込んで中身を触れます。「対戦相手にする」がある構成は相手にも選べます。</p>
     <div class="bd-grid">${cards}</div>
     <h3 class="bd-h">相性表 <small>行が自分・列が相手。両者 閲覧者${Lab.MATCH_HP}・各自の管理画面つき。実際のエンジンで計算</small></h3>
     <div id="bd-matrix" class="bd-matrix"><p class="muted">計算中…</p></div>

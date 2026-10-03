@@ -1,25 +1,31 @@
 # UI RAID development branch
 
-This 2026-10-03 checkpoint advances `feat/raid-balance-async` from `0c9645b5534ad8bfbb1eaefa2fe11fa61d767fe4`. It includes canonical combat-v4, broader legal-composition studies, the service-form template, and a separately selected laboratory server-pressure prototype. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for scope and limitations.
+This continuation of `feat/raid-balance-async` starts from delivery commit `783c2c063291ad7e6bfd4cf631f171f37eab4c47`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
+
+## This increment
+
+- Protect legacy campaign/lab saves against stale-tab overwrites, keep rejected writes out of the profile mirror, and provide an explicit reload-latest action
+- Keep a newly reopened story workshop interactive when the previous dialog's queued close event arrives
+- Load optional online and URL panels on demand, with retry and disposal protection
+- Select arena opponents by distinct guest owner, avoid recent owners across historical runs, and exclude orphan snapshots
+- Show actual cache targets, support state and the shared rate-limit budget inside existing native controls
+- Preserve Books price and availability text in the same approximate product appearance; ignore print-only, conditional and non-CSS style elements
+- Add a small, paid-reachable search/document player preset without changing the 35 saved laboratory opponent indices
 
 ## Run locally
 
-Use Node.js 22.12 or later. Run `npm ci`, then `npm run arena` in one terminal and `npm run dev` in another. Open http://127.0.0.1:5178/. `npm run build` builds the client. `npm run preview` also needs the arena process for online features. Static `dist/` hosting alone does not provide ingestion or online APIs.
+Use Node.js 22.12 or later. Run `npm ci`, then `npm run arena` in one terminal and `npm run dev` in another. Open http://127.0.0.1:5178/. `npm run build` builds the client. `npm run preview` also needs the arena process for online features. Static `dist/` hosting does not provide ingestion or online APIs.
 
-The online backend is a local single-process development service. Runtime data and guest sessions under `.local/` are not committed. No public hosting has been deployed.
+The arena remains a local, single-process development service. Runtime data and guest sessions under `.local/` are not committed. Owner-level matching fairness does not prevent a person from creating multiple guest identities.
 
-## Combat versions and experiments
+## Versions and source limits
 
-Canonical combat is combat-v4; combat-v2/v3 remain explicitly versioned replay paths. Temporary server pressure is opt-in in the laboratory and excluded from story, campaign, URL battles and online commands. Its bounded fixture study is not global-balance certification.
+Canonical combat is combat-v4; combat-v2/v3 remain explicitly versioned replay paths. Temporary server pressure remains opt-in in the laboratory and excluded from story, campaign, URL battles and online commands. The story keeps its existing 15 battles and 8 stages.
 
-## URL reconstruction
-
-The two exact root pages `https://books.toscrape.com/` and `https://example.com/` can be fetched and converted into legal game-owned enemy UI through HTML/tag and bounded CSS analysis. The result is explicitly an approximate layout, not measured browser geometry or an exact screenshot. Source JavaScript is not executed. Unsupported origins are not accepted as an unrestricted proxy.
-
-See `server/site-ingest/README.md` for the allowlist and rendering boundaries, and `server/arena/README.md` for the online trust and persistence boundaries.
+Exactly two source roots are allowlisted: Books to Scrape and Example. A source only produces a legal approximate opponent if its fetched HTML contains supported static UI. The recorded Books response reconstructs; the observed Example response returns `no-playable-elements`. Source JavaScript never runs. The latter is an observation from this environment, not proof of an upstream change. This is not arbitrary-site or screenshot-faithful reconstruction.
 
 ## Verification
 
-The publication snapshot is checked with `npm test`, `npm run typecheck` and `npm run build`. The exact results are recorded in the publication commit message. Tests include actual HTTP/process recovery, deterministic replay, story progression and durable reward contracts.
+Run `npm test`, `npm run typecheck`, `npm run builds`, `npm run simulate -- --json`, and `npm run build`. The publication commit records results for the frozen source tree. Behavioral tests include real engine and HTTP/process tests plus explicitly labeled DOM adapters.
 
-Actual browser pixel/layout acceptance remains unverified in this runtime. The production build also emits a bundle-size warning. Numerical balance is still under evaluation; experimental content and local rule variants are distinguished from the ordinary acquisition pools. Do not equate passing automated tests with final balance or visual approval.
+Actual browser pixels, live click acceptance, responsive readability and load timing remain unverified because this environment's browser route is blocked. No workaround was used. Public deployment, TLS, operational backups, account recovery and production-scale online operation remain unconfigured.

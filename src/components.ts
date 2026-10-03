@@ -1,3 +1,4 @@
+import { RATE_LIMIT } from "./combat-rules.js";
 import { jobTableMarkup } from "./catalog/server-pressure-render.js";
 import { serviceFormHeader, serviceFormDecor } from "./catalog/service-form-render.js";
 import { musicShopHeader, musicShopDecor } from "./catalog/music-shop-render.js";
@@ -209,15 +210,15 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "ad_popup":
       return `<aside class="native-popup-ad"><span class="popup-kicker">スポンサー · $3で出稿</span><strong>${text(p, "ちょっと、こちらも見ていきませんか？")}</strong><div class="popup-ad-footer"><span class="popup-state">出稿待ち</span><span class="popup-charge">$<span class="state-charge">0</span> / 6</span><button type="button" data-ui="press" aria-label="ポップアップ広告をプレビュー">詳しく見る ↗</button></div></aside>`;
     case "go_cache":
-      return `<div class="native-cache"><a href="#" data-ui="cache">${text(p, "キャッシュを表示")}</a><span class="cache-copy-icon" aria-hidden="true">▤</span><small><span class="cache-state" role="status">準備完了</span> · 前回の表示を保持</small></div>`;
+      return `<div class="native-cache"><a href="#" data-ui="cache">${text(p, "キャッシュを表示")}</a><span class="cache-copy-icon" aria-hidden="true">▤</span><small class="cache-meta"><span class="cache-state" role="status">準備完了</span><span class="cache-target">戦闘中に対象を表示</span></small></div>`;
     case "yt_tip":
-      return `<button type="button" class="native-button native-support" data-ui="support">${icon("heart")}<span>${text(p, "このページを応援する")}</span><small class="support-state">$<span class="state-charge">0</span> / 6</small></button>`;
+      return `<button type="button" class="native-button native-support" data-ui="support">${icon("heart")}<span class="support-copy"><span>${text(p, "このページを応援する")}</span><small class="support-feedback">$3をシールドへ変換</small></span><small class="support-state">$<span class="state-charge">0</span> / 6</small></button>`;
     case "sc_track":
       return audioPlayerMarkup(p.label || "夜のインターネット");
     case "go_history":
       return historyPartMarkup(p.label || "変更履歴・版を復元");
     case "gov_rate_limit":
-      return `<aside class="native-rate-limit"><header><code>429</code><strong>${text(p, "アクセスを整理しています")}</strong></header><p>少し間をあけて、もう一度お試しください。</p><footer><span>制限枠 <b class="rate-budget">24</b> / 24</span><span>軽減 <b class="rate-total">0</b></span></footer></aside>`;
+      return `<aside class="native-rate-limit"><header><code>429</code><strong>${text(p, "アクセスを整理しています")}</strong></header><p>非貫通を1発最大4軽減 · 共有枠は毎秒24補充</p><meter class="rate-budget-meter" min="0" max="${RATE_LIMIT.capacity}" value="0" hidden aria-label="ページ共有のアクセス整理枠"></meter><footer><span>共有枠 <b class="rate-budget">—</b> / ${RATE_LIMIT.capacity}</span><span>累計軽減 <b class="rate-total">—</b></span></footer></aside>`;
     default:
       return socialPartMarkup(p) || knowledgePartMarkup(p) || communityPartMarkup(p);
   }

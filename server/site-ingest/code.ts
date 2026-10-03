@@ -11,16 +11,22 @@ import type {
 } from "../../src/raid/types.js";
 import type { Rect } from "../../src/types.js";
 import type { FetchedStaticSource } from "./service.js";
-import { createSafeStyleReader, type SafeStyle } from "./css.js";
+import { createSafeStyleReader, isScreenStylesheet, type SafeStyle } from "./css.js";
 
 type Node = DefaultTreeAdapterMap["node"];
 type Style = SafeStyle;
+type ProductDetail = {
+  kind: "price" | "availability";
+  label: string;
+  style: Style;
+};
 type Candidate = {
   kind: RaidComponent["evidence"];
   label: string;
   style: Style;
   region: "navigation" | "content";
   sourceNode: NonNullable<RaidComponent["sourceNode"]>;
+  details?: ProductDetail[];
 };
 const children = (n: Node): Node[] => ("childNodes" in n ? n.childNodes : []);
 const tag = (n: Node) => ("tagName" in n ? n.tagName : "");
@@ -70,7 +76,7 @@ export function analyzeStaticCode(html: string, externalStyles: string[] = []) {
   bound(doc);
   const reader = createSafeStyleReader([
     ...externalStyles,
-    ...nodes.filter((n) => tag(n) === "style").map((n) => rawText(n)),
+    ...nodes.filter((n) => tag(n) === "style" && isScreenStylesheet(attr(n, "media"), attr(n, "type"))).map((n) => rawText(n)),
   ]);
   const styleFor = (n: Node, _parent: Style = {}): Style => reader.styleFor(n);
   const hidden = (n: Node) =>
@@ -121,6 +127,7 @@ export function analyzeStaticCode(html: string, externalStyles: string[] = []) {
     const sourceClasses = classes(n);
     let kind: Candidate["kind"] | undefined,
       label = clean(visibleText(n));
+    const details: ProductDetail[] = [];
     const product =
       name === "article" &&
       descendants(n).some(
@@ -144,6 +151,25 @@ export function analyzeStaticCode(html: string, externalStyles: string[] = []) {
           (heading && visibleText(heading)) ||
           label,
       );
+      // The reviewed Books source marks these visible product facts explicitly.
+      // Keep them within the same appearance: they are not extra combat parts.
+      const productNodes = descendants(n);
+      for (const [detailKind, className] of [
+        ["price", "price_color"],
+        ["availability", "availability"],
+      ] as const) {
+        const detail = productNodes.find(
+          (node) =>
+            (attr(node, "class") ?? "").split(/\s+/).includes(className) &&
+            clean(visibleText(node)),
+        );
+        if (detail)
+          details.push({
+            kind: detailKind,
+            label: clean(visibleText(detail)),
+            style: styleFor(detail),
+          });
+      }
     } else if (/^h[1-3]$/.test(name) && !group) kind = "heading";
     else if (name === "a" && !group) kind = "navigation";
     else if (
@@ -178,6 +204,7 @@ export function analyzeStaticCode(html: string, externalStyles: string[] = []) {
           label,
           style,
           region,
+          ...(details.length ? { details } : {}),
           sourceNode: {
             tag: name,
             path,
@@ -231,12 +258,19 @@ const text = (
   align: "left",
 });
 function component(c: Candidate, index: number, rect: Rect): RaidComponent {
+  const details = c.kind === "product" ? (c.details ?? []) : [];
+  const footerTop = rect.h - 24;
+  const detailTop = footerTop - 4 - details.length * 24;
   const top = Math.min(
     c.style.padding?.[0] ?? (c.kind === "product" ? 20 : 8),
     (rect.h - 16) / 2,
   );
   const bottom = Math.min(c.style.padding?.[2] ?? 8, rect.h - top - 16);
-  const textHeight = Math.min(64, rect.h - top - bottom);
+  const textHeight = Math.min(
+    64,
+    rect.h - top - bottom,
+    details.length ? detailTop - top - 8 : 64,
+  );
   const background =
       c.style.background ?? (c.kind === "purchase" ? "#276c91" : "#ffffff"),
     foreground =
@@ -274,15 +308,35 @@ function component(c: Candidate, index: number, rect: Rect): RaidComponent {
     label.weight = c.style.weight ?? "normal";
     label.align = c.style.align ?? "left";
   }
-  if (c.kind === "product")
+  if (c.kind === "product") {
+    for (const [i, detail] of details.entries()) {
+      const row = text(
+        detail.label,
+        R(12, detailTop + i * 24, rect.w - 24, 22),
+        Math.min(detail.style.size ?? 14, 22 / 1.4),
+        detail.style.color ?? foreground,
+        detail.style.font ?? c.style.font ?? "sans",
+      );
+      if (row.kind === "text") {
+        row.weight = detail.style.weight ?? "normal";
+        row.align = detail.style.align ?? c.style.align ?? "left";
+      }
+      primitives.push(row);
+    }
     primitives.push(
       text(
         "画像は省略 / HTMLの商品要素",
-        R(12, rect.h - 38, rect.w - 24, 24),
-        11,
+        R(
+          12,
+          details.length ? footerTop : rect.h - 38,
+          rect.w - 24,
+          details.length ? 16 : 24,
+        ),
+        details.length ? 10 : 11,
         "#6c7e89",
       ),
     );
+  }
   return {
     componentId: `component-${String(index).padStart(2, "0")}`,
     canonicalType: canonicalTypeFor(c.kind),

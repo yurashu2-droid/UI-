@@ -20,6 +20,8 @@ export function selectRecoveredRun(local: SaveRead, persisted: Run | undefined):
 /** The invalid original is protected until the user explicitly starts recovery. */
 export function createRunPersistence(storage: StoragePort, prefix: string) {
   const reads = new Map<Mode, SaveRead>();
+  const lastRaw = new Map<Mode, string | null>();
+  const conflict = (): SaveWrite => ({ ok: false, error: "別の画面で保存データが変更されました。今の構成を書き出してから、最新の保存を読み直してください。" });
   function load(mode: Mode): SaveRead {
     let raw: string | null;
     try { raw = storage.getItem(prefix + mode); }
@@ -28,6 +30,7 @@ export function createRunPersistence(storage: StoragePort, prefix: string) {
       reads.set(mode, result);
       return result;
     }
+    lastRaw.set(mode, raw);
     if (raw === null) {
       const result: SaveRead = { status: "empty" };
       reads.set(mode, result);
@@ -53,9 +56,13 @@ export function createRunPersistence(storage: StoragePort, prefix: string) {
     if (prior.status === "corrupt" || prior.status === "unavailable") return { ok: false, error: prior.error };
     if (!R.validateRun(run)) return { ok: false, error: "保存するデータの検証に失敗しました。" };
     try {
-      storage.setItem(prefix + run.mode, JSON.stringify(run));
+      if (storage.getItem(prefix + run.mode) !== lastRaw.get(run.mode)) return conflict();
+      const raw = JSON.stringify(run);
+      storage.setItem(prefix + run.mode, raw);
+      // The journal has committed even if the optional last-mode pointer fails.
+      lastRaw.set(run.mode, raw);
+      reads.set(run.mode, { status: "loaded", run: JSON.parse(raw) as Run });
       storage.setItem(prefix + "mode", run.mode);
-      reads.set(run.mode, { status: "loaded", run });
       return { ok: true };
     } catch {
       return { ok: false, error: "保存できません。構成を書き出してバックアップしてください。" };
@@ -69,7 +76,10 @@ export function createRunPersistence(storage: StoragePort, prefix: string) {
       return recover(run);
     }
     if (prior.status === "corrupt") {
-      try { storage.setItem(prefix + run.mode + "-recovery", prior.raw); }
+      try {
+        if (storage.getItem(prefix + run.mode) !== lastRaw.get(run.mode)) return conflict();
+        storage.setItem(prefix + run.mode + "-recovery", prior.raw);
+      }
       catch { return { ok: false, error: "元データを保全できないため、置き換えを中止しました。" }; }
       reads.set(run.mode, { status: "empty" });
     }

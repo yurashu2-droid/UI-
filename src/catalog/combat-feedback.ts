@@ -1,4 +1,4 @@
-import { CONTROL } from "../combat-rules.js";
+import { CONTROL, RATE_LIMIT } from "../combat-rules.js";
 
 export interface VisibleCombatState {
   coveredUntil: number;
@@ -16,6 +16,8 @@ export function combatFeedback(type: string, charge: number, ticks: number, stat
   if (type === "go_cache") stateText = state?.cache ? "準備完了" : `${Math.max(0, ((state?.cacheAt ?? ticks) - ticks) / 20).toFixed(1)}秒で再充填`;
   if (type === "ad_popup") stateText = charge >= CONTROL.cost ? "出稿準備完了" : "出稿待ち";
   if (type === "yt_tip") stateText = shield >= 60 && charge >= CONTROL.cost ? "シールド満杯・待機" : charge >= CONTROL.cost ? "応援準備完了" : "応援を受付中";
+  const rateKnown = !!rate && Number.isFinite(rate.budget) && Number.isFinite(rate.limited);
+  const rateBudget = rateKnown ? Math.max(0, Math.min(RATE_LIMIT.capacity, rate!.budget)) : 0;
   return {
     covered,
     recovering: !covered && !!state && state.immuneUntil > ticks,
@@ -24,8 +26,11 @@ export function combatFeedback(type: string, charge: number, ticks: number, stat
     stateText,
     targetText: targetName ? `対象：${targetName}` : "接続対象なし",
     chargeText: String(Math.round(charge * 100) / 100),
-    rateBudgetText: String(Math.round((rate?.budget ?? 0) * 10) / 10),
-    rateTotalText: String(Math.round((rate?.limited ?? 0) * 10) / 10),
+    rateKnown,
+    rateBudget,
+    rateCapacity: RATE_LIMIT.capacity,
+    rateBudgetText: rateKnown ? String(Math.round(rateBudget * 10) / 10) : "—",
+    rateTotalText: rateKnown ? String(Math.round(Math.max(0, rate!.limited) * 10) / 10) : "—",
   };
 }
 
@@ -52,10 +57,21 @@ export function applyCombatFeedback(host: HTMLElement, view: ReturnType<typeof c
     state.textContent = view.stateText;
     state.title = view.targetText;
   }
+  const target = host.querySelector<HTMLElement>(".cache-target");
+  if (target) { target.textContent = view.targetText; target.title = view.targetText; }
+  const supportState = host.querySelector<HTMLElement>(".support-feedback");
+  if (supportState && view.stateText) { supportState.textContent = view.stateText; supportState.title = view.stateText; }
   const support = host.querySelector<HTMLElement>(".native-support");
   if (support) support.title = view.stateText;
   const charge = host.querySelector(".state-charge");
   if (charge) charge.textContent = view.chargeText;
+  const meter = host.querySelector<HTMLMeterElement>(".rate-budget-meter");
+  if (meter) {
+    meter.hidden = !view.rateKnown;
+    meter.max = view.rateCapacity;
+    meter.value = view.rateBudget;
+    meter.setAttribute("aria-valuetext", view.rateKnown ? `ページ共有 ${view.rateBudgetText} / ${view.rateCapacity}` : "戦闘情報を待機");
+  }
   const budget = host.querySelector(".rate-budget");
   if (budget) budget.textContent = view.rateBudgetText;
   const limited = host.querySelector(".rate-total");
