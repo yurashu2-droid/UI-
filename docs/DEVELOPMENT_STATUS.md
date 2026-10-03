@@ -4,6 +4,11 @@ Ongoing development is delivered on `feat/raid-balance-async`. See [the current 
 
 ## Current user-facing workflows
 
+- Subscription previews restore the exact authored label when toggled off; dedicated label/status children preserve native state and handlers while battle registration remains one-way
+- Previously unnamed voice and notification icon controls expose accurate local-preview action names/tooltips, with no recording, notification permissions or external behavior
+- Captured Books navigation keeps its visible source name on the original live anchor, including same-host fallback, while preserving native text/href/events, local navigation prevention and stored identities
+- Existing arena-session resume and same-command receipt recovery avoid deep-copying the gameplay archive. Pre-rename rollback, detached views, other-session isolation and restart semantics remain protected; full-file durable writes and unbounded historical retention remain explicit limitations
+
 - Separate local collection archives carry acquired appearances/provenance plus complete referenced captures, with a read-only count/conflict preview and explicit add-only atomic restore. Existing IDs/timestamps are preserved, identical records are no-ops, and pending/discarded/same-ID conflicts cannot reopen rewards or partially overwrite data
 - Archive-only transport limits are 256 acquired entries/captures and 16 MiB UTF-8; oversized or incomplete exports fail without truncation. These are not collection storage quotas. Run/story JSON and pending URL rewards remain separate; unsigned consistency hashes do not authenticate a real victory
 - Collection backup code/controls load on demand. Current-dialog and transaction-boundary guards reject stale callbacks or obsolete pending writes; successful persistence is distinguished from a later display-refresh failure

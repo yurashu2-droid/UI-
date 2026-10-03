@@ -237,5 +237,15 @@ export function applyRaidAppearance(host: HTMLElement, item: Item): boolean {
   host.classList.add("has-raid-skin");
   host.append(overlay);
   preserveLiveControls(host, appearance, item.type);
+  // Name only the original navigation link; keep its native content and layer.
+  if (item.type === "ab_nav")
+    host
+      .querySelector<HTMLAnchorElement>(
+        ':scope > a.native-old-link[data-ui="link"]',
+      )
+      ?.setAttribute(
+        "aria-label",
+        capturedLabel(appearance) || D.PARTS.ab_nav.name,
+      );
   return true;
 }

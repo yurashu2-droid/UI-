@@ -280,9 +280,11 @@ export class ArenaService {
   private renewSession(token: string): void {
     // Authenticate before changing anything: expired guests cannot be revived.
     this.auth(token);
-    const next = clone(this.data);
-    const { session } = this.auth(token, next);
-    session.expiresAt = Date.now() + SESSION_TTL_MS;
+    // Renewal only changes one session. Preserve the gameplay archive without
+    // cloning it; the new session object still isolates a failed persistence.
+    const next: Store = { ...this.data, sessions: { ...this.data.sessions } };
+    const { key, session } = this.auth(token, next);
+    next.sessions[key] = { ...session, expiresAt: Date.now() + SESSION_TTL_MS };
     this.persist(next);
   }
   sessionExpiresAt(token: string): number {

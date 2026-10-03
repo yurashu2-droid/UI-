@@ -13,6 +13,7 @@ import type { Battle } from "./engine.js";
 import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
 import { targetCaption } from "./catalog/target-caption.js";
 import { advancePagination } from "./catalog/pagination.js";
+import { setSubscriptionState } from "./catalog/subscription-state.js";
 import { applyAudienceFeedback } from "./catalog/audience-feedback.js";
 import { applyHistoryFeedback, historyFeedback } from "./catalog/history-render.js";
 
@@ -332,10 +333,7 @@ class Effects {
         break;
       case "yt_sub": {
         const b = q(".native-button");
-        if (b && !b.classList.contains("is-on")) {
-          b.classList.add("is-on");
-          b.textContent = "登録済み";
-        }
+        if (b) setSubscriptionState(b, true);
         break;
       }
       case "yt_like":

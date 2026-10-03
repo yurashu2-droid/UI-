@@ -2767,10 +2767,6 @@ function previewAction(e: MouseEvent) {
     if(score){const base=Number(score.dataset.previewBase??score.textContent??128);score.dataset.previewBase=String(base);score.textContent=String(base+(selected?0:kind==="vote-up"?1:-1));}
   } else if (kind === "comment" && act.tagName === "BUTTON") {
     previewVideoComment(act.closest("form"));
-  } else if (kind === "subscribe") {
-    act.textContent =
-      act.textContent === "登録済み" ? "メンバーになる" : "登録済み";
-    act.classList.toggle("is-on");
   } else if (kind === "like") {
     const n = act.querySelector(".like-value");
     if (n) n.textContent = String(Number(n.textContent) + 1);

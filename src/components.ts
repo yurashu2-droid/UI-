@@ -98,7 +98,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "yt_ad":
       return `<aside class="native-ad"><span class="ad-kicker">スポンサー</span><div><b>${text(p, "インターネットを、もう一度。")}</b><small>Every view builds something new.</small></div><button type="button" data-ui="press">詳しく見る ↗</button><span class="ad-money">$<span class="state-income">0</span></span></aside>`;
     case "yt_sub":
-      return button(text(p, "メンバーになる"), "subscribe-button", "subscribe");
+      return `<button type="button" class="native-button subscribe-button" data-ui="subscribe" aria-pressed="false"><span class="subscribe-label">${text(p, "メンバーになる")}</span><span class="subscribe-state" hidden>登録済み</span></button>`;
     case "yt_like":
       return button(
         `${icon("like")}<span class="like-value">128</span><span class="split-line"></span><span class="downlike">♧</span>`,
@@ -116,11 +116,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "yt_autoplay":
       return `<label class="native-toggle"><span>自動再生</span><input type="checkbox" checked aria-label="自動再生"><i><b>▶</b></i></label>`;
     case "yt_notify":
-      return button(
-        `${icon("bell")}<i class="notification-dot"></i>`,
-        "yt-button notify-button",
-        "notify",
-      );
+      return `<button type="button" class="native-button yt-button notify-button" data-ui="notify" aria-label="通知ベルの表示を切り替える（プレビュー）" title="ページ内の表示プレビューです。端末への通知は送りません。">${icon("bell")}<i class="notification-dot"></i></button>`;
     case "am_buy":
       return button(text(p, "カートに入れる"), "buy-button", "buy");
     case "am_cart":
@@ -154,7 +150,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "go_tabs":
       return `<nav class="native-tabs" aria-label="検索カテゴリ">${["すべて", "画像", "動画", "ニュース", "ショッピング"].map((s, i) => `<button type="button" class="${i ? "" : "current"}" data-ui="tab">${s}</button>`).join("")}</nav>`;
     case "go_voice":
-      return button(icon("mic"), "voice-button", "voice");
+      return `<button type="button" class="native-button voice-button" data-ui="voice" aria-label="音声検索UIの反応をプレビュー" title="ページ内の操作デモです。音声の録音・認識はしません。">${icon("mic")}</button>`;
     case "go_result":
       return `<article class="native-result"><div class="result-address"><span class="result-favicon">↗</span><i>archive.example / journal / 01</i><span>⋮</span></div><a href="#" data-ui="link">${text(p, "小さなWebから、世界を組み直そう。")}</a><p>きれいな検索窓も、昔の青いリンクも。<br>好きな部品をつなげたら、あなただけのページになる。</p></article>`;
     case "go_translate":

@@ -78,7 +78,7 @@ npm run dev:local
 ```sh
 npm test                  # 元HTMLとの比較、20通りの戦闘、進行・保存互換性
 npm run typecheck         # ゲーム本体・設定・シミュレーションすべての型チェック
-npm run simulate          # 4プリセット × 5対戦相手の結果を表で表示
+npm run simulate          # 全プリセット × 5対戦相手の結果を表で表示
 npm run simulate -- --json
 npm run build             # 型チェックと dist/ の生成
 npm run preview           # http://127.0.0.1:4173/ でビルド結果を確認
