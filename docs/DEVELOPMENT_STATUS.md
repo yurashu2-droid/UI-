@@ -31,7 +31,7 @@ This continuation of `feat/raid-balance-async` starts from delivery commit `d95f
 
 ## Run locally
 
-Use Node.js 22.12 or later. Run `npm ci`, then `npm run arena` in one terminal and `npm run dev` in another. Open http://127.0.0.1:5178/. `npm run build` builds the client. `npm run preview` also needs the arena process for online features. Static `dist/` hosting does not provide ingestion or online APIs.
+Use Node.js 22.12 or later. Run `npm ci`, then `npm run dev:local` to explicitly start Vite and arena together. Wait for the direct/proxied arena-health ready message, then open http://127.0.0.1:5178/. Ctrl+C stops only this launcher’s children; conflicting ports are rejected without touching their owners. The two-terminal `npm run arena` plus `npm run dev` flow remains available, and `npm run dev` alone still starts only Vite. `npm run build` builds the client. `npm run preview` also needs the arena process for online features. Static `dist/` hosting does not provide ingestion or online APIs.
 
 The arena remains a local, single-process development service. Runtime data and guest sessions under `.local/` are not committed. Owner-level matching fairness does not prevent a person from creating multiple guest identities.
 
