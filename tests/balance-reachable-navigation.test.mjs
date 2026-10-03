@@ -63,11 +63,12 @@ test("the ordinary navigation example is player-only and its marquee actually re
   assert.ok(build, "a paid ordinary navigation example is available");
   assert.deepEqual(build.admin, []);
   assert.equal(build.labOpponent, false);
-  assert.equal(R.labEnemies().length, 39);
+  assert.equal(R.labEnemies().length, 40);
   assert.equal(R.labEnemies()[35].id, "site_trello");
   assert.equal(R.labEnemies()[36].id, "site_gmail");
   assert.equal(R.labEnemies()[37].id, "site_calendar");
   assert.equal(R.labEnemies()[38].id, "site_figma");
+  assert.equal(R.labEnemies()[39].id, "site_slack");
   assert.ok(!R.labEnemies().some((b) => b.id === build.id));
   assert.equal(R.newRun("lab", build.id).owned.length, 8);
   assert.equal(resources(build.layout).acquisitionValue, 28);

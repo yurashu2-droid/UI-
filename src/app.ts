@@ -1881,41 +1881,74 @@ async function raidPanel(initialRequest?: RaidInitialRequest) {
 }
 async function collectionPanel() {
   if (!profileStore) { toast("コレクションを読み込めません。"); return; }
-  openModal(`<div class="modal-inner">${modalHead("COLLECTION", "持ち帰ったUI")}<p>実験室では手持ちへ追加。本編では所持済みの同じUIに外観を適用できます。</p><div id="collection-feature-host">読み込んでいます…</div></div>`);
-  const host = $("#collection-feature-host"), store = profileStore;
-  try {
-    const trophies = await store.listTrophies();
-    if (!host.isConnected) return;
-    host.replaceChildren();
-    if (!trophies.length) { host.textContent = "まだ持ち帰ったUIはありません。URLレイドで勝利すると、そのページのUIを選んで回収できます。"; return; }
-    for (const trophy of trophies) {
-      const capture = await store.getBlueprint(trophy.captureId), component = capture?.components.find(c => c.componentId === trophy.componentId);
-      if (capture) await registerRaidBlueprint(capture);
-      const section = document.createElement("section"); section.className = "collection-acquisition";
-      const title = document.createElement("h3"); title.textContent = `${P[trophy.item.type].name} · ${capture?.source.name ?? "保存されたページ"}${capture?.fidelity === "code-approximation" ? " · コード解析による近似配置" : ""}`;
-      const previewHost = document.createElement("div"); previewHost.className = "collection-preview";
-      if (component) renderRaidAppearance(previewHost, component.appearance);
-      else previewHost.textContent = "外観データがないため標準表示を使います。";
-      const action = document.createElement("button"); action.textContent = run.mode === "lab" ? "手持ちに追加" : "所持中の同じUIへ外観を適用";
-      action.onclick = () => {
-        if (battle || run.phase !== "build") { toast("編集画面に戻ってから使ってください。"); return; }
-        if (run.mode === "lab") {
-          if (run.owned.length >= D.MAX_ITEMS) { toast("手持ちがいっぱいです。コレクションのUIは失われません。空きを作ってから追加してください。"); return; }
-          closeModal();
-          if (!editor.commit(() => { const item = R.nextItem(run, trophy.item.type, null, null, trophy.item.w, trophy.item.h); Object.assign(item, { appearanceId: trophy.item.appearanceId, provenanceId: trophy.item.provenanceId }); run.owned.push(item); return true; })) { toast("編集可能な画面で追加してください。"); return; }
-        } else {
-          const matches = run.owned.filter(p => p.type === trophy.item.type);
-          const target = editor.selected().find(p => p.type === trophy.item.type) ?? (matches.length === 1 ? matches[0] : undefined);
-          if (!target && matches.length > 1) { toast("同じUIが複数あります。適用したいUIをページで選んでから、もう一度コレクションを開いてください。"); return; }
-          if (!target) { toast("本編では同じ標準UIを入手してから外観を適用できます。"); return; }
-          closeModal();
-          if (!editor.commit(() => { Object.assign(target, { appearanceId: trophy.item.appearanceId, provenanceId: trophy.item.provenanceId }); return true; })) { toast("編集可能な画面で適用してください。"); return; }
+  openModal(`<div class="modal-inner">${modalHead("COLLECTION", "持ち帰ったUI")}<p>実験室では手持ちへ追加。本編では所持済みの同じUIに外観を適用できます。</p><div id="collection-backup-host"></div><div id="collection-feature-host">読み込んでいます…</div></div>`);
+  const host = $("#collection-feature-host"), backupHost = $("#collection-backup-host"), store = profileStore;
+  let disposed = false, listEpoch = 0;
+  const isCurrent = () => !disposed && modalFeatureDispose === dispose &&
+    profileStore === store && host.isConnected && $<HTMLDialogElement>("#modal").open;
+  const backup = deferredModalFeature(backupHost, () => import("./collection-backup-controls.js"), ({ mountCollectionBackupControls }) =>
+    mountCollectionBackupControls(backupHost, {
+      store, isCurrent,
+      onRestored: async (_result, stillCurrent) => {
+        if (!isCurrent() || !stillCurrent()) return;
+        await refreshCollection();
+        if (isCurrent() && stillCurrent()) render();
+      },
+    }));
+  function dispose() { disposed = true; listEpoch++; backup.dispose(); }
+  modalFeatureDispose = dispose;
+  void backup.start();
+  await refreshCollection();
+
+  async function refreshCollection() {
+    const epoch = ++listEpoch, current = () => isCurrent() && epoch === listEpoch;
+    try {
+      const trophies = await store.listTrophies();
+      if (!current()) return;
+      if (!trophies.length) { host.textContent = "まだ持ち帰ったUIはありません。URLレイドで勝利すると、そのページのUIを選んで回収できます。"; return; }
+      const sections: HTMLElement[] = [], captures = new Map<string, RaidBlueprint | undefined>();
+      for (const trophy of trophies) {
+        if (!captures.has(trophy.captureId)) {
+          const capture = await store.getBlueprint(trophy.captureId);
+          if (!current()) return;
+          if (capture) {
+            const registered = await registerRaidBlueprint(capture);
+            if (!current()) return;
+            if (!registered.ok) throw new Error(registered.error);
+          }
+          captures.set(trophy.captureId, capture);
         }
-        save(); render(); closeModal(); toast("取得したUIの外観を使えるようにしました。");
-      };
-      section.append(title, previewHost, action); host.append(section);
+        const capture = captures.get(trophy.captureId), component = capture?.components.find(c => c.componentId === trophy.componentId);
+        const section = document.createElement("section"); section.className = "collection-acquisition";
+        const title = document.createElement("h3"); title.textContent = `${P[trophy.item.type].name} · ${capture?.source.name ?? "保存されたページ"}${capture?.fidelity === "code-approximation" ? " · コード解析による近似配置" : ""}`;
+        const previewHost = document.createElement("div"); previewHost.className = "collection-preview";
+        if (component) renderRaidAppearance(previewHost, component.appearance);
+        else previewHost.textContent = "外観データがないため標準表示を使います。";
+        const action = document.createElement("button"); action.textContent = run.mode === "lab" ? "手持ちに追加" : "所持中の同じUIへ外観を適用";
+        action.onclick = () => {
+          if (!current()) return;
+          if (battle || run.phase !== "build") { toast("編集画面に戻ってから使ってください。"); return; }
+          if (run.mode === "lab") {
+            if (run.owned.length >= D.MAX_ITEMS) { toast("手持ちがいっぱいです。コレクションのUIは失われません。空きを作ってから追加してください。"); return; }
+            closeModal();
+            if (!editor.commit(() => { const item = R.nextItem(run, trophy.item.type, null, null, trophy.item.w, trophy.item.h); Object.assign(item, { appearanceId: trophy.item.appearanceId, provenanceId: trophy.item.provenanceId }); run.owned.push(item); return true; })) { toast("編集可能な画面で追加してください。"); return; }
+          } else {
+            const matches = run.owned.filter(p => p.type === trophy.item.type);
+            const target = editor.selected().find(p => p.type === trophy.item.type) ?? (matches.length === 1 ? matches[0] : undefined);
+            if (!target && matches.length > 1) { toast("同じUIが複数あります。適用したいUIをページで選んでから、もう一度コレクションを開いてください。"); return; }
+            if (!target) { toast("本編では同じ標準UIを入手してから外観を適用できます。"); return; }
+            closeModal();
+            if (!editor.commit(() => { Object.assign(target, { appearanceId: trophy.item.appearanceId, provenanceId: trophy.item.provenanceId }); return true; })) { toast("編集可能な画面で適用してください。"); return; }
+          }
+          save(); render(); closeModal(); toast("取得したUIの外観を使えるようにしました。");
+        };
+        section.append(title, previewHost, action); sections.push(section);
+      }
+      if (current()) host.replaceChildren(...sections);
+    } catch (error) {
+      if (current()) host.textContent = error instanceof Error ? error.message : "コレクションを読み込めません。";
     }
-  } catch (error) { host.textContent = error instanceof Error ? error.message : "コレクションを読み込めません。"; }
+  }
 }
 function overflowPanel() {
   openModal(`<div class="modal-inner">${modalHead("REWARD INBOX", "報酬の受取箱")}<p>手持ちが満杯でも報酬はここに残ります。編集画面で空きを作ってから受け取れます。</p><div id="overflow-feature-host"></div></div>`);
@@ -2295,7 +2328,7 @@ function exportFile() {
   a.download = storyActive ? "the-last-browser-story.json" : "ui-raid-page.json";
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast("構成JSONを書き出しました。取得元の画像・外観データは含まれず、別の端末では標準表示になる場合があります。");
+  toast("構成JSONを書き出しました。取得外観の一式は別保存です。別の端末へ移す時は、個人コレクションの「取得外観を書き出す」も使ってください。");
 }
 let importRequestId = 0;
 async function importFile(file: File | undefined) {
@@ -2332,7 +2365,7 @@ async function importFile(file: File | undefined) {
     view = "self";
     save();
     render();
-    toast("構成を読み込みました。取得外観がこの端末にないUIは標準表示になります。");
+    toast("構成を読み込みました。この端末にない取得外観は標準表示になります。外観のバックアップは個人コレクションから追加して復元できます。");
   } catch (e) {
     if (requestId === importRequestId && (applying || canApply()))
       toast(e instanceof Error ? e.message : "読み込めませんでした。");

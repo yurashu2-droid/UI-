@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import { build } from "vite";
 
 // Inspect real production output without writing dist or opening a browser.
-// A static story barrel can make the hub initial despite a call-site import().
-test("QA: production initial graph excludes optional story workshop code and styles", async () => {
+// A static barrel can defeat a call-site import() for workshop or archive code.
+test("QA: production initial graph excludes optional workshop and collection archive modules", async () => {
   const result = await build({ root: fileURLToPath(new URL("../", import.meta.url)), logLevel: "silent", build: { write: false } });
   assert.ok(!Array.isArray(result), "one client build is expected");
   const output = new Map(result.output.map(item => [item.fileName, item]));
@@ -28,6 +28,22 @@ test("QA: production initial graph excludes optional story workshop code and sty
   assert.ok(panel, "the real workshop renderer remains present in a deferred chunk");
   assert.ok(!initial.has(panel.fileName));
   assert.ok(result.output.some(item => item.type === "chunk" && item.dynamicImports.includes(panel.fileName)), "the optional panel remains reachable by dynamic import");
+  const reachable = new Set();
+  const walkAllImports = filename => {
+    if (reachable.has(filename)) return;
+    const chunk = output.get(filename);
+    assert.equal(chunk?.type, "chunk", `local deferred dependency ${filename}`);
+    reachable.add(filename);
+    [...chunk.imports, ...chunk.dynamicImports].forEach(walkAllImports);
+  };
+  entries.forEach(entry => walkAllImports(entry.fileName));
+  for (const module of ["/src/collection-backup.ts", "/src/collection-backup-controls.ts"]) {
+    assert.ok(!initialModules.some(id => id.endsWith(module)), `${module} must stay outside the initial static graph`);
+    const deferred = result.output.find(item => item.type === "chunk" && Object.keys(item.modules).some(id => id.endsWith(module)));
+    assert.ok(deferred, `${module} remains present in emitted production code`);
+    assert.ok(!initial.has(deferred.fileName));
+    assert.ok(reachable.has(deferred.fileName), `${module} is reachable from the entry through a dynamic-import boundary`);
+  }
   const initialCss = new Set(initialChunks.flatMap(chunk => [...chunk.viteMetadata.importedCss]));
   const toText = asset => typeof asset.source === "string" ? asset.source : Buffer.from(asset.source).toString("utf8");
   for (const filename of initialCss) assert.doesNotMatch(toText(output.get(filename)), /\.story-hub(?:[\s.{,:>]|$)/, "workshop CSS must not be in initial styles");

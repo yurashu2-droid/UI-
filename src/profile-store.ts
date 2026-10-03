@@ -2,6 +2,7 @@ import R from "./run.js";
 import type { Item, Mode, Run } from "./types.js";
 import { contentHash, createRaidLootItem, prepareRaidRewards, verifyRaidBlueprint } from "./raid/blueprint.js";
 import type { RaidBlueprint, RaidReward } from "./raid/types.js";
+import type { CollectionBackupCandidate } from "./collection-backup.js";
 
 export interface RaidTrophy {
   rewardId: string;
@@ -166,7 +167,21 @@ export function createProfileStore(factory: IDBFactory, name = "ui-raid-studio-v
       tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
     });
   }
+  async function exportCollectionBackup() {
+    const archive = await import("./collection-backup.js");
+    return archive.exportCollectionFromDatabase(await dbPromise);
+  }
+  async function inspectCollectionBackup(text: string) {
+    const archive = await import("./collection-backup.js");
+    const candidate = await archive.parseCollectionBackup(text);
+    return archive.inspectCollectionDatabase(await dbPromise, candidate);
+  }
+  async function restoreCollectionBackup(candidate: CollectionBackupCandidate, options?: { isCurrent?: () => boolean }) {
+    const archive = await import("./collection-backup.js");
+    return archive.restoreCollectionDatabase(await dbPromise, candidate, options);
+  }
   return {
+    exportCollectionBackup, inspectCollectionBackup, restoreCollectionBackup,
     loadRun, saveRun: (run: Run, options?: { isCurrent?: (snapshot: Run) => boolean }) => writeRun(run, false, options),
     migrateLegacy: (run: Run) => writeRun(run, true), claimRaidReward, listTrophies,
     recordRaidVictory, listPendingRaids, discardRaidVictory,

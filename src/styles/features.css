@@ -10,3 +10,7 @@
 .collection-acquisition button { padding: 8px 12px; }
 @media(max-width:900px) { .raid-live-pages { grid-template-columns: 1fr; } }
 @media(prefers-reduced-motion:reduce) { .raid-live-paper * { animation: none !important; } }
+
+/* Keep the three explicit local-backup actions on separate rows when needed. */
+.collection-backup .modal-footer { flex-wrap: wrap; justify-content: flex-start; }
+.collection-backup .modal-footer button { max-width: 100%; }

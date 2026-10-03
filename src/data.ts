@@ -81,6 +81,10 @@ const FACTIONS: Record<
     name: "Trello風", short: "BOARD", color: "#216d99", era: "PROJECT BOARD",
     set: "テンプレート専用：既存UIで構成・追加補正なし",
   },
+  chatworkspace: {
+    name: "Slack風", short: "CHAT", color: "#63506b", era: "CHANNELS / THREADS",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
   designcanvas: {
     name: "Figma風", short: "FRAME", color: "#75628f", era: "DESIGN CANVAS",
     set: "テンプレート専用：既存UIで構成・追加補正なし",
