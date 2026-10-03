@@ -1,3 +1,4 @@
+import * as conversionViews from '../src/conversion-guidance.js';
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import {createHash} from 'node:crypto';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
 import D from '../src/data.js';import C from '../src/document.js';import E from '../src/engine.js';import R from '../src/run.js';
 import {instantSearchSupport} from '../src/app-guidance.js';
@@ -27,7 +28,7 @@ test('QA actual inspector markup reports battle-equivalent natural cadence in ca
  for(const mode of ['campaign','lab'])for(const n of [1,2,3,4])for(const active of [false,true]){
   const run=R.newRun(mode);run.owned=parts(n);run.capacity=8;
   const capacity=active?10:mode==='lab'?Infinity:8;const battle=active?new E.Battle(run.owned,[],{playerCapacity:10}):null,info=E.analyze(run.owned),selected=[run.owned[0]];
-  const context=vm.createContext({navigationGuidance,renderNavigationGuidance,instantSearchSupport,D,P:D.PARTS,E,R,run,battle,storyActive:false,labPressureCapacity:()=>null,working:()=>true,esc:s=>String(s??''),KIND:{attack:'attack'},GROUP_BONUS:{},skinPicker:()=>'',connectText:()=>'',selected,info});
+  const context=vm.createContext({...conversionViews,navigationGuidance,renderNavigationGuidance,instantSearchSupport,D,P:D.PARTS,E,R,run,battle,storyActive:false,labPressureCapacity:()=>null,working:()=>true,esc:s=>String(s??''),KIND:{attack:'attack'},GROUP_BONUS:{},skinPicker:()=>'',connectText:()=>'',selected,info});
   vm.runInContext(code+';output=selectionCard(selected,info);',context);
   const expected=E.naturalPeriod(selected[0],info,capacity).toFixed(2)+'秒ごと';assert.ok(context.output.includes(expected),`${mode}/${n}/${active}: expected ${expected}`);
   if(n>=3)assert.match(context.output,/自然発動間隔 ×1\.(25|50)/);
@@ -60,7 +61,7 @@ test('QA v4 admission cannot match v3 snapshots while old pending settlement rem
 test('QA a selected stash item never advertises an instantaneous natural attack',()=>{
  const source=fs.readFileSync(new URL('../src/app.ts',import.meta.url),'utf8');let code=source.slice(source.indexOf('function selectionCard('),source.indexOf('// Each site culture gets')).replace(/\)!\./g,').').replace(/function selectionCard\(sel: Item\[\], info: EngineInfo\)/,'function selectionCard(sel, info)');
  const run=R.newRun('campaign');run.owned=[C.makeItem('am_oneclick','held',null,null)];
- const context=vm.createContext({navigationGuidance,renderNavigationGuidance,instantSearchSupport,D,P:D.PARTS,E,R,run,battle:null,storyActive:false,labPressureCapacity:()=>null,working:()=>false,esc:s=>String(s??''),KIND:{attack:'attack'},GROUP_BONUS:{},skinPicker:()=>'',connectText:()=>'',selected:run.owned,info:E.analyze(run.owned)});
+ const context=vm.createContext({...conversionViews,navigationGuidance,renderNavigationGuidance,instantSearchSupport,D,P:D.PARTS,E,R,run,battle:null,storyActive:false,labPressureCapacity:()=>null,working:()=>false,esc:s=>String(s??''),KIND:{attack:'attack'},GROUP_BONUS:{},skinPicker:()=>'',connectText:()=>'',selected:run.owned,info:E.analyze(run.owned)});
  vm.runInContext(code+';output=selectionCard(selected,info);',context);assert.doesNotMatch(context.output,/0\.00秒ごと/);assert.match(context.output,/未配置/);
 });
 

@@ -31,6 +31,7 @@ import { targetCaption } from "./catalog/target-caption.js";
 import { previewCatalogueAction } from "./catalog/preview.js";
 import { VIDEO_SPEED_HELP, INSTANT_SEARCH_HELP, instantSearchSupport, isVideoSource, videoSpeedWorking, videoSpeedHint, factionSetView, activeFactionSets } from "./app-guidance.js";
 import { navigationGuidance, renderNavigationGuidance } from "./navigation-guidance.js";
+import { conversionGuidance, renderConversionGuidance } from "./conversion-guidance.js";
 import { getHelpContent, renderHelpBody } from "./help-content.js";
 import { createDeferredMount } from "./feature-loader.js";
 import { createRaidEnemy } from "./raid/blueprint.js";
@@ -417,6 +418,7 @@ function connectText(t: string) {
 function working(p: Item, info: EngineInfo) {
   if (p.type === "go_jobs" && !labBattleController.value.startsWith("server-pressure")) return false;
   if (p.type === "yt_speed") return videoSpeedWorking(p, info);
+  if (p.type === "am_cart") return conversionGuidance(p, info)?.state === "wired";
   const n = NEEDS[p.type];
   if (!n) return true;
   if (p.type === "yt_progress")
@@ -1174,6 +1176,7 @@ function selectionCard(sel: Item[], info: EngineInfo) {
      : ""
  }
  ${ok ? "" : `<p class="sel-warn">⚠ 今は働いていません</p>`}<div class="sel-connect"><b>つなぎ方</b>${esc(connectText(p.type))}</div>
+ ${renderConversionGuidance(conversionGuidance(p, info))}
  ${instantSupport ? `<div class="sel-connect"><b>接続している文字攻撃</b>${!instantSupport.placed ? "未配置：ページに置くと、自分の攻撃と近くの文字攻撃を支援します。" : instantSupport.targets.length ? `<ul class="sel-bonus">${instantSupport.targets.map(target => `<li>${esc(target.label || P[target.type].name)}</li>`).join("")}</ul>` : "ほかの文字攻撃には未接続。自分の内蔵サジェストは有効です。"}</div>` : ""}
  ${d.kind === "attack" && d.tags.includes("navigation") ? `<details class="sel-more"><summary>このUIの余白加算</summary>${renderNavigationGuidance(navigationGuidance(info, p))}</details>` : ""}
  <button id="toggle-fusion-lock" class="side-btn">${p.fusionLocked ? "合成を許可する" : "このUIの自動合成を保留"}</button>

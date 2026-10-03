@@ -1,3 +1,4 @@
+import * as conversionViews from '../src/conversion-guidance.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -50,7 +51,7 @@ function renderSelection(p,info) {
   const escape=value=>String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
   const context={p,info,P:D.PARTS,D,E,R,battle:null,run:R.newRun('campaign'),storyActive:false,
     labPressureCapacity:()=>null,working:()=>true,KIND:{attack:'攻撃'},GROUP_BONUS:{},
-    esc:escape,connectText:()=>guidance.INSTANT_SEARCH_HELP,skinPicker:()=>'',...guidance,...navigation};
+    esc:escape,connectText:()=>guidance.INSTANT_SEARCH_HELP,skinPicker:()=>'',...guidance,...navigation,...conversionViews};
   vm.runInNewContext(transformSync(functionSource,{loader:'ts',target:'es2022'}).code+'\nglobalThis.output=selectionCard([p],info);',context);
   return context.output;
 }
