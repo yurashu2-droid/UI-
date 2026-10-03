@@ -1,8 +1,15 @@
 # UI RAID development branch
 
-This continuation of `feat/raid-balance-async` starts from delivery commit `d8cc38db23de38f2a883519bb62868e8c0d7f088`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
+This continuation of `feat/raid-balance-async` starts from delivery commit `d95fe0292a72c91c3d14661378aa38e2b1143a2b`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
 
 ## Latest additions
+
+- Append the original-code PATCHBOARD template while preserving all 35 prior opponent IDs; 22 templates and 28 experimental parts, with inert lanes and no new combat bonus
+- Apply acquired CSS in reviewed source-link order without extra requests or expanded destinations
+- Retain uncertain arena command identity through retryable HTTP 408/429 until explicit recovery in the same open panel
+- Establish a paid-reachable supported-link counter with explicit inventory-value, cumulative-spend and normalized-duel boundaries
+
+## Earlier continuity fixes
 
 - Prevent delayed file imports from overwriting a newer import, paid edit, reopened mode, new story or active battle; release only the latest file selection, including successful story imports
 - Give conditional, reversible advice about holding paid bridge UI under overload, preserving ownership and showing why the same choice can hurt after capacity upgrades

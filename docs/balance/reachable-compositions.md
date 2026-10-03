@@ -148,3 +148,58 @@ node --import tsx --test tests/balance-paid-bridge-cleanup.test.mjs tests/balanc
 ```
 
 The script contains only the five fixed seeds and three editor choices, with no search or optimization framework. Its report retains the original paid snapshots, item provenance and alternative boards/results. Browser presentation remains unverified under the existing restriction.
+
+## A genuinely paid-reachable counter to the frozen link defense
+
+The preceding shortlist leader is **not** unbeatable at its measured budget. A focused ordinary-parts construction found a six-part counter with **$23 input value and CPU7**, requiring no fusion or administrator:
+
+| Part | x | y | width | height |
+| --- | ---: | ---: | ---: | ---: |
+| `gov_font` | 32 | 24 | 640 | 32 |
+| `ab_link` | 32 | 64 | 96 | 24 |
+| `ab_link` | 128 | 64 | 96 | 24 |
+| `ab_link` | 224 | 64 | 96 | 24 |
+| `ab_link` | 320 | 64 | 96 | 24 |
+| `go_suggest` | 32 | 96 | 640 | 56 |
+
+The hypothesis was that a smaller, connected attack row could outpace the dispersed eight-link defense. The existing engine gives **all four links 2.1× power** from font and suggestion support, plus **1.3225× speed** from the navigation row and retro set. Four attack entries incur no navigation-attention slowdown; the frozen eight-link board has a1.10× interval factor, and its font reaches only two links. These are already-existing mechanics, not new combat numbers.
+
+### Same conditions, then support ablations
+
+At **combat-v4, HP300, capacity17 and no administrators on either side**, with the existing **≤$40 input-value admission budget**, the $23 counter defeats the frozen $40/CPU14 defense in **10.25 seconds with20HP remaining**. The reverse seat has the same result, time and normalized-HP margin. The four-link core also beats all twelve frozen shortlist layouts in this particular slice, with no reversed-seat mismatch. This is a small, historical comparison set, not a universal counter or a new metagame ranking.
+
+| Same target with one explicit change | Input value / CPU | Result against frozen defense |
+| --- | --- | --- |
+| Connected six-part core | $23 / 7 | Win,20HP remaining |
+| Move font to y400 | $23 / 7 | Loss, defense93.6HP remaining |
+| Move suggestion panel to y500 | $23 / 7 | Loss, defense76HP remaining |
+| Remove the fourth link | $20 / 6 | Loss, defense37.6HP remaining |
+
+The first two disconnections retain every part, size, cost and CPU load while removing that support's connection. The last row is a separately cheaper ablation. Thus the counter is not simply a list of six owned part types: both support connections and the fourth attacker matter to this result. No presets, prices, recipes, combat constants or replay contracts were changed.
+
+### Paid acquisition and the whole-board budget
+
+The target was then pursued using the **unchanged actual offer/purchase/reroll/loot policy** in `simulateCompositionPath`, rather than added to a run for free. All bridge UI remains owned and placed. The target identifier is `supported-links` in the existing reachable-counter wrapper; it is a benchmark target, not a new player or opponent preset.
+
+| Fixed seed cohort | Exact target layouts | Reach round8 | Campaign wins | Blocked transactions |
+| --- | ---: | ---: | ---: | ---: |
+| 101–130 | 11/30 | 15/30 | 131 | 0 |
+| 201–210, held out after geometry selection | 2/10 | 3/10 | 36 | 0 |
+
+All thirteen first-completion inventories are legal **whole boards valued$31–39, CPU11–15**, so none relies on stripping an over-budget inventory down to its target. Every full board defeats the frozen defense in the same HP300/CPU17/no-admin slice, in both seats. Some primary paths have less purchased capacity and would be overloaded in their actual campaign conditions. The normalized comparison is not their original campaign battle and does not grant rewards or alter later offers.
+
+**Seed111 is a stronger, explicit cash-budget witness.** It completes at round4 with four links, font, suggestion panel, one extra navigation control and a guestbook: **eight owned and placed items, $31 total inventory input value, CPU11/capacity12**. Actual cumulative spending is **$26 parts + $5 rerolls + $0 server = $31**, within an explicit **$40 all-in cash cap** as well as the comparison's $40 inventory-value cap. It retains the actually rewarded `adnet` administrator during acquisition; the normalized duel removes administrators from both sides. The whole paid board then wins with **75.5HP at8.85 seconds**. Its spare UI was neither sold, removed, refunded nor silently excluded.
+
+Inventory value and cumulative spending are different budgets. Four primary completions (seeds110,111,126,130) also fit the $40 all-in cash cap. The other seven primary completions spend$42–58; the two held-out completions spend$42 and$43. The held-out paths confirm acquisition and the ≤$40 **whole-inventory-value** counter, but do not independently reproduce the stricter $40 cash-spend witness. These are bounded policy outcomes in the legacy eight-round expedition, not optimal acquisition probabilities or evidence about the canonical fifteen-battle story.
+
+This closes the narrow existence question: an ordinary counter to this frozen defense is both legal and genuinely paid-reachable under a stated comparable inventory budget, with one documented all-in cash witness. It does not establish a closed counter cycle, balance completion, or dominance outside the measured HP/admin/capacity slice.
+
+### Reproduce without ignored artifacts
+
+```sh
+node --import tsx scripts/reachable-counter-benchmark.ts --target=supported-links --first-seed=101 --seeds=30 --search=fixtures/balance/reachable-finalists.json
+node --import tsx scripts/reachable-counter-benchmark.ts --target=supported-links --first-seed=201 --seeds=10 --search=fixtures/balance/reachable-finalists.json
+node --import tsx --test tests/balance-reachable-defense-counter.test.mjs
+```
+
+Reports expose the real paid snapshots and transactions, and each completion now separately records `inventoryInputValue` and `totalSpend`. The regression test replays seed111's untouched full paid board, both seats, the actual spend ledger and the support-disconnection counterfactuals. The frozen opponent definitions remain in the existing portable fixture. No browser acceptance is claimed.

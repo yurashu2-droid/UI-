@@ -22,9 +22,11 @@ const existingIds = [
   "site_github_releases", "site_hacker_news", "site_google_maps", "site_geocities", "site_bandcamp", "site_govuk",
 ];
 
-test("QA: all 35 established laboratory opponent indices preserve saved meaning", () => {
-  assert.deepEqual(R.labEnemies().map(enemy=>enemy.id),existingIds);
-  for (const [index,id] of existingIds.entries()) {
+test("QA: all 35 established laboratory opponent indices preserve saved meaning with only the reviewed board appended", () => {
+  const currentIds=R.labEnemies().map(enemy=>enemy.id);
+  assert.deepEqual(currentIds.slice(0,existingIds.length),existingIds);
+  assert.deepEqual(currentIds.slice(existingIds.length),["site_trello"]);
+  for (const [index,id] of [...existingIds,"site_trello"].entries()) {
     const run=R.newRun("lab");run.stage=index;
     const restored=JSON.parse(JSON.stringify(run));
     assert.equal(R.validateRun(restored),true);

@@ -279,6 +279,11 @@ export function simulateStoryPath(
       blocked = prepared.error;
       break;
     }
+    assert.equal(
+      prepared.battle.combatVersion,
+      BATTLE_RULES_VERSION,
+      "paid story evidence must run the current combat rules it reports",
+    );
     session = prepared.session;
     for (let i = 0; i < 5000 && !prepared.battle.result; i++)
       prepared.battle.step(0.05);

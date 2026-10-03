@@ -9,8 +9,10 @@ export const CSS_LIMITS = Object.freeze({
 });
 /** No viewport is measured; only unconditional screen/all CSS is eligible. */
 export function isScreenStylesheet(media?: string, type?: string): boolean {
-  return ["", "all", "screen"].includes((media ?? "").trim().toLowerCase()) &&
-    ["", "text/css"].includes((type ?? "").trim().toLowerCase());
+  return (
+    ["", "all", "screen"].includes((media ?? "").trim().toLowerCase()) &&
+    ["", "text/css"].includes((type ?? "").trim().toLowerCase())
+  );
 }
 export type SafeStyle = {
   color?: string;
@@ -28,6 +30,26 @@ export type SafeStyle = {
 const tag = (n: Node) => ("tagName" in n ? n.tagName : "");
 const attr = (n: Node, k: string) =>
   "attrs" in n ? n.attrs.find((a) => a.name === k)?.value : undefined;
+/** Eligibility only: callers must still match this URL to an acquired/reviewed sheet. */
+export function activeStylesheetLinkUrl(
+  n: Node,
+  pageUrl: string,
+): string | undefined {
+  const rel = (attr(n, "rel") ?? "").toLowerCase().split(/\s+/);
+  if (
+    tag(n) !== "link" ||
+    !rel.includes("stylesheet") ||
+    rel.includes("alternate") ||
+    attr(n, "disabled") !== undefined ||
+    !isScreenStylesheet(attr(n, "media"), attr(n, "type"))
+  )
+    return undefined;
+  try {
+    return new URL(attr(n, "href") ?? "", pageUrl).href;
+  } catch {
+    return undefined;
+  }
+}
 const classList = (n: Node) =>
   (attr(n, "class") ?? "").split(/\s+/).slice(0, 64);
 const names: Record<string, string> = {

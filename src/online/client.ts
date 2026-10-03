@@ -13,6 +13,17 @@ export class OnlineError extends Error {
     super(message);
   }
 }
+function definitivelyRejected(error: unknown) {
+  return (
+    error instanceof OnlineError &&
+    error.status >= 400 &&
+    error.status < 500 &&
+    // A temporary refusal says nothing about an earlier uncertain attempt.
+    // Keep its identity until the player's explicit retry resolves the receipt.
+    error.status !== 408 &&
+    error.status !== 429
+  );
+}
 export function createOnlineClient(
   baseUrl: string,
   options: { fetch?: typeof fetch; timeoutMs?: number } = {},
@@ -119,12 +130,7 @@ export function createOnlineClient(
         pending = null;
         return next;
       } catch (error) {
-        if (
-          error instanceof OnlineError &&
-          error.status >= 400 &&
-          error.status < 500
-        )
-          pending = null;
+        if (definitivelyRejected(error)) pending = null;
         throw error;
       } finally {
         busy = false;
@@ -139,12 +145,7 @@ export function createOnlineClient(
         pending = null;
         return next;
       } catch (error) {
-        if (
-          error instanceof OnlineError &&
-          error.status >= 400 &&
-          error.status < 500
-        )
-          pending = null;
+        if (definitivelyRejected(error)) pending = null;
         throw error;
       } finally {
         busy = false;

@@ -8,7 +8,29 @@ Every accepted story transaction is validated and JSON-round-tripped. Each battl
 
 These are reproducible heuristic examples, **not population win rates, optimal-play proofs or browser visual QA**. The older transaction-only fifteen-battle test with a preassembled build and capacity 200 is not acquisition/difficulty evidence.
 
-## The early bottleneck and bounded correction
+## Current combat-v4 recheck — 2026-10-03
+
+Fresh execution of the existing paid path runner under production `combat-v4`, using the same seeds 101–130 and the same three policies, reproduces the earlier `combat-v3` results:
+
+| Policy                            | Pass stage two | Full fifteen-win ending | First-attempt stage-two wins |
+| --------------------------------- | -------------- | ----------------------- | ---------------------------- |
+| Navigation, capped at six attacks | 30/30          | 0/30                    | 30/30                        |
+| Commerce                          | 30/30          | 20/30                   | 29/30                        |
+| Mixed                             | 30/30          | 29/30                   | 29/30                        |
+
+Every complete route obtains all eight records and performs the actual archive restoration, ending-link placement and first visit. All ninety route outputs exactly match the stored v3 outputs after excluding only the `rulesVersion` label: purchases, rerolls, cash, capacity, chosen loot, fusion, boards and battle results are unchanged. This is a new execution of every session transaction, not a replay of completed boards.
+
+The existing no-Cart alternative also reproduces all thirty earlier route outputs exactly, including 23/30 endings. Seed 130 commerce, mixed and no-Cart mixed still finish without losses with the costs shown below. The existing seed 130 finale check also completes with the tutorial newsletter held off-board.
+
+The baseline includes 1,280 battles, of which 69 are genuinely overloaded at their purchased capacity. No route receives an economy or capacity grant, encounters a rejected transaction, or loses its fusion kit. Every placed player board contains at most two `am_oneclick` copies, below v4's new three-copy threshold; the [v4 repeated-copy change](combat-v4.md) therefore does not alter these paths. This does not establish progression for strategies that assemble three or more copies.
+
+The bounded navigation policy still exhausts its lives at stage six, as do ten commerce and one mixed route. These are canonical-story losses, distinct from the separate legacy eight-round expedition studies. Of the 41 failed paths, 35 end at `permission-desk` and six at `permission-proof`; no new progression-state roadblock or authored-content change is indicated by this comparison.
+
+The runner now checks each actual battle's version against the version it reports. The existing five paid-progression tests and all 42 story/session/QA tests pass. Those counts describe focused existing coverage, not the whole repository suite or visual acceptance.
+
+## Earlier bottleneck study and bounded correction
+
+The following candidate comparison and independent holdout are retained historical evidence, not fresh v4 runs of every rejected opponent. The six-part authored board remains current and is the board used in the recheck above.
 
 The original `delivery-contract` inherited the complete ten-part commerce board and three back-office abilities (`adnet`, `cdn`, `server`). With its listed HP 270, server raises actual HP to 338. Its preceding encounter has four parts, no back-office abilities and HP 210.
 
@@ -25,7 +47,7 @@ Results per thirty fixed seeds, in policy order navigation / commerce / mixed:
 | Ten parts, ad network only          | 0 / 21 / 21    | 0 / 17 / 20 | 0 / 2 / 2                    |
 | Six parts, server only (current)    | 30 / 30 / 30   | 0 / 20 / 29 | 30 / 29 / 29                 |
 
-Current commerce/mixed first-attempt winners retain median 112 of 220 HP at this boss. No blanket HP nerf or global Cart change was used. The one-ability-only ten-part alternatives still demanded repeated early losses from nearly every successful path.
+Commerce/mixed first-attempt winners in that study retain median 112 of 220 HP at this boss; the current production recheck is unchanged. No blanket HP nerf or global Cart change was used. The one-ability-only ten-part alternatives still demanded repeated early losses from nearly every successful path.
 
 An independent QA holdout, seeds 201–210, reproduced thirty of thirty first-attempt stage-two wins with the new board; mixed finished ten of ten and commerce five of ten. The original board passed stage two in only two of those thirty holdout paths, neither on the first attempt.
 
@@ -69,6 +91,7 @@ The finale regression also unequips the guaranteed tutorial newsletter before th
 node --import tsx scripts/story-progression-benchmark.ts --seeds=30
 node --import tsx scripts/story-ramp-candidates.ts --seeds=30
 node --import tsx --test tests/story-paid-progression.test.mjs
+node --import tsx --test tests/story-*.test.mjs tests/qa-story-*.test.mjs
 npm test
 npm run typecheck
 ```
@@ -77,6 +100,8 @@ The candidate runner compares isolated copies in one process and restores the pr
 
 For alternatives, import `simulateStoryPath` and use `{excludedTypes:["am_cart"]}`, `{retireTutorialFusionBeforeFinal:true}`, `{layout:"modules"}` or `{navigationLimit:12}`. The explicit module layout and larger-navigation policy were investigated without improving the original boss bottleneck, so the content correction is not based solely on one accidental placement.
 
-Local generated evidence: `.verification/story-paid-production90.json`, `.verification/story-paid-no-cart30.json`, `.verification/story-ramp-candidates.json`. The independent holdout is `/workspace/shared/ui-raid-qa/story-ramp-holdout60.json`. These are generated measurements; the executable scripts and tests are the maintained reproducible source.
+The current baseline is regenerated by the first command above. To reproduce the no-Cart cohort, import `simulateStoryPath` and run seeds 101–130 with policy `mixed` and `{excludedTypes:["am_cart"]}`; the finale alternative is seed 130, policy `mixed`, with `{retireTutorialFusionBeforeFinal:true}`.
 
-Fresh verification at this checkpoint: five paid-progression regressions passed; the whole repository suite passed 339/339. A sensitivity check restored the original boss only inside a process: seed 102 mixed then returned three victories and zero lives, correctly violating the new stage-two progression assertion. Typecheck passed. Future product edits should rerun these checks.
+Historical local generated evidence: `.verification/story-paid-production90.json` and `.verification/story-paid-no-cart30.json` contain the earlier v3 outputs used for the exact comparison; `.verification/story-ramp-candidates.json` retains the earlier candidate study. The independent historical holdout is `/workspace/shared/ui-raid-qa/story-ramp-holdout60.json`. These generated files may be absent from a fresh checkout; the executable scripts and tests are the maintained reproducible source.
+
+At the original bottleneck-correction checkpoint, the five paid-progression regressions and then-current 339-test repository suite passed. Its sensitivity check restored the original boss only inside a process: seed 102 mixed returned three victories and zero lives, correctly violating the stage-two progression assertion. These historical checks must not be read as the current repository-suite count. Future product edits should rerun the commands above.

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 import { reconstructStaticCode } from "./code.js";
-import { CSS_LIMITS, isScreenStylesheet } from "./css.js";
+import { CSS_LIMITS, activeStylesheetLinkUrl } from "./css.js";
 import type { RaidBlueprint } from "../../src/raid/types.js";
 import {
   DEFAULT_PUBLIC_SOURCES,
@@ -44,7 +44,7 @@ export interface FetchedStaticSource {
   html: string;
   bytes: number;
   extraction: StaticExtraction;
-  stylesheets?: { css: string; sourceHash: string }[];
+  stylesheets?: { css: string; sourceHash: string; url?: string }[];
   stylesheetWarning?: boolean;
 }
 /** Future adapter boundary: offline renderer must enforce OS isolation and return real layout/reference pixels. */
@@ -265,21 +265,7 @@ export function createStaticIngestService(
         const visitLink = (n: Node, depth = 0) => {
           if (++linkNodes > INGEST_LIMITS.nodes || depth > 64)
             throw Error("source-too-large");
-          const rel = (attr(n, "rel") ?? "").toLowerCase().split(/\s+/);
-          if (
-            tag(n) === "link" &&
-            rel.includes("stylesheet") &&
-            !rel.includes("alternate") &&
-            attr(n, "disabled") === undefined &&
-            isScreenStylesheet(attr(n, "media"), attr(n, "type"))
-          ) {
-            try {
-              if (new URL(attr(n, "href") ?? "", input).href === allowed)
-                linked = true;
-            } catch {
-              /* Invalid link is ignored. */
-            }
-          }
+          if (activeStylesheetLinkUrl(n, input) === allowed) linked = true;
           for (const c of children(n)) visitLink(c, depth + 1);
         };
         visitLink(parse(body.html, { scriptingEnabled: false }));
@@ -308,6 +294,7 @@ export function createStaticIngestService(
               throw Error("stylesheet-response");
             const css = await readSource(sheet, cssSignal, CSS_LIMITS.bytes);
             stylesheets.push({
+              url: allowed,
               css: css.html,
               sourceHash: createHash("sha256")
                 .update(css.html, "utf8")

@@ -11,7 +11,12 @@ import type {
 } from "../../src/raid/types.js";
 import type { Rect } from "../../src/types.js";
 import type { FetchedStaticSource } from "./service.js";
-import { createSafeStyleReader, isScreenStylesheet, type SafeStyle } from "./css.js";
+import {
+  activeStylesheetLinkUrl,
+  createSafeStyleReader,
+  isScreenStylesheet,
+  type SafeStyle,
+} from "./css.js";
 
 type Node = DefaultTreeAdapterMap["node"];
 type Style = SafeStyle;
@@ -64,7 +69,11 @@ function rawText(n: Node, depth = 0): string {
     .map((c) => rawText(c, depth + 1))
     .join(" ");
 }
-export function analyzeStaticCode(html: string, externalStyles: string[] = []) {
+export function analyzeStaticCode(
+  html: string,
+  externalStyles: (string | { css: string; url: string })[] = [],
+  pageUrl?: string,
+) {
   if (Buffer.byteLength(html, "utf8") > 524288) throw Error("source-too-large");
   const doc = parse(html, { scriptingEnabled: false }),
     nodes: Node[] = [];
@@ -74,10 +83,30 @@ export function analyzeStaticCode(html: string, externalStyles: string[] = []) {
     for (const c of children(n)) bound(c, depth + 1);
   };
   bound(doc);
-  const reader = createSafeStyleReader([
-    ...externalStyles,
-    ...nodes.filter((n) => tag(n) === "style" && isScreenStylesheet(attr(n, "media"), attr(n, "type"))).map((n) => rawText(n)),
-  ]);
+  const orderedStyles: { css: string; order: number }[] = [];
+  const acquired = new Map<string, string>();
+  for (const sheet of externalStyles) {
+    // Legacy direct callers supply unpositioned text; preserve their old order.
+    if (typeof sheet === "string")
+      orderedStyles.push({ css: sheet, order: -1 });
+    else acquired.set(sheet.url, sheet.css);
+  }
+  const linkedStyles = new Map<string, { css: string; order: number }>();
+  nodes.forEach((n, order) => {
+    if (
+      tag(n) === "style" &&
+      isScreenStylesheet(attr(n, "media"), attr(n, "type"))
+    )
+      orderedStyles.push({ css: rawText(n), order });
+    const url = pageUrl && activeStylesheetLinkUrl(n, pageUrl);
+    const css = url ? acquired.get(url) : undefined;
+    // The same acquired sheet at its last eligible link has the same cascade
+    // effect, without charging repeated source text against the CSS budget.
+    if (url && css !== undefined) linkedStyles.set(url, { css, order });
+  });
+  orderedStyles.push(...linkedStyles.values());
+  orderedStyles.sort((a, b) => a.order - b.order);
+  const reader = createSafeStyleReader(orderedStyles.map((sheet) => sheet.css));
   const styleFor = (n: Node, _parent: Style = {}): Style => reader.styleFor(n);
   const hidden = (n: Node) =>
     attr(n, "hidden") !== undefined ||
@@ -365,7 +394,10 @@ export async function reconstructStaticCode(
       throw Error("stylesheet-hash-mismatch");
   const a = analyzeStaticCode(
       source.html,
-      (source.stylesheets ?? []).map((s) => s.css),
+      (source.stylesheets ?? []).map((s) =>
+        s.url ? { css: s.css, url: s.url } : s.css,
+      ),
+      source.requestedUrl,
     ),
     placed: { c: Candidate; r: Rect }[] = [];
   const products = a.candidates.filter((c) => c.kind === "product").slice(0, 2),

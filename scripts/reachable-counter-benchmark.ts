@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BUILDS } from "../src/builds.js";
 import { BATTLE_RULES_VERSION } from "../src/combat-rules.js";
-import { resources, type Entrant } from "../src/buildlab.js";
+import { acquisitionValue, resources, type Entrant } from "../src/buildlab.js";
 import { simulateCompositionPath } from "./paid-target-benchmark.js";
 import {
   assessCandidate,
@@ -16,9 +16,28 @@ import {
 } from "./open-build-search.js";
 
 type ReachableTarget =
-  "search-documents" | "navigation" | "navigation-no-marquee" | "link-defense";
+  | "search-documents"
+  | "navigation"
+  | "navigation-no-marquee"
+  | "link-defense"
+  | "supported-links";
 
 function targetFor(name: ReachableTarget): Entrant {
+  if (name === "supported-links")
+    return {
+      id: "supported-links",
+      name: "Four ordinary links with shared text support",
+      build: true,
+      admin: [],
+      layout: [
+        ["gov_font", 32, 24, 640, 32],
+        ["ab_link", 32, 64, 96, 24],
+        ["ab_link", 128, 64, 96, 24],
+        ["ab_link", 224, 64, 96, 24],
+        ["ab_link", 320, 64, 96, 24],
+        ["go_suggest", 32, 96, 640, 56],
+      ],
+    };
   if (name === "link-defense")
     return {
       id: "candidate-200912",
@@ -148,9 +167,17 @@ export function runReachableCounter(
         targetInputs: reached.targetTotal,
         outputs: reached.outputsOwned,
         inventorySize: reached.board.length,
+        inventoryInputValue: reached.board.reduce(
+          (sum, item) => sum + acquisitionValue(item.type),
+          0,
+        ),
         load: reached.load,
         capacity: reached.capacity,
         actualAdmin: reached.admin,
+        totalSpend: paid.reduce(
+          (sum, transaction) => sum + transaction.cost,
+          0,
+        ),
         partSpend: paid
           .filter((t) => t.kind === "buy" && !t.type.startsWith("plan:"))
           .reduce((s, t) => s + t.cost, 0),
