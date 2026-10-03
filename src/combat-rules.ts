@@ -1,10 +1,24 @@
 /** Increment whenever combat semantics change. Kept separate from cosmetics/catalogue. */
-export const BATTLE_RULES_VERSION = "combat-v3";
+export const BATTLE_RULES_VERSION = "combat-v4";
 export const SUPPORTED_COMBAT_VERSIONS = [
   "combat-v2",
+  "combat-v3",
   BATTLE_RULES_VERSION,
 ] as const;
 export type CombatRulesVersion = (typeof SUPPORTED_COMBAT_VERSIONS)[number];
+export function isSupportedCombatVersion(
+  value: unknown,
+): value is CombatRulesVersion {
+  return (
+    typeof value === "string" &&
+    SUPPORTED_COMBAT_VERSIONS.some((version) => version === value)
+  );
+}
+/** Pagewide game abstraction, not a claim about real checkout/network behavior. */
+export const ONECLICK_CONTENTION = Object.freeze({
+  freeCopies: 2,
+  extraCopyWeight: 0.25,
+});
 export const CONTROL = Object.freeze({
   cost: 3,
   durationTicks: 16,

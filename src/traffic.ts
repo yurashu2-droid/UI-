@@ -248,10 +248,13 @@ class Traffic {
         (this.ended && this.winner && this.winner !== c.origin)
         ? "gone"
         : c.origin;
+    // Lab overload is departure, not a zero-sum transfer. HP alone sets each page's real-viewer projection.
+    if (this.battle.pressure) return c.idx < this.R(c.origin) ? c.origin : "gone";
     if (this.ended && this.winner) return this.winner;
     return c.idx < this.R(c.origin) ? c.origin : other(c.origin);
   }
   final(): Record<SideName, number> {
+    if (this.battle.pressure) return {player: this.R("player"), enemy: this.R("enemy")};
     if (this.ended && this.winner)
       return {
         player:
@@ -363,7 +366,7 @@ class Traffic {
       this.winner = ev.winner === "draw" ? null : ev.winner;
       return;
     }
-    if (ev.kind === "fire" && !ev.echo) {
+    if (ev.kind === "fire" && !ev.echo && ev.type !== "go_jobs") {
       const el = this.fx.part(ev.side, ev.id);
       if (!el) return;
       const idle = this.cursors.filter(
@@ -521,6 +524,15 @@ class Traffic {
     this.now += dt;
     let budget = 5;
     for (const c of this.cursors) {
+      if (c.dead && !c.bot && this.battle.pressure && c.idx < this.R(c.origin)) {
+        c.dead = false;
+        c.alive = false;
+        c.side = "hub";
+        c.delay = 0;
+        c.moving = false;
+        c.legs = [];
+        c.leg = null;
+      }
       if (c.dead) continue;
       if (!c.alive) {
         c.delay -= dt;
@@ -923,8 +935,8 @@ class Traffic {
           w.classList.toggle("is-alert", !!s.adminState.exposed);
       }
       if (m)
-        m.innerHTML = `<span class="hp-num"><b>${n[side]}</b> 人が閲覧中</span><span class="health-shield">${s.shield > 0 ? "◇ " + Math.round(s.shield) : ""}</span><span class="health-income">${s.income ? "収益 $" + s.income : ""}</span>`;
-      const w = (100 * n[side]) / all + "%",
+        m.innerHTML = `<span class="hp-num">${this.battle.pressure ? `閲覧者HP <b>${Math.ceil(s.hp)}</b> / ${s.maxHp}` : `<b>${n[side]}</b> 人が閲覧中`}</span><span class="health-shield">${s.shield > 0 ? "◇ " + Math.round(s.shield) : ""}</span><span class="health-income">${s.income ? "収益 $" + s.income : ""}</span>`;
+      const w = (this.battle.pressure ? 100 * s.hp / s.maxHp : (100 * n[side]) / all) + "%",
         i = f.querySelector<HTMLElement>(".health-track i"),
         b = f.querySelector<HTMLElement>(".health-track b");
       if (i) i.style.width = w;

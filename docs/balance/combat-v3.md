@@ -2,7 +2,7 @@
 
 ## Scope
 
-Canonical battles now use `combat-v3`. Attack values, prices, CPU loads, faction bonuses and ordinary cooldowns are unchanged. Small navigation menus keep their original cadence. This is a bounded correction to cheaply repeated navigation; it is not an assertion that every archetype is fully balanced.
+This document records `combat-v3`. Current battles use [combat-v4](combat-v4.md), which inherits these navigation rules; explicit v3 remains replayable. Attack values, prices, CPU loads, faction bonuses and ordinary cooldowns are unchanged. Small navigation menus keep their original cadence. This is a bounded correction to cheaply repeated navigation; it is not an assertion that every archetype is fully balanced.
 
 - Whitespace still adds `min(3, floor(freeRatio * 5))` damage, but only to the first two blue hyperlinks in canonical visual order (top, then left). Those two highlights are shared by the whole page. Splitting a list into separate groups cannot duplicate them.
 - For attack parts tagged `navigation`, speed is divided by `1 + 0.05 * max(0, navigationAttackCount - 6)`. Total expected base throughput continues to grow as entries are added, with diminishing returns. Other attack families are unaffected.
@@ -18,7 +18,7 @@ These are deterministic scenario measurements, not population win rates. Cart/su
 
 ## Replay compatibility
 
-`new E.Battle(player, enemy, { combatVersion: 'combat-v2' })` executes the prior navigation rules. Omitting the option uses v3. Unknown versions are rejected. `E.analyze(board, experimentalRules, combatVersion)` supports the same explicit version selection.
+`new E.Battle(player, enemy, { combatVersion: 'combat-v2' })` executes the prior navigation rules. Omitting the option now uses v4; select `combat-v3` explicitly to reproduce this historical pass. Unknown versions are rejected. `E.analyze(board, experimentalRules, combatVersion)` supports the same explicit version selection.
 
 The immutable `tests/fixtures/combat-v2.json` is retained. All 20 old result/event hashes reproduce under the explicit legacy option. `combat-v3.json` uses those same frozen inputs; all winners remain unchanged, with one battle duration changing from 29.3 to 31.8 seconds. Replays must select their recorded combat version and still validate their catalogue fingerprint.
 
@@ -82,3 +82,7 @@ The video-checkout example beats heavy documents by only 0.4 HP at HP440/CPU35/n
 The integrated nine-example benchmark currently runs 1,152 ordered comparisons across core, common ceiling, pressure, showcase, production-only, post-fusion and experimental-counter conditions. The explicit native-counter script now produces 300 distinct comparisons because the additional examples are real entrants. Historical 480/260 artifacts remain earlier six-example snapshots, not updated counts.
 
 Administration remains a material sensitivity. Cart wins all eight authored opposing profiles under the two-own-admin pressure and four-own-admin showcase settings. A separate reversible probe gives the three new examples server+CDN first (backup+moderator later), without changing any part: Cart then wins 5/8 and 7/8, while heavy documents win 8/8 in those selected conditions. This does not certify every administrator package or establish a new universally dominant population strategy. It shows why fixed authored admin choices, the difficulty of repeatedly acquiring PDFs, and paid admin loot must be reported rather than hidden behind a single win-rate ranking. Shipped definitions retain their documented administration choices; the probe is labelled separately.
+
+## Open-composition continuation
+
+The authored examples are regression cases, not fixed classes. [Open-composition search](open-composition-search.md) now varies parts, counts, layout, size and administrator choices with actual ingredient, CPU and footprint accounting. Four crossed resource/seed searches found stronger repeated-1-Click packages than the original Cart example; overload-admitting probes retain that sampled hotspot. Independent cross-seed, administrator and part-removal audits are included. None of this establishes global optimality or paid reachability, and this continuation changes no runtime combat values.

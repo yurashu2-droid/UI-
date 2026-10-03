@@ -2,6 +2,13 @@ import type { PartDefinition } from "../types.js";
 
 /** First balance experiments. Values are starting hypotheses, not measured approvals. */
 export const BALANCE_PARTS: Record<string, PartDefinition> = {
+  go_jobs: {
+    id: "go_jobs", name: "自動閲覧ジョブ一覧", faction: "google", kind: "server-pressure",
+    tags: ["bot", "pressure"], layout: "job-table",
+    w: 280, h: 112, cd: 4, value: 6, load: 3, price: 7,
+    desc: "実験室のサーバー負荷ルール限定。隣の収益から$3を払い、基本4秒ごとに一時作業+6を5秒送る。相手ページ全体で上限12。蓄積$6まで。CAPTCHAで拒否されても支払い済み。再発動・広告の収益源にはならない。余剰CPUなら無害。",
+    added: true, status: "experimental", minW: 248, minH: 112, maxW: 560, maxH: 224,
+  },
   ad_popup: {
     id: "ad_popup", name: "ポップアップ広告", faction: "google", kind: "interference",
     tags: ["economy", "ad", "interference"], layout: "banner",

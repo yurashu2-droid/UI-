@@ -170,3 +170,53 @@ test("replay target tags participate in the gameplay catalogue fingerprint", asy
   assert.deepEqual(D.PARTS.nc_comment.replayTags, ["video"]);
   assert.ok(Object.isFrozen(D.PARTS.nc_comment.replayTags));
 });
+test("online replay intentionally supports known legacy semantics while new matches use v4", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { verifyOnlineReplay, createOnlineReplayBattle } = await import(
+    path.href
+  );
+  const { arenaCatalogDefinition, fingerprintJson } =
+    await import("../src/online/catalog.js");
+  assert.equal(typeof createOnlineReplayBattle, "function");
+  assert.equal((await serverMatch()).combatVersion, "combat-v4");
+  const fixture = JSON.parse(
+    readFileSync(
+      new URL("./fixtures/oneclick-legacy-v2-v3.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const catalogHash = await fingerprintJson(arenaCatalogDefinition());
+  for (const sample of fixture.cases) {
+    const i = sample.input,
+      o = i.options;
+    const match = {
+      combatVersion: o.combatVersion,
+      catalogHash,
+      player: {
+        items: i.playerBoard,
+        hp: o.playerHp,
+        capacity: o.playerCapacity,
+        admin: o.playerAdmin,
+      },
+      opponent: {
+        items: i.enemyBoard,
+        hp: o.enemyHp,
+        capacity: o.enemyCapacity,
+        admin: o.enemyAdmin,
+      },
+      winner: sample.expected.result.winner,
+      finalTick: sample.expected.ticks,
+      replayHash: sample.expected.eventsHash,
+    };
+    assert.deepEqual(await verifyOnlineReplay(match), { ok: true }, sample.key);
+    assert.equal(
+      createOnlineReplayBattle(match).combatVersion,
+      o.combatVersion,
+    );
+    assert.equal(
+      (await verifyOnlineReplay({ ...match, catalogHash: "0".repeat(64) }))
+        .code,
+      "CATALOG_MISMATCH",
+    );
+  }
+});

@@ -7,6 +7,8 @@ export function arenaCatalogDefinition() {
   return {
     parts: Object.fromEntries(
       Object.entries(D.PARTS)
+        // Isolated placed-UI lab prototype is not part of the online contract.
+        .filter(([, p]) => p.kind !== "server-pressure")
         .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
         .map(([id, p]) => [
           id,

@@ -99,7 +99,11 @@ test("prototype identities and legacy documents remain compatible while content 
   );
 });
 
-function verifyFrozenCombat(version, explicitVersion) {
+function verifyFrozenCombat(
+  version,
+  explicitVersion,
+  runtimeVersion = version,
+) {
   const fixture = JSON.parse(
     readFileSync(
       new URL(`./fixtures/${version}.json`, import.meta.url),
@@ -125,7 +129,7 @@ function verifyFrozenCombat(version, explicitVersion) {
       sample.input.enemyBoard,
       options,
     );
-    assert.equal(battle.combatVersion, version);
+    assert.equal(battle.combatVersion, runtimeVersion);
     const events = [];
     for (let i = 0; i < 1201 && !battle.result; i++)
       events.push(...battle.step(0.05));
@@ -145,9 +149,12 @@ function verifyFrozenCombat(version, explicitVersion) {
 test("20 immutable combat-v2 replay fixtures retain explicit legacy compatibility", () => {
   verifyFrozenCombat("combat-v2", true);
 });
-test("20 frozen combat-v3 battles match current default results and event hashes", () => {
-  assert.equal(BATTLE_RULES_VERSION, "combat-v3");
-  verifyFrozenCombat(BATTLE_RULES_VERSION, false);
+test("20 frozen combat-v3 battles retain explicit legacy results and event hashes", () => {
+  verifyFrozenCombat("combat-v3", true);
+});
+test("the same twenty non-repeat legacy inputs retain their hashes under default combat-v4", () => {
+  assert.equal(BATTLE_RULES_VERSION, "combat-v4");
+  verifyFrozenCombat("combat-v3", false, BATTLE_RULES_VERSION);
 });
 
 test("campaign settlement retains eight rounds, three lives and original economy", () => {

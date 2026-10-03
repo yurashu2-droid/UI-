@@ -16,37 +16,77 @@ import { RECIPES } from "../src/fusion.js";
 import type { Item, LayoutEntry, Run } from "../src/types.js";
 import type { Entrant } from "../src/buildlab.js";
 export type TargetPolicy =
-  "cart" | "cart-fused" | "fortress" | "documents" | "onestop";
+  "cart" | "cart-fused" | "fortress" | "documents" | "onestop" | "native-links" | "oneclick-battery";
 const base = (id: string): Entrant => ({
   ...BUILDS.find((b) => b.id === id)!,
   build: true,
 });
 export const targetFor = (policy: TargetPolicy): Entrant =>
-  policy === "onestop"
+  policy === "native-links"
     ? {
-        id: "paid_onestop",
-        name: "ワンストップ申請の購入目標",
+        id: "paid_native_links",
+        name: "リンク防御の購入目標",
         build: true,
         admin: [],
         layout: [
-          ["gov_form", 16, 16, 920, 300],
-          ["gov_breadcrumb", 32, 72, 560, 28],
-          ...Array.from({ length: 6 }, (_, i): LayoutEntry => [
-            "gov_onestop",
-            32 + 136 * i,
-            108,
-            136,
-            40,
+          ...[16, 320, 624].flatMap((x) => [
+            ...[24, 100].flatMap((y) =>
+              [0, 96].map(
+                (dx) => ["ab_link", x + dx, y, 96, 24] as LayoutEntry,
+              ),
+            ),
+            ["gov_font", x, 56, 208, 36] as LayoutEntry,
+            ...[132, 148].map((y) => ["ab_hr", x, y, 192, 8] as LayoutEntry),
           ]),
-          ["gov_font", 32, 156, 232, 36],
-          ["go_suggest", 272, 156, 420, 84],
+          ["ab_guestbook", 24, 216, 320, 132],
         ],
       }
-    : policy.startsWith("cart")
-      ? base("b_cart")
-      : policy === "fortress"
-        ? nativeFortressCandidate(base("b_fort"))
-        : heavyDocumentCandidate(base("b_echo"));
+    : policy === "oneclick-battery"
+      ? {
+          id: "paid_oneclick_battery",
+          name: "複数購入欄の購入目標",
+          build: true,
+          admin: [],
+          layout: [
+            ["am_product", 24, 24, 704, 300],
+            ["am_quantity", 24, 324, 80, 40],
+            ...Array.from({ length: 4 }, (_, i): LayoutEntry => [
+              "am_oneclick",
+              104 + 128 * i,
+              324,
+              128,
+              40,
+            ]),
+            ["am_prime", 616, 324, 112, 40],
+            ["am_rating", 736, 324, 200, 32],
+            ["ab_counter", 24, 372, 704, 26],
+          ],
+        }
+      : policy === "onestop"
+        ? {
+            id: "paid_onestop",
+            name: "ワンストップ申請の購入目標",
+            build: true,
+            admin: [],
+            layout: [
+              ["gov_form", 16, 16, 920, 300],
+              ["gov_breadcrumb", 32, 72, 560, 28],
+              ...Array.from({ length: 6 }, (_, i): LayoutEntry => [
+                "gov_onestop",
+                32 + 136 * i,
+                108,
+                136,
+                40,
+              ]),
+              ["gov_font", 32, 156, 232, 36],
+              ["go_suggest", 272, 156, 420, 84],
+            ],
+          }
+        : policy.startsWith("cart")
+          ? base("b_cart")
+          : policy === "fortress"
+            ? nativeFortressCandidate(base("b_fort"))
+            : heavyDocumentCandidate(base("b_echo"));
 const clone = <T>(v: T): T => structuredClone(v);
 function counts(items: Item[]) {
   const out: Record<string, number> = {};
@@ -63,6 +103,37 @@ function counts(items: Item[]) {
 function arrange(run: Run, target: Entrant, fuse: boolean) {
   for (const p of run.owned) assert.equal(R.move(run, p.id, null, null), true);
   const unused = new Set(run.owned.map((p) => p.id));
+  if (target.id === "paid_oneclick_battery") {
+    const place = (
+      type: string,
+      x: number,
+      y: number,
+      w: number,
+      h: number,
+    ) => {
+      const p = run.owned.find((p) => unused.has(p.id) && p.type === type);
+      if (!p) return;
+      assert.equal(
+        R.move(run, p.id, x, y, w, h),
+        true,
+        "purchase assembly: " + type,
+      );
+      unused.delete(p.id);
+    };
+    for (const [type, x, y, w, h] of target.layout) place(type, x!, y!, w!, h!);
+    for (let i = 0; i < 4; i++) {
+      const x = 24 + 232 * i;
+      place("am_cart", x, 408, 200, 100);
+      place("am_buy", x, 516, 128, 40);
+    }
+    for (const p of run.owned.filter((p) => unused.has(p.id))) {
+      const d = D.PARTS[p.type],
+        spot = C.findSpace(run.owned, { ...p, w: d.minW, h: d.minH });
+      if (spot)
+        assert.equal(R.move(run, p.id, spot.x, spot.y, d.minW, d.minH), true);
+    }
+    return;
+  }
   if (target.id === "paid_onestop") {
     const place = (
       type: string,
@@ -202,7 +273,7 @@ export function simulateTargetPath(
       if (d.kind === "attack") return 100 - (owned[type] ?? 0) * 2;
       if (
         ["gov_font", "go_suggest", "ab_table", "gov_form"].includes(type) &&
-        !(policy === "onestop" ? (owned.gov_submit ?? 0) : (owned.gov_pdf ?? 0))
+        !(policy === "onestop" ? (owned.gov_submit ?? 0) : policy === "native-links" ? (owned.ab_link ?? 0) : (owned.gov_pdf ?? 0))
       )
         return -100;
       return attacks ? 70 - (owned[type] ?? 0) * 2 : -100;
@@ -322,7 +393,7 @@ export function simulateTargetPath(
       time: settled.summary.time,
     });
     if (
-      ["cart-fused", "onestop"].includes(policy) &&
+      ["cart-fused", "onestop", "oneclick-battery"].includes(policy) &&
       (run.phase as string) !== "gameover"
     ) {
       // Use only the real adjacent purchase+cart recipe, after paying and surviving that battle.

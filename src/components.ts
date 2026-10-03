@@ -1,3 +1,5 @@
+import { jobTableMarkup } from "./catalog/server-pressure-render.js";
+import { serviceFormHeader, serviceFormDecor } from "./catalog/service-form-render.js";
 import { musicShopHeader, musicShopDecor } from "./catalog/music-shop-render.js";
 import { personalWebHeader, personalWebDecor } from "./catalog/personal-web-render.js";
 import { mapSearchHeader, mapSearchDecor } from "./catalog/map-search-render.js";
@@ -202,6 +204,8 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
       return `<aside class="native-ad fused-retarget"><span class="ad-kicker">あなたへのおすすめ</span><div><b>${text(p, "さっき見ていた、あのUI。")}</b><small>まだ迷っていますか？ いまなら期間限定。</small></div><span class="retarget-eye">${icon("eye")}</span><span class="ad-money">$<span class="state-income">0</span></span></aside>`;
     case "am_newsletter":
       return `<form class="fused-newsletter" data-ui="press"><b>✉ メルマガ登録で ¥200 OFF</b><span class="nl-field">you@example.com</span><span class="nl-btn">登録</span></form>`;
+    case "go_jobs":
+      return jobTableMarkup();
     case "ad_popup":
       return `<aside class="native-popup-ad"><span class="popup-kicker">スポンサー · $3で出稿</span><strong>${text(p, "ちょっと、こちらも見ていきませんか？")}</strong><div class="popup-ad-footer"><span class="popup-state">出稿待ち</span><span class="popup-charge">$<span class="state-charge">0</span> / 6</span><button type="button" data-ui="press" aria-label="ポップアップ広告をプレビュー">詳しく見る ↗</button></div></aside>`;
     case "go_cache":
@@ -221,6 +225,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
 const TAGS: Record<string, string> = {
   sc_track: "audio.waveform",
   go_history: "history.restore",
+  go_jobs: "table.local-jobs",
   yt_play: "<video>",
   yt_speed: "button.ytp-speed",
   yt_ad: "<aside> ad",
@@ -368,7 +373,7 @@ function decorMarkup(kind: string) {
     case "gov-contact":
       return `<div class="d-gov-contact"><b>このページに関するお問い合わせ</b><p>総務部 デジタル推進課　電話：000-000-0000（平日 8:30〜17:15）</p><small>ページ番号 1024-0098　更新日 2026年9月1日</small></div>`;
     default:
-      return socialDecor(kind) || knowledgeDecor(kind) || communityDecor(kind) || discoveryDecor(kind) || timeMediaDecor(kind) || documentsDecor(kind) || audioDecor(kind) || qandaDecor(kind) || feedreaderDecor(kind) || marketplaceDecor(kind) || releasesDecor(kind) || rankedNewsDecor(kind) || mapSearchDecor(kind) || personalWebDecor(kind) || musicShopDecor(kind);
+      return socialDecor(kind) || knowledgeDecor(kind) || communityDecor(kind) || discoveryDecor(kind) || timeMediaDecor(kind) || documentsDecor(kind) || audioDecor(kind) || qandaDecor(kind) || feedreaderDecor(kind) || marketplaceDecor(kind) || releasesDecor(kind) || rankedNewsDecor(kind) || mapSearchDecor(kind) || personalWebDecor(kind) || musicShopDecor(kind) || serviceFormDecor(kind);
   }
 }
 export interface CreateOptions {
@@ -421,6 +426,7 @@ function header(theme: string, name?: string) {
   if (theme === "mapsearch") return mapSearchHeader();
   if (theme === "personalweb") return personalWebHeader();
   if (theme === "musicshop") return musicShopHeader();
+  if (theme === "serviceform") return serviceFormHeader();
   const avatar = '<span class="site-avatar">u</span>';
   if (theme === "twitter" || theme === "x") return socialHeader(theme);
   if (theme === "wiki" || theme === "forge") return knowledgeHeader(theme);

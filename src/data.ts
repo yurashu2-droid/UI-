@@ -77,6 +77,10 @@ const FACTIONS: Record<
     name: "SoundCloud風", short: "AUDIO", color: "#c86831", era: "WAVEFORM AUDIO",
     set: "実験中：系統セット追加補正なし",
   },
+  serviceform: {
+    name: "GOV.UK風", short: "SERVICE", color: "#1d70b8", era: "PUBLIC SERVICE FORM",
+    set: "テンプレート専用：既存UIで構成・追加補正なし",
+  },
   musicshop: {
     name: "Bandcamp風", short: "ALBUM", color: "#477b79", era: "DIRECT MUSIC SHOP",
     set: "テンプレート専用：既存UIで構成・追加補正なし",

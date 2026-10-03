@@ -55,3 +55,47 @@ test("queued conversion is scaled exactly once and empty ablation is canonical",
     assert.deepEqual(none.step(0.05), original.step(0.05));
   assert.deepEqual(none.result, original.result);
 });
+test("income-growth ablation leaves the natural base and actual income ledger intact", () => {
+  const [a, b] = boards();
+  const fight = new P.OneClickAblationBattle(
+    a,
+    b,
+    { playerHp: 200, enemyHp: 200 },
+    { noIncomeGrowth: true },
+  );
+  fight.player.income = 40;
+  fight._attack(fight.player, fight.enemy, fight.player.parts[0], 1);
+  assert.equal(fight.enemy.hp, 188);
+  assert.equal(fight.player.income, 40);
+});
+test("repeat-cadence probe preserves one/two copies and changes only natural clocks beyond them", () => {
+  for (const count of [1, 2, 4]) {
+    const a = Array.from({ length: count }, (_, i) =>
+      C.makeItem("am_oneclick", `one${i}`, 24 + i * 208, 24, 208, 44),
+    );
+    const b = boards()[1],
+      opts = { playerHp: 200, enemyHp: 200, combatVersion: "combat-v3" };
+    const original = new E.Battle(a, b, opts),
+      probe = new P.OneClickAblationBattle(a, b, opts, {
+        repeatCadence: { freeCopies: 2, extraWeight: 0.2 },
+      });
+    const ratio = 1 + 0.2 * Math.max(0, count - 2);
+    assert.equal(probe.player.load, original.player.load);
+    assert.ok(
+      Math.abs(
+        probe.player.parts[0].period / original.player.parts[0].period - ratio,
+      ) < 1e-9,
+    );
+    assert.ok(
+      Math.abs(
+        probe.player.parts[0].remaining / original.player.parts[0].remaining -
+          ratio,
+      ) < 1e-9,
+    );
+    const p = probe.player.parts[0];
+    p.charge = 3;
+    probe._convert(probe.player, probe.enemy, p);
+    assert.equal(probe.enemy.hp, 180);
+    assert.equal(p.charge, 0);
+  }
+});

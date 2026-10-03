@@ -1,4 +1,5 @@
 import D from "./data.js";
+import { ServerPressure, SERVER_PRESSURE } from "./server-pressure.js";
 import { VersionHistory } from "./version-history.js";
 import C from "./document.js";
 import { AudienceState, AUDIENCE_RULES } from "./audience-experiment.js";
@@ -15,6 +16,7 @@ import {
   type CombatRulesVersion,
   CONTROL,
   RATE_LIMIT,
+  ONECLICK_CONTENTION,
   emptyMetrics,
   type CombatMetrics,
 } from "./combat-rules.js";
@@ -58,11 +60,12 @@ function selectRoute<T extends Item>(
   items: T[],
   near: Record<string, string[]>,
   p: Item,
+  pressure = false,
 ) {
   const candidates = items
     .filter(
       (q) =>
-        consumers.has(q.type) &&
+        (consumers.has(q.type) || (pressure && q.type === "go_jobs")) &&
         q.id !== p.id &&
         ((near[p.id] ?? []).includes(q.id) ||
           (near[q.id] ?? []).includes(p.id)),
@@ -126,6 +129,7 @@ export interface AnalysisWithCaps extends BattleAnalysis {
     slowdown: number;
     highlightedLinks: string[];
   };
+  oneClickContention?: { entries: number; slowdown: number };
 }
 function analyze(
   input: Item[],
@@ -315,7 +319,7 @@ function analyze(
   }
   let navigation: AnalysisWithCaps["navigation"];
   if (
-    combatVersion === "combat-v3" ||
+    combatVersion !== "combat-v2" ||
     navigationExperiment(experimentalRules)
   ) {
     const entries = board.filter(
@@ -345,9 +349,26 @@ function analyze(
         );
     }
   }
+  let oneClickContention: AnalysisWithCaps["oneClickContention"];
+  if (combatVersion === "combat-v4") {
+    const entries = board.filter((p) => p.type === "am_oneclick");
+    if (entries.length > 0) {
+      const slowdown =
+        1 +
+        ONECLICK_CONTENTION.extraCopyWeight *
+          Math.max(0, entries.length - ONECLICK_CONTENTION.freeCopies);
+      oneClickContention = { entries: entries.length, slowdown };
+      if (slowdown > 1)
+        for (const p of entries)
+          mods[p.id].notes.push(
+            `ページ内の1-Click ${entries.length}個：同じUIを並べた補正（ゲーム内ルール）で全ての自然発動間隔 ×${slowdown.toFixed(2)}。収益チャージの連動購入は変更なし`,
+          );
+    }
+  }
   const result: AnalysisWithCaps = {
     ...info,
     ...(navigation ? { navigation } : {}),
+    ...(oneClickContention ? { oneClickContention } : {}),
     capWaste,
     mods,
     relations,
@@ -365,13 +386,15 @@ function analyze(
       (P[p.type].tags.includes("economy") && !consumers.has(p.type)) ||
       ["gov_submit", "gov_onestop"].includes(p.type)
     ) {
-      const q = selectRoute(board, result.near, p);
+      const q = selectRoute(board, result.near, p, experimentalRules === "server-pressure-v1");
       if (q)
         rel(
           p.id,
           q.id,
           "conversion",
-          q.type === "yt_tip"
+          q.type === "go_jobs"
+            ? "$3 → 一時作業+6"
+            : q.type === "yt_tip"
             ? "$3 → シールド8"
             : q.type === "ad_popup"
               ? "$3 → 妨害"
@@ -390,6 +413,24 @@ function analyze(
   }
   return result;
 }
+/** Shared by battle construction and the inspector; includes actual capacity lag and v4 contention. */
+function naturalPeriod(p: Item, info: AnalysisWithCaps, capacity = Infinity) {
+  const d = P[p.type],
+    m = info.mods[p.id];
+  if (!d.cd || !m) return 0;
+  const lag =
+    Number.isFinite(capacity) && capacity > 0
+      ? 1 + Math.max(0, info.load / capacity - 1) * 0.6
+      : 1;
+  const period =
+    d.kind === "cache"
+      ? Math.ceil((d.cd / m.speed) * lag * 20) / 20
+      : (d.cd / m.speed) * lag;
+  return (
+    period *
+    (p.type === "am_oneclick" ? (info.oneClickContention?.slowdown ?? 1) : 1)
+  );
+}
 export type ExperimentalBattleOptions = BattleOptions & {
   experimentalRules?: ExperimentalRules;
   combatVersion?: CombatRulesVersion;
@@ -397,6 +438,8 @@ export type ExperimentalBattleOptions = BattleOptions & {
 class Battle {
   readonly experimentalRules: ExperimentalRules;
   readonly combatVersion: CombatRulesVersion;
+  readonly pressure: Record<SideName, ServerPressure> | null;
+  pendingPressure: {side: BattleSide; target: BattleSide; p: BattlePart}[] = [];
   readonly audience: Record<SideName, AudienceState> | null;
   ticks: number;
   elapsed: number;
@@ -441,6 +484,10 @@ class Battle {
       !EXPERIMENTAL_RULESETS.includes(this.experimentalRules)
     )
       throw new Error("Unknown experimental combat rules");
+    this.pressure = this.experimentalRules === "server-pressure-v1"
+      ? {player: new ServerPressure(), enemy: new ServerPressure()} : null;
+    if (this.pressure && [options.playerCapacity, options.enemyCapacity].some(capacity => !Number.isFinite(capacity) || (capacity ?? 0) <= 0))
+      throw new Error("Server-pressure requires finite positive capacities for both pages");
     this.audience = audienceExperiment(this.experimentalRules)
       ? { player: new AudienceState(), enemy: new AudienceState() }
       : null;
@@ -603,11 +650,7 @@ class Battle {
     side.parts = items.map((p) => {
       const d = P[p.type],
         m = info.mods[p.id],
-        period = d.cd
-          ? d.kind === "cache"
-            ? Math.ceil((d.cd / m.speed) * lag * 20) / 20
-            : (d.cd / m.speed) * lag
-          : 0;
+        period = p.type === "go_jobs" && !this.pressure ? 0 : naturalPeriod(p, info, capacity);
       return {
         ...p,
         period,
@@ -664,7 +707,42 @@ class Battle {
     const ids = side.info.near[p.id] || [];
     return side.parts.filter((q) => ids.includes(q.id));
   }
+  _refreshPressure(side: BattleSide, beforeInterval = false) {
+    if (!this.pressure) return;
+    const lag = 1 + 0.6 * Math.max(0, (side.load + this.pressure[side.name].work) / side.capacity - 1);
+    if (lag === side.lag) return;
+    const ratio = lag / side.lag;
+    for (const p of side.parts) {
+      p.period *= ratio;
+      p.remaining *= ratio;
+      const state = this.states[side.name].get(p.id)!;
+      if (p.type === "go_cache" && !state.cache)
+        state.cacheAt = this.ticks - (beforeInterval ? 1 : 0) + Math.max(0, state.cacheAt - this.ticks + (beforeInterval ? 1 : 0)) * ratio;
+    }
+    side.lag = lag;
+  }
+  _flushPressure() {
+    if (!this.pressure) return;
+    for (const {side, target, p} of this.pendingPressure) {
+      const blocked = this._captcha(target);
+      const accepted = blocked ? 0 : this.pressure[target.name].accept(SERVER_PRESSURE.work, this.ticks);
+      this.pressure[side.name].record(p.id, accepted);
+      if (blocked) target.adminState.captcha = (target.adminState.captcha || 0) + 1;
+      this.emit({kind: "server-pressure", side: side.name, target: target.name, id: p.id,
+        action: accepted ? "accepted" : "blocked", value: accepted,
+        rejected: SERVER_PRESSURE.work - accepted, queued: this.pressure[target.name].work,
+        ...(accepted < SERVER_PRESSURE.work ? {reason: blocked ? "captcha" as const : "cap" as const} : {})});
+    }
+    this.pendingPressure = [];
+    for (const side of [this.player, this.enemy]) this._refreshPressure(side);
+  }
   _tick() {
+    if (this.pressure) for (const side of [this.player, this.enemy]) {
+      const expired = this.pressure[side.name].expire(this.ticks);
+      if (expired) this.emit({kind: "server-pressure", side: side.name, target: side.name,
+        action: "expired", value: expired, rejected: 0, queued: this.pressure[side.name].work});
+      this._refreshPressure(side, true);
+    }
     for (const side of [this.player, this.enemy]) {
       const h = side.parts.find((p) => p.type === "go_history");
       if (h && this.history[side.name].expire(this.ticks))
@@ -744,6 +822,7 @@ class Battle {
         heal: 1,
         restore: 1,
         income: 2,
+        "server-pressure": 2.5,
         attack: 3,
         echo: 4,
       })[P[p.type].kind] ?? 5;
@@ -761,11 +840,12 @@ class Battle {
     const hits = this.pendingHits!;
     this.pendingHits = null;
     for (const apply of hits) apply();
+    this._flushPressure();
     if (this.ticks % 20 === 10)
       for (const s of [this.player, this.enemy])
         if (s.lag > 1 && s.hp > 0) {
           const n =
-            Math.round(Math.min(12, (s.load - s.capacity) * 0.45) * 10) / 10;
+            Math.round(Math.min(12, (s.load + (this.pressure?.[s.name].work ?? 0) - s.capacity) * 0.45) * 10) / 10;
           s.hp = Math.max(0, s.hp - n);
           s.lagLoss = (s.lagLoss || 0) + n;
           this.emit({ kind: "lag", side: s.name, value: n });
@@ -801,6 +881,16 @@ class Battle {
     const d = P[p.type],
       near = this._near(side, p);
     if (this.states[side.name].get(p.id)!.coveredUntil > this.ticks) return;
+    if (p.type === "go_jobs") {
+      if (!this.pressure || p.charge < SERVER_PRESSURE.cost) return;
+      p.charge -= SERVER_PRESSURE.cost;
+      p.fires++;
+      this.metrics[side.name].spent += SERVER_PRESSURE.cost;
+      this.emit({kind: "conversion", side: side.name, id: p.id, to: p.id, value: SERVER_PRESSURE.cost, action: "spend"});
+      this.emit({kind: "fire", side: side.name, id: p.id, type: p.type});
+      this.pendingPressure.push({side, target, p});
+      return;
+    }
     if (p.type === "ad_popup") {
       this._obstruct(side, target, p);
       return;
@@ -1285,13 +1375,13 @@ class Battle {
     side.income += value;
     p.earned += value;
     this.emit({ kind: "income", side: side.name, id: p.id, value });
-    const selected = selectRoute(side.parts, side.info.near, p);
+    const selected = selectRoute(side.parts, side.info.near, p, !!this.pressure);
     if (!selected) {
       this.metrics[side.name].unconverted += value;
       return;
     }
     const capacity =
-      selected.type === "yt_tip" || selected.type === "ad_popup"
+      selected.type === "yt_tip" || selected.type === "ad_popup" || selected.type === "go_jobs"
         ? 2 * CONTROL.cost
         : Infinity;
     const accepted = Math.max(0, Math.min(value, capacity - selected.charge));
@@ -1339,6 +1429,7 @@ class Battle {
 export { Battle };
 const api = {
   analyze,
+  naturalPeriod,
   Battle,
   groupNames,
   makeItem: C.makeItem,

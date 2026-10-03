@@ -363,7 +363,7 @@ function reroll(run: Run): TransactionFailure | { ok: true } {
 }
 function startBattle(
   run: Run,
-  options: { audienceExperiment?: boolean } = {},
+  options: { audienceExperiment?: boolean; serverPressureExperiment?: boolean; pressureCapacity?: 15 | 26 | 38 } = {},
 ): TransactionFailure | { ok: true; battle: InstanceType<typeof E.Battle> } {
   if (run.phase !== "build") return fail("今は対戦できません。");
   if (!run.owned.some((q) => C.placed(q) && D.PARTS[q.type].kind === "attack"))
@@ -371,13 +371,16 @@ function startBattle(
   const o = opponent(run);
   if ((run.admin || []).length > adminSlots(run))
     return fail("管理画面の設備がスロット数を超えています。");
+  const pressure = run.mode === "lab" && options.serverPressureExperiment === true;
+  const pressureCapacity = options.pressureCapacity === 15 ? 15 : options.pressureCapacity === 38 ? 38 : 26;
   const battle = new E.Battle(run.owned, enemyBoard(run), {
     playerHp: playerHp(run),
     enemyHp: o.hp,
     playerAdmin: run.admin || [],
     enemyAdmin: o.admin,
-    playerCapacity: run.mode === "lab" ? Infinity : capacity(run),
-    experimentalRules: run.mode === "lab" && options.audienceExperiment === true ? "audience-v1" : null,
+    playerCapacity: pressure ? pressureCapacity : run.mode === "lab" ? Infinity : capacity(run),
+    ...(pressure ? {enemyCapacity: pressureCapacity} : {}),
+    experimentalRules: pressure ? "server-pressure-v1" : run.mode === "lab" && options.audienceExperiment === true ? "audience-v1" : null,
   });
   run.phase = "battle";
   return { ok: true, battle };

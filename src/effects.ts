@@ -1,3 +1,4 @@
+import { applyJobFeedback, jobFeedback, applyPressureFeedback } from "./catalog/server-pressure-render.js";
 import {applyTransferFeedback,transferFeedback} from "./catalog/transfer-render.js";
 import D from "./data.js";
 import V from "./components.js";
@@ -587,6 +588,17 @@ class Effects {
     const el = side && id ? this.part(side, id) : null,
       src = side && id ? battle[side].parts.find((p) => p.id === id) : null,
       t = battle.elapsed;
+    if (event.kind === "server-pressure") {
+      const message = event.action === "expired"
+        ? `一時作業 −${event.value} · 回復（残り ${event.queued}）`
+        : event.action === "blocked"
+          ? `自動閲覧波を拒否（${event.reason === "captcha" ? "CAPTCHA" : "共有上限"}）· $3支払い済み`
+          : `自動閲覧波 · 一時作業 +${event.value} / 5秒${event.rejected ? ` · ${event.rejected}は上限で拒否` : ""} · $3支払い済み`;
+      this.pulse(el, event.action === "blocked" ? "is-pressure-blocked" : "is-pressure-accepted", 500);
+      this.log(event.target, `<em class="shd">${message}</em>`, t);
+      if (event.reason === "captcha") this.adminPulse(event.target, ["captcha"]);
+      return;
+    }
     if (event.kind === "history") {
       this.syncHistory(el, battle, event.side);
       // Normal fire/heal events own the button press and recovery log, once.
@@ -849,6 +861,7 @@ class Effects {
         "#" + side.name + "-frame",
       );
       if (!frame) continue;
+      if (battle.pressure) applyPressureFeedback(frame, side.load, side.capacity, battle.pressure[side.name].snapshot(battle.ticks));
       applyAudienceFeedback(frame, battle.audience?.[side.name].snapshot(), battle.elapsed);
       if (!this.traffic?.active) {
         const hp = Math.ceil(side.hp);
@@ -864,6 +877,7 @@ class Effects {
       for (const p of side.parts) {
         const el = this.part(side.name, p.id);
         if (!el) continue;
+        if (p.type === "go_jobs") applyJobFeedback(el, jobFeedback(!!battle.pressure, p.charge, battle.pressure?.[side.name].sources.get(p.id), p.remaining));
         if (p.type === "go_history") this.syncHistory(el, battle, side.name);
         if (p.type === "gh_transfer") this.syncTransfer(el, p.period, p.remaining);
         if (p.type === "sc_track") this.syncAudio(el, battle.elapsed, p.period ? parts[p.type].cd / p.period : 1);

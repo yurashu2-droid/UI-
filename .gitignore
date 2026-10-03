@@ -9,5 +9,6 @@ _backup/
 !.env.example
 .local/
 
-# Isolated verification dependency links
+# Local validation links and internal execution plans
 /node_modules
+/docs/superpowers/

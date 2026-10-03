@@ -1,6 +1,6 @@
 import D from "../data.js";
 import E, { type Battle } from "../engine.js";
-import { BATTLE_RULES_VERSION } from "../combat-rules.js";
+import { isSupportedCombatVersion } from "../combat-rules.js";
 import { arenaCatalogDefinition, fingerprintJson } from "./catalog.js";
 import type { OnlineMatch } from "./types.js";
 import type { BattleEvent } from "../types.js";
@@ -86,20 +86,11 @@ export function onlineEventText(event: BattleEvent, battle: Battle): string {
 }
 
 /** Verify actual simulation equivalence before animation; the server result is never replaced. */
-export async function verifyOnlineReplay(
-  match: OnlineMatch,
-): Promise<
-  | { ok: true }
-  | {
-      ok: false;
-      code: "RULES_MISMATCH" | "CATALOG_MISMATCH" | "REPLAY_MISMATCH";
-    }
-> {
-  if (match.combatVersion !== BATTLE_RULES_VERSION)
-    return { ok: false, code: "RULES_MISMATCH" };
-  if ((await fingerprintJson(arenaCatalogDefinition())) !== match.catalogHash)
-    return { ok: false, code: "CATALOG_MISMATCH" };
-  const battle = new E.Battle(match.player.items, match.opponent.items, {
+export function createOnlineReplayBattle(match: OnlineMatch) {
+  if (!isSupportedCombatVersion(match.combatVersion))
+    throw new Error("Unsupported replay combat version");
+  return new E.Battle(match.player.items, match.opponent.items, {
+    combatVersion: match.combatVersion,
     playerHp: match.player.hp,
     enemyHp: match.opponent.hp,
     playerAdmin: match.player.admin,
@@ -107,6 +98,19 @@ export async function verifyOnlineReplay(
     playerCapacity: match.player.capacity,
     enemyCapacity: match.opponent.capacity,
   });
+}
+export async function verifyOnlineReplay(match: OnlineMatch): Promise<
+  | { ok: true }
+  | {
+      ok: false;
+      code: "RULES_MISMATCH" | "CATALOG_MISMATCH" | "REPLAY_MISMATCH";
+    }
+> {
+  if (!isSupportedCombatVersion(match.combatVersion))
+    return { ok: false, code: "RULES_MISMATCH" };
+  if ((await fingerprintJson(arenaCatalogDefinition())) !== match.catalogHash)
+    return { ok: false, code: "CATALOG_MISMATCH" };
+  const battle = createOnlineReplayBattle(match);
   const events: BattleEvent[] = [];
   for (let tick = 0; tick < 1200 && !battle.result; tick++)
     events.push(...battle.step(0.05));

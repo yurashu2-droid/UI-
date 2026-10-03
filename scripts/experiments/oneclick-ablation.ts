@@ -6,6 +6,12 @@ export interface OneClickDials {
   naturalBase9?: boolean;
   period3?: boolean;
   restoreInputLoad?: boolean;
+  noIncomeGrowth?: boolean;
+  noConversionDamage?: boolean;
+  noNaturalDamage?: boolean;
+  sharedIncomeGrowth?: boolean;
+  /** Candidate intervention: one/two copies can remain exactly canonical. */
+  repeatCadence?: { freeCopies: number; extraWeight: number };
 }
 export class OneClickAblationBattle extends E.Battle {
   private converting: string | null = null;
@@ -15,7 +21,15 @@ export class OneClickAblationBattle extends E.Battle {
     options: ConstructorParameters<typeof E.Battle>[2],
     readonly dials: OneClickDials,
   ) {
-    super(a, b, options);
+    // Historical evidence is a v3 counterfactual; never double-apply the production v4 rule.
+    if (options?.combatVersion === "combat-v4")
+      throw new Error(
+        "Historical ablation probes require explicit v2/v3 or the default v3 baseline",
+      );
+    super(a, b, {
+      ...options,
+      combatVersion: options?.combatVersion ?? "combat-v3",
+    });
     for (const side of [this.player, this.enemy]) {
       const count = side.parts.filter((p) => p.type === "am_oneclick").length;
       if (dials.restoreInputLoad && count) {
@@ -35,6 +49,16 @@ export class OneClickAblationBattle extends E.Battle {
           p.period *= 3 / 2.4;
           p.remaining *= 3 / 2.4;
         }
+      if (dials.repeatCadence) {
+        const multiplier =
+          1 +
+          dials.repeatCadence.extraWeight *
+            Math.max(0, count - dials.repeatCadence.freeCopies);
+        for (const p of side.parts.filter((p) => p.type === "am_oneclick")) {
+          p.period *= multiplier;
+          p.remaining *= multiplier;
+        }
+      }
     }
   }
   override _convert(side: BattleSide, target: BattleSide, p: BattlePart) {
@@ -55,6 +79,7 @@ export class OneClickAblationBattle extends E.Battle {
     admin?: string,
   ) {
     if (this.dials.conversion15 && p.id === this.converting) value *= 15 / 20;
+    if (this.dials.noConversionDamage && p.id === this.converting) value = 0;
     super._hit(side, target, p, value, pierce, admin);
   }
   override _attack(
@@ -63,9 +88,16 @@ export class OneClickAblationBattle extends E.Battle {
     p: BattlePart,
     scale: number,
   ) {
-    if (this.dials.naturalBase9 && p.type === "am_oneclick") {
+    if (p.type === "am_oneclick") {
       const growth = Math.min(8, Math.floor(side.income / 5));
-      scale *= (9 + growth) / (12 + growth);
+      const effectiveGrowth = this.dials.noIncomeGrowth
+        ? 0
+        : this.dials.sharedIncomeGrowth
+          ? growth / side.parts.filter((q) => q.type === "am_oneclick").length
+          : growth;
+      scale *=
+        ((this.dials.naturalBase9 ? 9 : 12) + effectiveGrowth) / (12 + growth);
+      if (this.dials.noNaturalDamage) scale = 0;
     }
     super._attack(side, target, p, scale);
   }

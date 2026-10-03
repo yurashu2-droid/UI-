@@ -1,3 +1,4 @@
+import { pressureMeterMarkup } from "./catalog/server-pressure-render.js";
 import D from "./data.js";
 import C from "./document.js";
 import E from "./engine.js";
@@ -263,6 +264,7 @@ const KIND: Record<string, string> = {
   interference: "妨害",
   cache: "保護",
   restore: "復元",
+  "server-pressure": "一時負荷",
 };
 const GROUP_BONUS: Record<string, string> = {
   "button-group": "速度 +12%",
@@ -364,6 +366,7 @@ const NEEDS: Record<string, { t: (item: Item) => boolean; x: string }> = {
   },
 };
 function connectText(t: string) {
+  if (t === "go_jobs") return "文字・動画 → 隣の広告などの収益UI → 隣のジョブ一覧。収益の行き先は1つだけ。実験室の一時サーバー負荷ルールを選んでください。";
   const d = P[t];
   if (NEEDS[t]) return NEEDS[t].x;
   if (d.container)
@@ -386,6 +389,7 @@ function connectText(t: string) {
   );
 }
 function working(p: Item, info: EngineInfo) {
+  if (p.type === "go_jobs" && !labBattleController.value.startsWith("server-pressure")) return false;
   if (p.type === "yt_speed") return videoSpeedWorking(p, info);
   const n = NEEDS[p.type];
   if (!n) return true;
@@ -487,6 +491,9 @@ function hints(info: EngineInfo) {
 }
 
 /* ---------- Page frames & back office ---------- */
+function labPressureCapacity() {
+  return run.mode === "lab" && !storyActive && labBattleController.value.startsWith("server-pressure") ? (labBattleController.value === "server-pressure-tight" ? 15 : labBattleController.value === "server-pressure-spare" ? 38 : 26) : null;
+}
 function frameMarkup(
   side: SideName,
   theme: Theme,
@@ -494,7 +501,7 @@ function frameMarkup(
   address: string,
 ) {
   const o = appOpponent();
-  return `<div class="frame-caption ${side === "enemy" ? "enemy" : ""}"><div class="frame-name"><i style="background:${side === "enemy" ? "#e5484d" : "#2fb47c"}"></i><b>${esc(name)}</b><small>${side === "enemy" ? (o.round ? `ROUND ${o.round} の相手` : "相手のサイト") : "あなたのサイト"}</small></div><div class="frame-health"><div class="health-meta"><span>HP</span></div><div class="health-track"><b style="width:100%"></b><i style="width:100%"></i></div></div></div><div class="frame-viewport"><div class="browser-paper site-theme-${theme}"><div class="browser-tabs"><span class="traffic-lights"><i></i><i></i><i></i></span><div class="browser-tab"><i style="background:${(theme === "mixed" ? undefined : D.FACTIONS[theme].color) || "#8baa94"}"></i>${esc(name)} <span>×</span></div><span class="browser-plus">＋</span></div><div class="address-bar"><span class="address-controls">‹　›　↻</span><div class="address-field"><span>▧</span> ${esc(address)} <i>☆</i></div><span class="address-menu">⋮</span></div><header class="site-header">${V.header(theme, name)}</header><div class="page-wrap"><div class="page-body" id="${side}-body"></div>${side === "player" ? '<div class="editor-overlay" id="editor-overlay"></div><div class="tut-layer" id="tut-layer"></div>' : ""}</div><footer class="site-footer"><span>${esc(name)}　/　UI MASHUP</span><span>ローカル試作 · 実際のサービスには接続しません</span></footer>${adminDock(side, name)}</div></div>`;
+  return `<div class="frame-caption ${side === "enemy" ? "enemy" : ""}"><div class="frame-name"><i style="background:${side === "enemy" ? "#e5484d" : "#2fb47c"}"></i><b>${esc(name)}</b><small>${side === "enemy" ? (o.round ? `ROUND ${o.round} の相手` : "相手のサイト") : "あなたのサイト"}</small></div><div class="frame-health"><div class="health-meta"><span>HP</span></div><div class="health-track"><b style="width:100%"></b><i style="width:100%"></i></div></div></div>${labPressureCapacity() ? pressureMeterMarkup(C.analyze(side === "player" ? run.owned : appEnemyBoard()).load, labPressureCapacity()!) : ""}<div class="frame-viewport"><div class="browser-paper site-theme-${theme}"><div class="browser-tabs"><span class="traffic-lights"><i></i><i></i><i></i></span><div class="browser-tab"><i style="background:${(theme === "mixed" ? undefined : D.FACTIONS[theme].color) || "#8baa94"}"></i>${esc(name)} <span>×</span></div><span class="browser-plus">＋</span></div><div class="address-bar"><span class="address-controls">‹　›　↻</span><div class="address-field"><span>▧</span> ${esc(address)} <i>☆</i></div><span class="address-menu">⋮</span></div><header class="site-header">${V.header(theme, name)}</header><div class="page-wrap"><div class="page-body" id="${side}-body"></div>${side === "player" ? '<div class="editor-overlay" id="editor-overlay"></div><div class="tut-layer" id="tut-layer"></div>' : ""}</div><footer class="site-footer"><span>${esc(name)}　/　UI MASHUP</span><span>ローカル試作 · 実際のサービスには接続しません</span></footer>${adminDock(side, name)}</div></div>`;
 }
 const INVADER = [
   "..X.....X..",
@@ -597,7 +604,7 @@ function renderFrames() {
     decor: o.decor || [],
   });
   const pInfo = C.analyze(run.owned),
-    cap = R.capacity(run),
+    cap = labPressureCapacity() ?? R.capacity(run),
     slow = pInfo.load > cap,
     paper = $("#player-frame .browser-paper");
   paper.classList.toggle("is-slow", slow);
@@ -691,8 +698,8 @@ function fit() {
 
 /* ---------- Top bar ---------- */
 function loadMeter(info: DocumentInfo) {
-  const cap = R.capacity(run),
-    load = info.load,
+  const cap = labPressureCapacity() ?? R.capacity(run),
+    load = info.load + (battle?.pressure?.player.work ?? 0),
     over = load > cap,
     pct = Math.round(R.pageSpeed(load, cap) * 100);
   return `<div class="tb-load ${over ? "over" : ""}" title="ページの重さ（UIの合計）と、サーバーの処理能力。重さが処理能力を超えると、UIの発動が遅くなり、待たされた閲覧者が離れていく。"><small>重さ / 処理能力</small><div class="load-bar"><i style="width:${Math.min(100, (load / cap) * 100)}%"></i>${over ? `<em style="width:${Math.min(60, ((load - cap) / cap) * 100)}%"></em>` : ""}</div><b>${load} / ${cap}</b><span class="tb-speed">${over ? `表示速度 ${pct}%` : "表示速度 100%"}</span></div>`;
@@ -715,7 +722,7 @@ function renderTopbar() {
       `<div class="tb-money" title="資金：巡回先サイトからのUI移植と、サーバー契約に使う。対戦中の収益で増える。"><small>資金</small>$<b>${run.cash}</b></div>${loadMeter(info)}`;
   } else {
     $("#tb-run").innerHTML =
-      `<div class="tb-mode"><b>実験室</b><small>${labBattleController.value === "audience-v1" ? "実験：広告の離脱・登録の定着" : "すべてのUIを無料で試せます"}</small></div>`;
+      `<div class="tb-mode"><b>実験室</b><small>${labPressureCapacity() ? `一時サーバー負荷 · 双方CPU ${labPressureCapacity()} · HPとは別` : labBattleController.value === "audience-v1" ? "実験：広告の離脱・登録の定着" : "すべてのUIを無料で試せます"}</small></div>`;
     $("#tb-stats").innerHTML = loadMeter(info);
   }
   const b = $<HTMLButtonElement>("#battle-button");
@@ -1123,13 +1130,14 @@ function selectionCard(sel: Item[], info: EngineInfo) {
     groups = info.member[p.id] || [],
     parent = info.parents[p.id],
     ok = working(p, info);
+  const interval=battle?.player.parts.find(part=>part.id===p.id)?.period ?? E.naturalPeriod(p,info,battle?.player.capacity??(labPressureCapacity()??(run.mode==="lab"&&!storyActive?Infinity:R.capacity(run))));
   const notes = [...m.notes];
   if (parent)
     notes.unshift(
       `${P[info.board.find((q) => q.id === parent)!.type].name}の内側`,
     );
   return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2>${d.status === "experimental" ? '<p class="sel-warn">実験用UI · バランス調整中。本編・オンラインの入手候補には入りません。</p>' : ""}<p class="sel-desc">${esc(d.desc)}</p>
- <div class="sel-stats"><div><small>発動</small><b>${d.cd ? (d.cd / (m.speed || 1)).toFixed(1) + "秒ごと" : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
+ <div class="sel-stats">${p.type === "go_jobs" ? `<div><small>試験価格</small><b>$${d.price}</b></div><div><small>設置サイズ</small><b>${p.w}×${p.h}</b></div>` : ""}<div><small>自然発動</small><b>${d.cd ? (interval>0?interval.toFixed(2) + "秒ごと":"未配置") : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
  ${
    notes.length || groups.length
      ? `<ul class="sel-bonus">${groups.map((g) => `<li>≡ ${esc(E.groupNames[g.kind])}（${esc(GROUP_BONUS[g.kind] || "")}）</li>`).join("")}${notes
@@ -1198,7 +1206,7 @@ function opponentCard() {
 function renderSide() {
   const host = $("#inspector"),
     sel = editor.selected(),
-    info = E.analyze(run.owned);
+    info = E.analyze(run.owned, labPressureCapacity() ? "server-pressure-v1" : null);
   $<HTMLButtonElement>("#undo-button").disabled =
     !editor.history.length || !!battle;
   $<HTMLButtonElement>("#redo-button").disabled =
@@ -1214,7 +1222,7 @@ function renderSide() {
     const controlHost = document.createElement("section");
     controlHost.className = "side-sec lab-experiment-control";
     mountAudienceLabControl(controlHost, labBattleController,
-      () => ({ mode: run.mode, storyActive, battleActive: !!battle }), renderTopbar);
+      () => ({ mode: run.mode, storyActive, battleActive: !!battle }), () => { renderTopbar(); renderFrames(); renderSide(); });
     host.append(controlHost);
   }
   const o = appOpponent(),
@@ -2022,6 +2030,7 @@ function tick(now: number) {
     const events = battle.step(delta * speed);
     for (const ev of events) {
       fx.emit(ev, battle);
+      if (ev.kind === "server-pressure") renderTopbar();
       traffic.event(ev);
       battleSfx(ev as unknown as { kind: string; [k: string]: unknown }, battle);
     }
@@ -2338,7 +2347,7 @@ function publishLog(): Cer.PublishLine[] {
   ];
   for (const f of fusions.slice(0, 2))
     lines.push({ kind: "info", text: `統合候補: ${P[f.a.type].name} ＋ ${P[f.b.type].name} → ${P[f.recipe.into].name}（公開後）` });
-  if (lab) lines.push({ kind: "step", text: `負荷チェック ${info.load}`, result: "実験室: 無制限" });
+  if (lab) lines.push({ kind: "step", text: `基本CPU ${info.load}`, result: labPressureCapacity() ? `実験: 双方CPU ${labPressureCapacity()}` : "実験室: 無制限" });
   else if (info.load > cap)
     lines.push({ kind: "warn", text: `負荷 ${info.load} / 処理能力 ${cap} — 表示が遅くなり、閲覧者が離れます` });
   else lines.push({ kind: "step", text: `負荷チェック ${info.load} / ${cap}`, result: "ok" });

@@ -1,0 +1,12 @@
+.native-job-table{height:100%;box-sizing:border-box;background:#f8fafb;color:#243947;border:1px solid #b8c9d3;border-radius:5px;font:11px/1.3 ui-monospace,monospace;overflow:hidden}
+.native-job-table header,.native-job-table footer{display:flex;justify-content:space-between;gap:6px;padding:5px 8px;background:#e7eef2}
+.native-job-table header small{font-size:8px;align-self:center;color:#647988}
+.native-job-table table{width:100%;border-collapse:collapse;font-size:10px}
+.native-job-table th{text-align:left;width:48px;padding:3px 8px;font-weight:500}
+.native-job-table td{padding:3px 5px;border-bottom:1px solid #e6edf1}
+.native-job-table footer{padding:4px 8px;font-size:9px}
+.job-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#829baa;margin-right:4px}
+.server-pressure-meter{display:flex;flex-direction:column;gap:2px;padding:5px 12px;background:#15232b;color:#c8e9f1;font:11px/1.3 ui-monospace,monospace;border-bottom:1px solid #415c69}
+.server-pressure-meter b{font-weight:600}.pressure-expiry{font-size:10px;color:#9dbbc8}.pressure-track{height:3px;background:#34444b}.pressure-track i{display:block;width:0;height:100%;background:#eaa457;transition:width .15s}
+.node-go_jobs.is-pressure-accepted .native-job-table{outline:2px solid #dfab59}.node-go_jobs.is-pressure-blocked .native-job-table{outline:2px solid #649fa3}
+@media(prefers-reduced-motion:reduce){.pressure-track i{transition:none}}

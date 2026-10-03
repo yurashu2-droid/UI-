@@ -1,7 +1,7 @@
 import R from "./run.js";
 import type { Mode, Run } from "./types.js";
 
-export type LabAudienceVariant = "standard" | "audience-v1";
+export type LabAudienceVariant = "standard" | "audience-v1" | "server-pressure-v1" | "server-pressure-tight" | "server-pressure-spare";
 export interface LabControlContext {
   mode: Mode;
   storyActive: boolean;
@@ -15,13 +15,15 @@ export function createLabBattleController() {
     get value() { return selected; },
     choose(value: string, context: LabControlContext) {
       if (context.mode !== "lab" || context.storyActive || context.battleActive ||
-          (value !== "standard" && value !== "audience-v1")) return false;
-      selected = value;
+          !["standard", "audience-v1", "server-pressure-v1", "server-pressure-tight", "server-pressure-spare"].includes(value)) return false;
+      selected = value as LabAudienceVariant;
       return true;
     },
     reset() { selected = "standard"; },
     start(run: Run, storyActive: boolean) {
       return R.startBattle(run, {
+        serverPressureExperiment: run.mode === "lab" && !storyActive && selected.startsWith("server-pressure"),
+        pressureCapacity: selected === "server-pressure-tight" ? 15 : selected === "server-pressure-spare" ? 38 : 26,
         audienceExperiment: run.mode === "lab" && !storyActive && selected === "audience-v1",
       });
     },
@@ -48,6 +50,9 @@ export function mountAudienceLabControl(
   for (const [value, text] of [
     ["standard", "通常ルール"],
     ["audience-v1", "実験：広告の離脱・登録の定着"],
+    ["server-pressure-v1", "実験：一時サーバー負荷（双方CPU 26）"],
+    ["server-pressure-tight", "比較：容量ぎりぎり（双方CPU 15）"],
+    ["server-pressure-spare", "比較：余剰CPU（双方CPU 38）"],
   ]) {
     const option = doc.createElement("option");
     option.value = value;
@@ -57,7 +62,7 @@ export function mountAudienceLabControl(
   const description = doc.createElement("p");
   description.id = "lab-audience-description";
   description.className = "opp-tip";
-  description.textContent = "試験中の追加ルール。広告が集中すると閲覧者が離脱し、登録は収益の一部を定着に変えます。双方のページに適用。実験室を離れると通常に戻ります。";
+  description.textContent = "サーバー負荷では自動閲覧ジョブが収益$3を消費。CPUは双方26／比較15・38、HPとは別です。CAPTCHAと余剰CPUで対抗。実通信なし。試験中の追加ルール。広告が集中すると閲覧者が離脱し、登録は収益の一部を定着に変えます。双方のページに適用。実験室を離れると通常に戻ります。";
   const sync = () => {
     const context = getContext();
     select.value = controller.value;

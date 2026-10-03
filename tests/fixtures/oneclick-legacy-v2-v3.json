@@ -1,0 +1,5320 @@
+{
+  "note": "Immutable pre-cadence baseline. Preserve these explicit combat-v2/v3 results when introducing a new canonical rules version; do not regenerate to accommodate the new rule.",
+  "source": "Verified repeat-oneclick benchmark original and first selected challenger",
+  "engineSourceHash": "946073078bd8b62a56037bf5826ce77fab09f08f837e33a1c6961c7043b2f46f",
+  "caseCount": 16,
+  "cases": [
+    {
+      "key": "combat-v2/1-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "1bcf11a60a0daee7a8f179d195860151d1a8cf961c22dae5ddd67e7e817f7dce",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 8.85,
+          "income": 4
+        },
+        "ticks": 177,
+        "playerHp": 0,
+        "enemyHp": 517.2,
+        "eventsHash": "4f9118a54c35d9003e4d8c9218af1ebcbc122a4ff95662d2b66a04613f1f1723",
+        "metricsHash": "0e053c1096df7b28f4f3b61aed53791a75143637536ae9091e3fdde172183a52"
+      }
+    },
+    {
+      "key": "combat-v2/1-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "b7502fb7788cd331e7a0ad91543207e1423b18af0cd31b90769b65d3898cb95f",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 8.85,
+          "income": 0
+        },
+        "ticks": 177,
+        "playerHp": 517.2,
+        "enemyHp": 0,
+        "eventsHash": "9faa73288c6cc0c330ba874de20e4e133fe3d1c3c283763ef9d946df58b7374b",
+        "metricsHash": "518e85000b1f5a08e30410186dd7fa8a651bef0ab0de9ebb767472def043317a"
+      }
+    },
+    {
+      "key": "combat-v2/2-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "db07155f76d0d3e6cf2bc0634a60a2a8be8db269810c2c0d46eb510c89b7e8e8",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 8.85,
+          "income": 6
+        },
+        "ticks": 177,
+        "playerHp": 0,
+        "enemyHp": 426.6,
+        "eventsHash": "3d2f4d94828e82d755bcc5438a277fd9b06c3efaf11bb77cef80656ffabf4736",
+        "metricsHash": "8df7ef62808602d83a4f7e857e6e127f3ae0685d6b97baa8690c03bf061b1054"
+      }
+    },
+    {
+      "key": "combat-v2/2-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "6186a7ee7d6a7596b3547ffd79b18f1faa0fc10fba20a4c4a8fcf2f8600f9df0",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 8.85,
+          "income": 0
+        },
+        "ticks": 177,
+        "playerHp": 426.6,
+        "enemyHp": 0,
+        "eventsHash": "7e6036f519f42f18c78f03ae5ec25f2cc95f63b857976080ea6576e9c99c9a5b",
+        "metricsHash": "8419c42a8bf55c6a7d794c06e7915b5f836865648ecfb7fc4c00db9ae73c9ef5"
+      }
+    },
+    {
+      "key": "combat-v2/3-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "b2c13263e9e7e67c2005348371dd284b4ab5aed1d78c532d09e8f3b98164621d",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 8.85,
+          "income": 8
+        },
+        "ticks": 177,
+        "playerHp": 0,
+        "enemyHp": 354.6000000000001,
+        "eventsHash": "ae804d837235d95d25ff3d0db474aacd1b3da50fa69b43d58bd173f33bb6c040",
+        "metricsHash": "bfabaee4b4d039e0b4010f3ae0e8f929a854eafec33a84bf914da379f70ce2bc"
+      }
+    },
+    {
+      "key": "combat-v2/3-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "57b49333fe46f163f0e08d8821b93bbf0e97e508d4d8ced0e8a2b0c4fe3a3171",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 8.85,
+          "income": 0
+        },
+        "ticks": 177,
+        "playerHp": 354.6000000000001,
+        "enemyHp": 0,
+        "eventsHash": "f3215a93f59bbd3824d30c51244bad032d25999017ed913319c753265726e614",
+        "metricsHash": "f9ab01dde641f089f769717a2d463bd9c4b23d7d4b3e930419fcb3eb23982793"
+      }
+    },
+    {
+      "key": "combat-v2/4-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "am_oneclick",
+            "x": 488,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a8",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "f23216fb912288c637110208fbfa33b3818d60202c4f60b4e04642303fba3ebc",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 8.85,
+          "income": 13
+        },
+        "ticks": 177,
+        "playerHp": 0,
+        "enemyHp": 79.60000000000014,
+        "eventsHash": "b12b94944685e67889c9679b03c3cc2cbddf48c1d6d717c4b551ea1e2c9ab62f",
+        "metricsHash": "8014912d3aba3ad92108924c83793ddd67fa77e668b541bcec195c5a7b862c68"
+      }
+    },
+    {
+      "key": "combat-v2/4-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "am_oneclick",
+            "x": 488,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a8",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v2"
+        }
+      },
+      "inputHash": "e37676730f31dace3fc7b5c8e7086acc5ed21a53a9165d92da153fd0ac7e329c",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 8.85,
+          "income": 0
+        },
+        "ticks": 177,
+        "playerHp": 79.60000000000014,
+        "enemyHp": 0,
+        "eventsHash": "b21856a12c4dc5c1bc7ede3407f99e2fd68b63433d69f5514d8ec0d110e571c5",
+        "metricsHash": "f805edaf22d324a8232200c8c2656ae169483dccfb6497d79af7757fc444771c"
+      }
+    },
+    {
+      "key": "combat-v3/1-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "24bda9d3471c4ff8a93556d51bd3693f38da54e4bc5b95e19892f61e3c169918",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 15.05,
+          "income": 8
+        },
+        "ticks": 301,
+        "playerHp": 0,
+        "enemyHp": 444.90000000000003,
+        "eventsHash": "5e61a43da35b4b9cdffc77a782982f52ea258b5a8746be8190896ce59621c438",
+        "metricsHash": "5f9aaa43774cb59b01769ccc78e214e448b2f11c6111ab48a3bd18a20d965bf4"
+      }
+    },
+    {
+      "key": "combat-v3/1-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "2a0e5dde07fd9f78f7e37cad8998c617f49b0135d1794b62cfacd366eeced800",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 15.05,
+          "income": 0
+        },
+        "ticks": 301,
+        "playerHp": 444.90000000000003,
+        "enemyHp": 0,
+        "eventsHash": "9e4fdfa44084903c14f29a8fd08a91fadbbac5e4c907661354bc94aeaf446e80",
+        "metricsHash": "52aaaded271c0abcd80a8e61ceb2a8f2fee94595353e209be42d8d750acd4ac5"
+      }
+    },
+    {
+      "key": "combat-v3/2-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "7b28e625cb0de176edee286038b9ad6c20b7e67d4d673e71073decc74319beb3",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 15.05,
+          "income": 12
+        },
+        "ticks": 301,
+        "playerHp": 0,
+        "enemyHp": 273.80000000000007,
+        "eventsHash": "90b5de49bc379eb9e27cac2630cf53c174fa891ae663af0529ab101339aea6ed",
+        "metricsHash": "e3eb8e6225f909e1e277252e04ebb19cda78c046a9a4737581fe8074a5e97909"
+      }
+    },
+    {
+      "key": "combat-v3/2-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "34fb28bf86f90af0df67d94ff0cf72e877cf97228226e30ef81880050cc8498d",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 15.05,
+          "income": 0
+        },
+        "ticks": 301,
+        "playerHp": 273.80000000000007,
+        "enemyHp": 0,
+        "eventsHash": "23e8c17bcf66a1907f0c2a87c6232178a95430e9fe8c8ce841d389f1be7f32bb",
+        "metricsHash": "659e22de66d5aee5cc70b04bc47a75ed0baac61033f132bcc948a77556c352d9"
+      }
+    },
+    {
+      "key": "combat-v3/3-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "eef0a9185a44c45beb7f0348f3c692703d2fbca9c3c12d9f3d805c1626307098",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 15.05,
+          "income": 14
+        },
+        "ticks": 301,
+        "playerHp": 0,
+        "enemyHp": 138.2000000000002,
+        "eventsHash": "4a0b32234673ea22e10caceca9e2eca1ede2f1fdf0a26f0da2268dfbcc6e3eb3",
+        "metricsHash": "a88f1bb67a6a88ef293a7fb7119cace0d49e8946d9b63725d20aa4bad97fdd2b"
+      }
+    },
+    {
+      "key": "combat-v3/3-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "ce9173717434f714e4554283f4341b786f9a731119b16eb57b38e3fecd63efc2",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 15.05,
+          "income": 0
+        },
+        "ticks": 301,
+        "playerHp": 138.2000000000002,
+        "enemyHp": 0,
+        "eventsHash": "b7f0f604837450ce7fdfd0db631459adea913e26619dbf274387909a47442101",
+        "metricsHash": "24ff8cffbb9ea45dc6c32e1b4506d17c436fd3cf136518347f5bc37fa8e37540"
+      }
+    },
+    {
+      "key": "combat-v3/4-copies/forward",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "am_oneclick",
+            "x": 488,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a8",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "f0839be8971b33d3563f67694ec92981b6c5a12a535dfde59b3e6cf9bfec9021",
+      "expected": {
+        "result": {
+          "winner": "player",
+          "time": 12.15,
+          "income": 20
+        },
+        "ticks": 243,
+        "playerHp": 165,
+        "enemyHp": 0,
+        "eventsHash": "e45a18977d99c7ef5c9eccc6f14c3437c9e0dd47005f91f9af0ec929e1f719c0",
+        "metricsHash": "b4f818c294ccdcc9d7bc52cc315b910e462d053c64efee5d35f421bb6b09ed35"
+      }
+    },
+    {
+      "key": "combat-v3/4-copies/reverse",
+      "input": {
+        "playerBoard": [
+          {
+            "id": "b0",
+            "type": "ab_link",
+            "x": 16,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b1",
+            "type": "ab_link",
+            "x": 112,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b2",
+            "type": "ab_link",
+            "x": 16,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b3",
+            "type": "ab_link",
+            "x": 112,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b4",
+            "type": "gov_font",
+            "x": 16,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b5",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b6",
+            "type": "ab_hr",
+            "x": 16,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b7",
+            "type": "ab_link",
+            "x": 320,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b8",
+            "type": "ab_link",
+            "x": 416,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b9",
+            "type": "ab_link",
+            "x": 320,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b10",
+            "type": "ab_link",
+            "x": 416,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b11",
+            "type": "gov_font",
+            "x": 320,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b12",
+            "type": "ab_hr",
+            "x": 320,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b13",
+            "type": "ab_link",
+            "x": 624,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b14",
+            "type": "ab_link",
+            "x": 720,
+            "y": 24,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b15",
+            "type": "ab_link",
+            "x": 624,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b16",
+            "type": "ab_link",
+            "x": 720,
+            "y": 100,
+            "w": 96,
+            "h": 24,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b17",
+            "type": "gov_font",
+            "x": 624,
+            "y": 56,
+            "w": 208,
+            "h": 36,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b18",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 132,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b19",
+            "type": "ab_hr",
+            "x": 624,
+            "y": 148,
+            "w": 192,
+            "h": 8,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b20",
+            "type": "ab_hr",
+            "x": 464,
+            "y": 156,
+            "w": 160,
+            "h": 32,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "b21",
+            "type": "ab_heading",
+            "x": 0,
+            "y": 248,
+            "w": 736,
+            "h": 56,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "enemyBoard": [
+          {
+            "id": "a0",
+            "type": "am_product",
+            "x": 24,
+            "y": 24,
+            "w": 704,
+            "h": 300,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a1",
+            "type": "am_quantity",
+            "x": 24,
+            "y": 324,
+            "w": 80,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a2",
+            "type": "am_prime",
+            "x": 616,
+            "y": 324,
+            "w": 112,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a3",
+            "type": "ab_counter",
+            "x": 24,
+            "y": 372,
+            "w": 704,
+            "h": 26,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a4",
+            "type": "am_oneclick",
+            "x": 104,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a5",
+            "type": "am_oneclick",
+            "x": 232,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a6",
+            "type": "am_oneclick",
+            "x": 360,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a7",
+            "type": "am_oneclick",
+            "x": 488,
+            "y": 324,
+            "w": 128,
+            "h": 40,
+            "shape": "source",
+            "label": ""
+          },
+          {
+            "id": "a8",
+            "type": "gov_form",
+            "x": 24,
+            "y": 398,
+            "w": 640,
+            "h": 200,
+            "shape": "source",
+            "label": ""
+          }
+        ],
+        "options": {
+          "playerHp": 440,
+          "enemyHp": 440,
+          "playerCapacity": 35,
+          "enemyCapacity": 35,
+          "playerAdmin": [
+            "server",
+            "backup"
+          ],
+          "enemyAdmin": [
+            "server",
+            "backup"
+          ],
+          "combatVersion": "combat-v3"
+        }
+      },
+      "inputHash": "00157ca93b7550ea8cf3dea45dd0ac40c5a6bd0d83456a242dce66a0e1f801c9",
+      "expected": {
+        "result": {
+          "winner": "enemy",
+          "time": 12.15,
+          "income": 0
+        },
+        "ticks": 243,
+        "playerHp": 0,
+        "enemyHp": 165,
+        "eventsHash": "4fa3a6a47f1f8146bb6168f703b1630e0d95f883487d63618f826f2e5f85a05b",
+        "metricsHash": "41c5f94d208d21e752015c7eec217a342bb2334a185800203477f3b4aa56bf60"
+      }
+    }
+  ]
+}

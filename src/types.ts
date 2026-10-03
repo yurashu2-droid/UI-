@@ -2,7 +2,7 @@ export type Mode = "lab" | "campaign";
 export type Phase = "build" | "battle" | "reward" | "complete" | "gameover";
 export type SideName = "player" | "enemy";
 export type Winner = SideName | "draw";
-export type Theme = "mixed" | "youtube" | "amazon" | "google" | "retro" | "gov" | "twitter" | "x" | "wiki" | "forge" | "nico" | "reddit" | "portal" | "storefront" | "webarchive" | "livechannel" | "documents" | "audio" | "qanda" | "feedreader" | "marketplace" | "rankednews" | "mapsearch" | "personalweb" | "musicshop";
+export type Theme = "mixed" | "youtube" | "amazon" | "google" | "retro" | "gov" | "twitter" | "x" | "wiki" | "forge" | "nico" | "reddit" | "portal" | "storefront" | "webarchive" | "livechannel" | "documents" | "audio" | "qanda" | "feedreader" | "marketplace" | "rankednews" | "mapsearch" | "personalweb" | "musicshop" | "serviceform";
 export type Faction = Exclude<Theme, "mixed">;
 
 export interface Item {
@@ -178,6 +178,7 @@ export interface BattleResult {
   income: number;
 }
 export type BattleEvent =
+  | { kind: "server-pressure"; time: number; side: SideName; target: SideName; id?: string; action: "accepted" | "blocked" | "expired"; value: number; rejected: number; queued: number; reason?: "captcha" | "cap" }
   | import("./combat-rules.js").CombatEvent
   | {
       kind: "fire";

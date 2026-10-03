@@ -7,7 +7,7 @@ import C from "../src/document.js";
 import { BATTLE_RULES_VERSION } from "../src/combat-rules.js";
 const hash = (x) =>
   createHash("sha256").update(JSON.stringify(x)).digest("hex");
-test("new battles default to combat-v3 navigation while explicit combat-v2 remains unchanged", () => {
+test("new combat-v4 battles inherit navigation while explicit combat-v2 remains unchanged", () => {
   const items = [0, 1, 2].map((i) =>
     C.makeItem("ab_link", "p" + i, 24, 24 + i * 80, 192, 32),
   );
@@ -17,8 +17,8 @@ test("new battles default to combat-v3 navigation while explicit combat-v2 remai
     enemyHp: 1000,
     combatVersion: "combat-v2",
   });
-  assert.equal(BATTLE_RULES_VERSION, "combat-v3");
-  assert.equal(current.combatVersion, "combat-v3");
+  assert.equal(BATTLE_RULES_VERSION, "combat-v4");
+  assert.equal(current.combatVersion, "combat-v4");
   assert.equal(legacy.combatVersion, "combat-v2");
   current._activate(current.player, current.enemy, current.player.parts[2]);
   legacy._activate(legacy.player, legacy.enemy, legacy.player.parts[2]);

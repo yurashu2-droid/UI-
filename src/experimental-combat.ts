@@ -1,5 +1,6 @@
 /** Opt-in laboratory rule sets. Never selected by campaign or authoritative online play. */
 export const EXPERIMENTAL_RULESETS = [
+  "server-pressure-v1",
   "navigation-v1",
   "audience-v1",
   "navigation-audience-v1",

@@ -3,7 +3,7 @@ import C from "../document.js";
 import R from "../run.js";
 import V from "../components.js";
 import E from "../engine.js";
-import { BATTLE_RULES_VERSION } from "../combat-rules.js";
+import { isSupportedCombatVersion } from "../combat-rules.js";
 import { createOnlineClient, OnlineError } from "./client.js";
 import {
   placeItem,
@@ -16,6 +16,7 @@ import {
   applyOnlineReplayFeedback,
   onlineEventText,
   verifyOnlineReplay,
+  createOnlineReplayBattle,
 } from "./replay.js";
 import type { OnlineView } from "./types.js";
 import "../styles/online.css";
@@ -195,7 +196,7 @@ export function mountOnlinePanel(
        ${build ? `<h2>公開して対戦</h2><p>登録されるのは標準UIと配置・性能だけです。URLの画像・取得元・元サイトの文言は送信されません。</p><button class="arena-primary" data-arena="match" ${busy ? "disabled" : ""}>ビルドを公開して対戦</button><button data-arena="publish" ${busy ? "disabled" : ""}>ビルドだけ公開</button><div class="arena-undo"><button data-arena="undo" ${busy || !undo.length ? "disabled" : ""}>元に戻す</button><button data-arena="redo" ${busy || !redo.length ? "disabled" : ""}>やり直す</button></div>` : ""}
        ${s.phase === "battle" && match ? `<h2>${match.winner === "player" ? "勝利" : match.winner === "enemy" ? "敗北" : "引き分け"}</h2><p>基本 $${match.summary.base} ＋ 勝利 $${match.summary.bonus} ＋ 収益 $${match.summary.income}</p><button class="arena-primary" data-arena="settle" ${busy ? "disabled" : ""}>結果を受け取る $${match.summary.total}</button>` : ""}
        ${s.phase === "reward" && s.pending ? `<h2>報酬を一つ選ぶ</h2>${s.pending.loot.map((t) => `<button class="arena-reward" data-arena="claim" data-type="${esc(t)}" ${busy ? "disabled" : ""}>${esc(t.startsWith("admin:") ? (D.ADMIN[t.slice(6)]?.name ?? t) : (D.PARTS[t]?.name ?? t))}</button>`).join("")}<button data-arena="skip" ${busy ? "disabled" : ""}>選ばずに次へ</button>` : ""}
-       ${s.phase === "complete" || s.phase === "gameover" || (view!.online.requiresNewRun && !view!.online.pendingMatchId) ? `<h2>${view!.online.requiresNewRun ? "ルールが更新されました" : s.phase === "complete" ? "ラン完了" : "残機がなくなりました"}</h2><p>${s.wins}勝 / ${s.history.length}戦。保存ビルドは他のプレイヤーの対戦候補に残ります。</p><button class="arena-primary" data-arena="new-run" ${busy ? "disabled" : ""}>新しいオンラインラン</button>` : ""}
+       ${s.phase === "complete" || s.phase === "gameover" || (view!.online.requiresNewRun && !view!.online.pendingMatchId) ? `<h2>${view!.online.requiresNewRun ? "ルールが更新されました" : s.phase === "complete" ? "ラン完了" : "残機がなくなりました"}</h2><p>${s.wins}勝 / ${s.history.length}戦。${view!.online.requiresNewRun ? "以前のルールの記録は引き続き閲覧できます。現在の対戦候補に参加するには、新しいランを始めてください。" : "保存ビルドは他のプレイヤーの対戦候補に残ります。"}</p><button class="arena-primary" data-arena="new-run" ${busy ? "disabled" : ""}>新しいオンラインラン</button>` : ""}
        <h2>対戦履歴</h2><ol class="arena-history">${s.history.map((h) => `<li>R${h.round} ${h.winner === "player" ? "勝利" : h.winner === "draw" ? "引分" : "敗北"} <span>+$${h.total}</span></li>`).join("") || "<li>まだ対戦していません</li>"}</ol></aside>
       </div>`
       }`;
@@ -561,12 +562,9 @@ export function mountOnlinePanel(
   );
   async function startReplay() {
     if (!view?.match) return;
-    if (
-      view.match.combatVersion !== BATTLE_RULES_VERSION ||
-      view.online.requiresNewRun
-    ) {
+    if (!isSupportedCombatVersion(view.match.combatVersion)) {
       message =
-        "この対戦は以前のルールです。確定した結果と報酬は復元できますが、この版では再生しません。";
+        "この対戦のルール版には対応していません。確定した結果と報酬は復元できますが、再生はできません。";
       error = true;
       render();
       return;
@@ -595,16 +593,9 @@ export function mountOnlinePanel(
       render();
       return;
     }
-    message = "保存された記録と一致するリプレイです。";
+    message = `保存された記録と一致するリプレイです（${m.combatVersion}）。`;
     render();
-    replay = new E.Battle(m.player.items, m.opponent.items, {
-      playerHp: m.player.hp,
-      enemyHp: m.opponent.hp,
-      playerAdmin: m.player.admin,
-      enemyAdmin: m.opponent.admin,
-      playerCapacity: m.player.capacity,
-      enemyCapacity: m.opponent.capacity,
-    });
+    replay = createOnlineReplayBattle(m);
     paused = false;
     replayAccumulator = 0;
     replayLog = [];

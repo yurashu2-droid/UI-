@@ -122,3 +122,30 @@ test("onestop pursuit expands six real recipes and never buys a zero-price fused
     assert.ok(row.rounds.every((r) => r.targetTotal === 16));
   }
 });
+test("native-link and repeated-oneclick pursuits keep real target inputs and legal assembly slots", () => {
+  for (const [policy, id, total] of [
+    ["native-links", "paid_native_links", 22],
+    ["oneclick-battery", "paid_oneclick_battery", 13],
+  ]) {
+    const t = P.targetFor(policy);
+    assert.equal(t.id, id);
+    const r = P.simulateTargetPath(103, policy, {
+      preferredAdmins: ["server", "backup"],
+    });
+    assert.equal(r.blocked, null);
+    assert.ok(r.rounds.every((s) => s.legal && s.targetTotal === total));
+    assert.equal(
+      r.cash,
+      10 + r.rewards - r.partSpend - r.serverSpend - r.rerollSpend,
+    );
+    assert.ok(
+      r.transactions
+        .filter((t) => t.kind === "buy")
+        .every((t) => !D.PARTS[t.type]?.fused),
+    );
+  }
+});
+test('native link policy actually purchases its font support without requiring an unrelated PDF',()=>{
+  const rows=Array.from({length:10},(_,i)=>P.simulateTargetPath(101+i,'native-links'));
+  assert.ok(rows.some(r=>r.transactions.some(t=>t.type==='gov_font')));
+});
