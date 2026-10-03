@@ -36,6 +36,8 @@ import { incomeRouteGuidance, renderIncomeRouteGuidance } from "./income-route-g
 import { containmentGuidance, renderContainmentGuidance } from "./containment-guidance.js";
 import { sidechannelPlacementGuide, renderSidechannelPlacementGuide, type SidechannelPlacement } from "./sidechannel-placement-guide.js";
 import { redditSidebarPlacementGuide, redditSidebarPlacementIntent, renderRedditSidebarPlacementGuide, type RedditSidebarPlacement } from "./reddit-sidebar-placement-guide.js";
+import { cpuConditionsGuidance, renderCpuConditionsGuidance } from "./cpu-conditions-guidance.js";
+import { opponentHpGuidance } from "./opponent-hp-guidance.js";
 import { battleIncomeResult, renderBattleIncomeResult, type BattleIncomeResultView } from "./battle-income-result.js";
 import { getHelpContent, renderHelpBody } from "./help-content.js";
 import { createDeferredMount } from "./feature-loader.js";
@@ -776,20 +778,7 @@ function renderFrames() {
     interactive: preview && !battle,
     decor: o.decor || [],
   });
-  const pInfo = C.analyze(run.owned),
-    cap = labPressureCapacity() ?? R.capacity(run),
-    slow = pInfo.load > cap,
-    paper = $("#player-frame .browser-paper");
-  paper.classList.toggle("is-slow", slow);
-  if (slow) {
-    const pct = Math.round(R.pageSpeed(pInfo.load, cap) * 100);
-    paper
-      .querySelector(".page-wrap")!
-      .insertAdjacentHTML(
-        "beforeend",
-        `<div class="slow-banner">ページが重い（重さ ${pInfo.load} ／ 処理能力 ${cap}）— 表示速度 ${pct}%。UIの発動が遅くなり、待たされた閲覧者が離れていきます。</div>`,
-      );
-  }
+  refreshCpuFrameConditions();
   $("#player-frame").hidden = !battle && view === "enemy";
   $("#page-window").hidden = !battle && view === "enemy";
   $("#enemy-frame").hidden = !battle && view !== "enemy";
@@ -870,12 +859,28 @@ function fit() {
 }
 
 /* ---------- Top bar ---------- */
+function currentCpuConditions(info: Pick<DocumentInfo, "load"> = C.analyze(run.owned)) {
+  return cpuConditionsGuidance(info, {
+    mode: run.mode, storyActive, runCapacity: R.capacity(run),
+    pressureCapacity: labPressureCapacity(), battle,
+  });
+}
+function refreshCpuFrameConditions() {
+  const paper = document.querySelector<HTMLElement>("#player-frame .browser-paper");
+  if (!paper) return;
+  const cpu = currentCpuConditions(), slow = cpu.overloaded === true;
+  paper.classList.toggle("is-slow", slow);
+  let banner = paper.querySelector<HTMLElement>(".slow-banner");
+  if (!slow) { banner?.remove(); return; }
+  const page = paper.querySelector<HTMLElement>(".page-wrap");
+  if (!page) return;
+  if (!banner) { banner = document.createElement("div"); banner.className = "slow-banner"; page.append(banner); }
+  const work = cpu.transientLoad ? `（基本${cpu.baseLoad}＋一時${cpu.transientLoad}）` : "";
+  const speedText = cpu.cpuSpeed === null ? "CPU速度は確認できません" : `CPU速度 約${Math.round(cpu.cpuSpeed * 100)}%`;
+  banner.textContent = `CPU過負荷：${cpu.load}${work} ／ 容量${cpu.capacity}。${speedText}。UIの発動が遅くなり、HPの離脱損失が生じます。部品ごとの速度補正とは別です。`;
+}
 function loadMeter(info: DocumentInfo) {
-  const cap = labPressureCapacity() ?? R.capacity(run),
-    load = info.load + (battle?.pressure?.player.work ?? 0),
-    over = load > cap,
-    pct = Math.round(R.pageSpeed(load, cap) * 100);
-  return `<div class="tb-load ${over ? "over" : ""}" title="ページの重さ（UIの合計）と、サーバーの処理能力。重さが処理能力を超えると、UIの発動が遅くなり、待たされた閲覧者が離れていく。"><small>重さ / 処理能力</small><div class="load-bar"><i style="width:${Math.min(100, (load / cap) * 100)}%"></i>${over ? `<em style="width:${Math.min(60, ((load - cap) / cap) * 100)}%"></em>` : ""}</div><b>${load} / ${cap}</b><span class="tb-speed">${over ? `表示速度 ${pct}%` : "表示速度 100%"}</span></div>`;
+  return renderCpuConditionsGuidance(currentCpuConditions(info));
 }
 function renderTopbar() {
   const info = C.analyze(run.owned);
@@ -1305,13 +1310,14 @@ function selectionCard(sel: Item[], info: EngineInfo) {
     ok = working(p, info),
     instantSupport = instantSearchSupport(p, info);
   const interval=battle?.player.parts.find(part=>part.id===p.id)?.period ?? E.naturalPeriod(p,info,battle?.player.capacity??(labPressureCapacity()??(run.mode==="lab"&&!storyActive?Infinity:R.capacity(run))));
+  const inactiveJob = p.type === "go_jobs" && (battle ? battle.experimentalRules !== "server-pressure-v1" : labPressureCapacity() === null);
   const notes = [...m.notes];
   const placementGuide = run.mode === "lab" && !storyActive && run.page.templateId === "site_slack"
     ? renderSidechannelPlacementGuide(sidechannelPlacementGuide(run, [...editor.selection], { editable: sidechannelPlacementEditingAllowed() }))
     : run.mode === "lab" && !storyActive && run.page.templateId === "lesson_reddit_sidebar"
       ? renderRedditSidebarPlacementGuide(redditSidebarPlacementGuide(run, [...editor.selection], { editable: redditSidebarPlacementEditingAllowed() })) : "";
   return `<section class="side-sec sel-card"><div class="sel-kicker"><i style="background:${f.color}"></i>${esc(f.name)}<span class="sc-kind kind-${d.kind}">${KIND[d.kind]}</span></div><h2>${esc(d.name)}</h2>${d.status === "experimental" ? '<p class="sel-warn">実験用UI · バランス調整中。本編・オンラインの入手候補には入りません。</p>' : ""}<p class="sel-desc">${esc(d.desc)}</p>
- <div class="sel-stats">${p.type === "go_jobs" ? `<div><small>試験価格</small><b>$${d.price}</b></div><div><small>設置サイズ</small><b>${p.w}×${p.h}</b></div>` : ""}<div><small>自然発動</small><b>${d.cd ? (interval>0?interval.toFixed(2) + "秒ごと":"未配置") : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
+ <div class="sel-stats">${p.type === "go_jobs" ? `<div><small>試験価格</small><b>$${d.price}</b></div><div><small>設置サイズ</small><b>${p.w}×${p.h}</b></div>` : ""}<div><small>自然発動</small><b>${inactiveJob ? "実験ルールで有効" : d.cd ? (interval>0?interval.toFixed(2) + "秒ごと":"未配置") : "連動"}</b></div><div><small>威力</small><b>×${(m.power || 1).toFixed(2)}</b></div><div><small>重さ</small><b>${d.load}</b></div></div>
  ${
    notes.length || groups.length
      ? `<ul class="sel-bonus">${groups.map((g) => `<li>≡ ${esc(E.groupNames[g.kind])}（${esc(GROUP_BONUS[g.kind] || "")}）</li>`).join("")}${notes
@@ -1381,8 +1387,8 @@ function synergyPanel(info: EngineInfo) {
 }
 function opponentCard() {
   const o = appOpponent(),
-    adm = o.admin.map((a) => D.ADMIN[a].name);
-  return `<section class="side-sec opp"><h3>${o.round ? `次の相手 <small>ROUND ${o.round}</small>` : "対戦相手"}</h3><div id="enemy-thumbnail" class="enemy-thumbnail" role="button" tabindex="0" aria-label="相手のサイトを大きく見る"></div><b class="opp-name">${esc(o.pageName)}</b><div class="opp-meta"><span>UI ${o.size}個</span><span>閲覧者の粘り ${o.hp}</span>${adm.length ? `<span>管理画面：${esc(adm.join("・"))}</span>` : ""}</div><p class="opp-tip">${esc(o.tip)}</p>${run.mode === "lab" ? `<select id="enemy-select" class="select-input">${enemyOptions(o.index)}</select><button id="open-builds" class="side-btn">構成例図鑑・相性表</button>` : ""}<button id="view-enemy" class="side-btn">相手のサイトをよく見る</button></section>`;
+    adm = o.admin.map((a) => D.ADMIN[a].name), hp = opponentHpGuidance(o);
+  return `<section class="side-sec opp"><h3>${o.round ? `次の相手 <small>ROUND ${o.round}</small>` : "対戦相手"}</h3><div id="enemy-thumbnail" class="enemy-thumbnail" role="button" tabindex="0" aria-label="相手のサイトを大きく見る"></div><b class="opp-name">${esc(o.pageName)}</b><div class="opp-meta"><span>UI ${o.size}個</span><span title="${esc(hp.explanation)}">${esc(hp.startingLabel)} ${esc(hp.startingText)}</span><span>${esc(hp.baseLabel)} ${esc(hp.baseText)}</span>${adm.length ? `<span>管理画面：${esc(adm.join("・"))}</span>` : ""}</div><p class="opp-tip">${esc(o.tip)}</p>${run.mode === "lab" ? `<select id="enemy-select" class="select-input">${enemyOptions(o.index)}</select><button id="open-builds" class="side-btn">構成例図鑑・相性表</button>` : ""}<button id="view-enemy" class="side-btn">相手のサイトをよく見る</button></section>`;
 }
 function renderSide() {
   incomeRouteBinding = null;
@@ -1649,6 +1655,8 @@ function render() {
     renderSide();
     markFusions();
   } else {
+    // start() clears selection; remove the old editable/period snapshot as well.
+    renderSide();
     crawler.setEnabled(false);
     basket.setEnabled(false);
     fx.update(battle);
@@ -2509,9 +2517,13 @@ function tick(now: number) {
     const events = battle.step(delta * speed);
     for (const ev of events) {
       fx.emit(ev, battle);
-      if (ev.kind === "server-pressure") renderTopbar();
       traffic.event(ev);
       battleSfx(ev as unknown as { kind: string; [k: string]: unknown }, battle);
+    }
+    if (events.some(ev => ev.kind === "server-pressure")) {
+      renderTopbar();
+      // Keep native combat nodes and their local state; update only CPU feedback.
+      refreshCpuFrameConditions();
     }
     battleIntensity(battle);
     fx.update(battle);
@@ -2877,7 +2889,7 @@ function siteCardYou(): Cer.SiteCard {
   };
 }
 function siteCardFoe(): Cer.SiteCard {
-  const o = appOpponent();
+  const o = appOpponent(), hp = opponentHpGuidance(o);
   return {
     name: o.pageName,
     url: o.address,
@@ -2885,7 +2897,8 @@ function siteCardFoe(): Cer.SiteCard {
     faction: o.faction,
     stats: [
       { label: "UI", value: o.size + "個" },
-      { label: "閲覧者の粘り", value: String(o.hp) },
+      { label: hp.startingLabel, value: hp.startingText },
+      { label: hp.baseLabel, value: hp.baseText },
       { label: "管理画面", value: o.admin.length ? o.admin.length + "個" : "なし" },
     ],
     tags: o.admin.map((a) => D.ADMIN[a].name),

@@ -1,3 +1,5 @@
+import E from "../src/engine.js";
+import { cpuConditionsGuidance } from "../src/cpu-conditions-guidance.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -23,7 +25,7 @@ const extract = name => {
 };
 const options = app.match(/^const editor = new UIRaidEditor.Editor\([^]*?^\}\);/m)?.[0];
 assert.ok(options);
-const compiled = transformSync(`${["save", "frameMarkup", "renderFrames", "render"].map(extract).join("\n")}\n${options}\nglobalThis.editor = editor;`, {loader: "ts", target: "es2022"}).code;
+const compiled = transformSync(`${["save", "frameMarkup", "currentCpuConditions", "refreshCpuFrameConditions", "renderFrames", "render"].map(extract).join("\n")}\n${options}\nglobalThis.editor = editor;`, {loader: "ts", target: "es2022"}).code;
 const camel = value => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 
 class ElementAdapter {
@@ -157,7 +159,7 @@ function fixture(t, entries = [["ab_link", 32, 32]]) {
   const persistence = createRunPersistence({getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value)}, "keyboard-focus-");
   let context;
   context = vm.createContext({
-    UIRaidEditor: {Editor}, run, R, V, C, D, memory: {}, runPersistence: persistence,
+    UIRaidEditor: {Editor}, cpuConditionsGuidance, run, R, V, C, D, memory: {}, runPersistence: persistence,
     clone: structuredClone, preview: false, battle: null, view: "self", storyActive: false, storySession: null,
     profileStore: null, saveOK: true, saveProblem: "", document: doc,
     Element: ElementAdapter, HTMLElement: ElementAdapter, HTMLInputElement: ElementAdapter, HTMLSelectElement: ElementAdapter,
@@ -165,7 +167,7 @@ function fixture(t, entries = [["ab_link", 32, 32]]) {
     renderSide() {}, renderShop() {}, renderCoach() {}, afterBuildChange() { counts.build++; context.afterChange?.(); },
     toast() {}, paused: false, fx: {update() {}}, crawler: {setEnabled() {}}, basket: {setEnabled() {}},
     appOpponent: () => ({faction: "google", pageName: "Other page", address: "local://other", decor: []}),
-    appEnemyBoard: () => [], ENEMY_ERA: {}, labPressureCapacity: () => 99999,
+    appEnemyBoard: () => [], ENEMY_ERA: {}, labPressureCapacity: () => null,
     pressureMeterMarkup: () => "", adminDock: () => "", scheduleFit() {}, esc: V.esc, icon: V.icon,
   });
   vm.runInContext(compiled, context);
@@ -283,6 +285,7 @@ for (const gate of ["preview", "battle", "enemy", "phase", "modal"]) {
       if (gate === "enemy") h.context.view = "enemy";
       else if (gate === "phase") h.context.run.phase = "reward";
       else if (gate === "modal") h.doc.querySelector("#modal").open = true;
+      else if (gate === "battle") h.context.battle = new E.Battle(h.context.run.owned, [], { playerCapacity: Infinity });
       else h.context[gate] = true;
     };
     press(h, id); const calls = h.doc.focusCalls.length;

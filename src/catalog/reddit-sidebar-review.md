@@ -58,6 +58,8 @@ Healing is capped by actual missing HP. Against an empty page, both layouts heal
 
 ## Ordinary capacity12 and completed weaknesses
 
+The capacity12/14 rows below are explicitly supplied diagnostic conditions. Normal laboratory launches use unbounded player CPU; simply loading this player-only lesson and pressing Battle does not reproduce these capacity-limited measurements. The game now labels actual CPU conditions separately from these examples.
+
 The normal starting capacity is 12, not14. The eight parts exceed it in both placements: **1.1 lag** and **21.6 HP overload loss** during24 seconds. Under the same HP10,000/diff/no-admin conditions, initial/reading damage is254.3/284, natural attacks44/44, healing48/32 and replays3/0. Capacity14 removes this overload; no capacity purchase or paid route is claimed.
 
 A completed-loss control uses a legal ordinary font-plus-five-links board, **$20/load6/37,376px²**:

@@ -1,3 +1,4 @@
+import { cpuConditionsGuidance } from "../src/cpu-conditions-guidance.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -26,7 +27,7 @@ const extract = name => {
 const options = app.match(/^const editor = new UIRaidEditor.Editor\([^]*?^\}\);/m)?.[0];
 const change = app.match(/^document.addEventListener\("change",[^]*?^\}\);/m)?.[0];
 assert.ok(options); assert.ok(change);
-const compiled = transformSync(`${["save", "frameMarkup", "renderFrames", "previewAction"].map(extract).join("\n")}\n${options}\n${change}\nglobalThis.editor = editor;`, {loader: "ts", target: "es2022"}).code;
+const compiled = transformSync(`${["save", "frameMarkup", "currentCpuConditions", "refreshCpuFrameConditions", "renderFrames", "previewAction"].map(extract).join("\n")}\n${options}\n${change}\nglobalThis.editor = editor;`, {loader: "ts", target: "es2022"}).code;
 const camel = value => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 
 class ElementAdapter {
@@ -155,7 +156,7 @@ function fixture(t, entries) {
   const persistence = createRunPersistence({getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value)}, "qa-identity-");
   let context;
   context = vm.createContext({
-    UIRaidEditor: {Editor}, run, R, V, C, D, memory: {}, runPersistence: persistence,
+    UIRaidEditor: {Editor}, cpuConditionsGuidance, run, R, V, C, D, memory: {}, runPersistence: persistence,
     clone: structuredClone, preview: false, battle: null, view: "self", storyActive: false, storySession: null,
     profileStore: null, saveOK: true, saveProblem: "", document: doc,
     Element: ElementAdapter, HTMLInputElement: ElementAdapter, HTMLSelectElement: ElementAdapter,
@@ -163,7 +164,7 @@ function fixture(t, entries) {
     renderSide() {}, renderShop() {}, renderCoach() {}, afterBuildChange() { counts.build++; },
     toast() {}, previewCatalogueAction, fx: {pulse() { counts.pulse++; }},
     appOpponent: () => ({faction: "google", pageName: "Other page", address: "local://other", decor: []}),
-    appEnemyBoard: () => [], ENEMY_ERA: {}, labPressureCapacity: () => 99999,
+    appEnemyBoard: () => [], ENEMY_ERA: {}, labPressureCapacity: () => null,
     pressureMeterMarkup: () => "", adminDock: () => "", scheduleFit() {}, esc: V.esc, icon: V.icon,
   });
   vm.runInContext(compiled, context);

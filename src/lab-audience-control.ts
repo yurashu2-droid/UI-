@@ -31,6 +31,15 @@ export function createLabBattleController() {
 }
 export type LabBattleController = ReturnType<typeof createLabBattleController>;
 
+function labRuleDescription(value: LabAudienceVariant): string {
+  if (value === "standard")
+    return "通常ルールです。自分のCPU（処理能力）は無制限。CPUは閲覧者HPとは別です。離脱・定着や一時サーバー負荷の追加ルールは無効です。";
+  if (value === "audience-v1")
+    return "広告が集中すると閲覧者が離脱し、登録は収益の一部を定着に変えます。双方のページに適用。自分のCPU（処理能力）は無制限で、閲覧者HPとは別です。実験室を離れると通常に戻ります。";
+  const capacity = value === "server-pressure-tight" ? 15 : value === "server-pressure-spare" ? 38 : 26;
+  return `双方CPU ${capacity}（処理能力）。CPUは閲覧者HPとは別です。自動閲覧ジョブは収益$3を消費して相手に一時負荷。CAPTCHAと余剰CPUが対策になります。実通信なし。実験室を離れると通常に戻ります。`;
+}
+
 /** A native labelled control; dynamic context also rejects queued/stale change events. */
 export function mountAudienceLabControl(
   host: HTMLElement,
@@ -62,11 +71,11 @@ export function mountAudienceLabControl(
   const description = doc.createElement("p");
   description.id = "lab-audience-description";
   description.className = "opp-tip";
-  description.textContent = "サーバー負荷では自動閲覧ジョブが収益$3を消費。CPUは双方26／比較15・38、HPとは別です。CAPTCHAと余剰CPUで対抗。実通信なし。試験中の追加ルール。広告が集中すると閲覧者が離脱し、登録は収益の一部を定着に変えます。双方のページに適用。実験室を離れると通常に戻ります。";
   const sync = () => {
     const context = getContext();
     select.value = controller.value;
     select.disabled = context.mode !== "lab" || context.storyActive || context.battleActive;
+    description.textContent = labRuleDescription(controller.value);
   };
   select.addEventListener("change", () => {
     const accepted = controller.choose(select.value, getContext());

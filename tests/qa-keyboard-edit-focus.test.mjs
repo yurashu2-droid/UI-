@@ -1,3 +1,5 @@
+import E from "../src/engine.js";
+import { cpuConditionsGuidance } from "../src/cpu-conditions-guidance.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -23,7 +25,7 @@ const extract = name => {
 };
 const options = app.match(/^const editor = new UIRaidEditor.Editor\([^]*?^\}\);/m)?.[0];
 assert.ok(options);
-const compiled = transformSync(`${["save", "frameMarkup", "renderFrames", "render"].map(extract).join("\n")}\n${options}\nglobalThis.editor = editor;`, {loader: "ts", target: "es2022"}).code;
+const compiled = transformSync(`${["save", "frameMarkup", "currentCpuConditions", "refreshCpuFrameConditions", "renderFrames", "render"].map(extract).join("\n")}\n${options}\nglobalThis.editor = editor;`, {loader: "ts", target: "es2022"}).code;
 const camel = value => value.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 
 class ElementAdapter {
@@ -163,7 +165,7 @@ function fixture(t, entries = [["yt_like", 32, 32], ["yt_sub", 144, 32]]) {
   const persistence = createRunPersistence({getItem: key => values.get(key) ?? null, setItem: (key, value) => {values.set(key, value); counts.writes++;}}, "qa-keyboard-focus-");
   let afterBuild = () => {};
   const context = vm.createContext({
-    UIRaidEditor: {Editor}, run, R, V, C, D, memory: {}, runPersistence: persistence,
+    UIRaidEditor: {Editor}, cpuConditionsGuidance, run, R, V, C, D, memory: {}, runPersistence: persistence,
     clone: structuredClone, preview: false, battle: null, paused: false, view: "self", storyActive: false, storySession: null,
     profileStore: null, saveOK: true, saveProblem: "", document: doc, Element: ElementAdapter,
     $: selector => { const node = doc.querySelector(selector); assert.ok(node, `app element ${selector}`); return node; },
@@ -171,7 +173,7 @@ function fixture(t, entries = [["yt_like", 32, 32], ["yt_sub", 144, 32]]) {
     renderSide() {}, renderShop() {}, renderCoach() {}, afterBuildChange() {counts.build++; afterBuild();},
     crawler: {setEnabled() {}}, basket: {setEnabled() {}}, fx: {update() {}}, toast() {},
     appOpponent: () => ({faction: "google", pageName: "Other page", address: "local://other", decor: []}),
-    appEnemyBoard: () => [C.makeItem("yt_like", "enemy-like", 32, 32)], ENEMY_ERA: {}, labPressureCapacity: () => 99999,
+    appEnemyBoard: () => [C.makeItem("yt_like", "enemy-like", 32, 32)], ENEMY_ERA: {}, labPressureCapacity: () => null,
     pressureMeterMarkup: () => "", adminDock: () => "", scheduleFit() {}, esc: V.esc, icon: V.icon,
   });
   vm.runInContext(compiled, context);
@@ -280,7 +282,7 @@ for (const origin of ["input", "textarea", "select", "contenteditable", "preview
       h.doc.body.append(target);
     } else if (origin === "preview") h.context.preview = true;
     else if (origin === "enemy") h.context.view = "enemy";
-    else if (origin === "battle") h.context.battle = {};
+    else if (origin === "battle") h.context.battle = new E.Battle(h.context.run.owned, [], { playerCapacity: Infinity });
     else if (origin === "phase") h.context.run.phase = "battle";
     else if (origin === "modal") h.doc.querySelector("#modal").open = true;
     else { const dialog = h.doc.createElement("dialog"); dialog.open = true; h.doc.body.append(dialog); }
@@ -302,7 +304,7 @@ for (const transition of ["preview", "enemy", "battle", "phase", "modal", "other
     h.afterBuild(() => {
       if (transition === "preview") h.context.preview = true;
       else if (transition === "enemy") h.context.view = "enemy";
-      else if (transition === "battle") h.context.battle = {};
+      else if (transition === "battle") h.context.battle = new E.Battle(h.context.run.owned, [], { playerCapacity: Infinity });
       else if (transition === "phase") h.context.run.phase = "battle";
       else if (transition === "modal") h.doc.querySelector("#modal").open = true;
       else if (transition === "other-dialog") { const dialog = h.doc.createElement("dialog"); dialog.open = true; h.doc.body.append(dialog); }

@@ -1,3 +1,4 @@
+import {cpuConditionsGuidance} from '../src/cpu-conditions-guidance.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -141,7 +142,7 @@ const editorOptions=app.match(/^const editor = new UIRaidEditor.Editor\([^]*?^\}
 const changeListener=app.match(/^document.addEventListener\("change",[^]*?^\}\);/m)?.[0];
 const submitListener=app.match(/^document.addEventListener\("submit",[^]*?^\}\);/m)?.[0];
 assert.ok(editorOptions);assert.ok(changeListener);assert.ok(submitListener);
-const appHost=transformSync(`${['save','frameMarkup','renderFrames','previewAction'].map(extract).join('\n')}\n${editorOptions}\n${changeListener}\n${submitListener}\nglobalThis.editor=editor;`,{loader:'ts',target:'es2022'}).code;
+const appHost=transformSync(`${['save','frameMarkup','currentCpuConditions','refreshCpuFrameConditions','renderFrames','previewAction'].map(extract).join('\n')}\n${editorOptions}\n${changeListener}\n${submitListener}\nglobalThis.editor=editor;`,{loader:'ts',target:'es2022'}).code;
 function fixture(t){
  const run=runFor(),globals=['document','Element','HTMLElement','HTMLInputElement','HTMLSelectElement','HTMLFormElement'];
  const old=new Map(globals.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
@@ -154,7 +155,7 @@ function fixture(t){
  const values=new Map(),counts={build:0,pulse:0},messages=[];
  const persistence=createRunPersistence({getItem:key=>values.get(key)??null,setItem:(key,value)=>values.set(key,value)},'qa-weekgrid-');
  let context;
- context=vm.createContext({UIRaidEditor:{Editor},run,R,V,C,D,memory:{},runPersistence:persistence,clone:structuredClone,preview:false,battle:null,view:'self',storyActive:false,storySession:null,
+ context=vm.createContext({UIRaidEditor:{Editor},cpuConditionsGuidance,run,R,V,C,D,memory:{},runPersistence:persistence,clone:structuredClone,preview:false,battle:null,view:'self',storyActive:false,storySession:null,
  profileStore:null,saveOK:true,saveProblem:'',document:doc,Element:ElementAdapter,HTMLInputElement:ElementAdapter,HTMLSelectElement:ElementAdapter,HTMLFormElement:ElementAdapter,
  $:selector=>doc.querySelector(selector),render(){context.renderFrames();},renderStorageNotice(){},renderSide(){},renderShop(){},renderCoach(){},afterBuildChange(){counts.build++;},toast:message=>messages.push(message),previewCatalogueAction,fx:{pulse(){counts.pulse++;}},
  appOpponent:()=>R.opponent(context.run),appEnemyBoard:()=>R.enemyBoard(context.run),ENEMY_ERA:{},labPressureCapacity:()=>null,pressureMeterMarkup:()=>'',adminDock:()=>'',scheduleFit(){},esc:V.esc,icon:V.icon});
