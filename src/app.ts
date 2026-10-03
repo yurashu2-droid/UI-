@@ -148,7 +148,7 @@ function save() {
   saveProblem = result.ok ? "" : result.error;
   if (result.ok && profileStore) {
     const snapshot = clone(run), store = profileStore;
-    profileWrites = profileWrites.then(() => store.saveRun(snapshot)).then(() => {
+    profileWrites = profileWrites.then(() => store.saveRun(snapshot, { isCurrent: value => runPersistence.isCurrent(value) })).then(() => {
       profileProblem = ""; renderStorageNotice();
     }).catch((error: unknown) => {
       profileProblem = error instanceof Error ? error.message : "コレクションの保存に失敗しました。";

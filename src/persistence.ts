@@ -85,5 +85,10 @@ export function createRunPersistence(storage: StoragePort, prefix: string) {
     }
     return save(run);
   }
-  return { load, save, recover, status: (mode: Mode) => reads.get(mode) };
+  // A mirror guard reads current bytes without granting this tab a newer save baseline.
+  function isCurrent(run: Run): boolean {
+    try { return storage.getItem(prefix + run.mode) === JSON.stringify(run); }
+    catch { return false; }
+  }
+  return { load, save, recover, isCurrent, status: (mode: Mode) => reads.get(mode) };
 }

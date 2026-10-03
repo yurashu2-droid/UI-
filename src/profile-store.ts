@@ -37,20 +37,29 @@ export function createProfileStore(factory: IDBFactory, name = "ui-raid-studio-v
     if (!R.validateRun(value) || value.mode !== mode) throw new Error("保存された構成を検証できません。元データは保護されています。");
     return value;
   }
-  async function writeRun(run: Run, migrate: boolean): Promise<void> {
+  async function writeRun(run: Run, migrate: boolean, options: { isCurrent?: (snapshot: Run) => boolean } = {}): Promise<void> {
     if (!R.validateRun(run)) throw new Error("保存する構成を検証できません。");
     const snapshot = structuredClone(run), db = await dbPromise;
     return new Promise((resolve, reject) => {
       const tx = db.transaction("profiles", "readwrite"), store = tx.objectStore("profiles");
+      let failure: Error | undefined;
       tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error ?? new Error("保存できません。"));
-      tx.onabort = () => reject(tx.error ?? new Error("保存を中止しました。"));
-      if (!migrate) { store.put(snapshot, run.mode); return; }
-      const previous = store.get(run.mode);
+      tx.onerror = () => reject(failure ?? tx.error ?? new Error("保存できません。"));
+      tx.onabort = () => reject(failure ?? tx.error ?? new Error("保存を中止しました。"));
+      const previous = store.get(snapshot.mode);
       previous.onsuccess = () => {
+        // This callback runs only when the transaction is active, after older
+        // queued transactions and database-opening delays have completed.
+        try {
+          if (options.isCurrent && !options.isCurrent(snapshot)) return;
+        } catch (error) {
+          failure = error instanceof Error ? error : new Error("保存の現在性を確認できません。");
+          tx.abort(); return;
+        }
+        if (!migrate) { store.put(snapshot, snapshot.mode); return; }
         if (previous.result === undefined) {
-          store.put(snapshot, run.mode);
-          store.put(snapshot, `legacy:${run.mode}`);
+          store.put(snapshot, snapshot.mode);
+          store.put(snapshot, `legacy:${snapshot.mode}`);
         }
       };
     });
@@ -158,7 +167,7 @@ export function createProfileStore(factory: IDBFactory, name = "ui-raid-studio-v
     });
   }
   return {
-    loadRun, saveRun: (run: Run) => writeRun(run, false),
+    loadRun, saveRun: (run: Run, options?: { isCurrent?: (snapshot: Run) => boolean }) => writeRun(run, false, options),
     migrateLegacy: (run: Run) => writeRun(run, true), claimRaidReward, listTrophies,
     recordRaidVictory, listPendingRaids, discardRaidVictory,
     getBlueprint: (captureId: string) => read<RaidBlueprint>("captures", captureId),

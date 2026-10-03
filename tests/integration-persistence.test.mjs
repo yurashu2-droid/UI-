@@ -85,3 +85,19 @@ test('recovery cannot back up obsolete corrupt bytes over a newer tab save', () 
   assert.equal(old.recover(R.newRun('campaign')).ok, false);
   assert.equal(storage.entries.get('v3-campaign'), raw);
 });
+
+test('mirror-current checks do not silently refresh a stale tab ownership baseline', () => {
+  const storage = memoryStorage(), journal = P.createRunPersistence(storage, 'v3-');
+  const first = R.newRun('campaign');
+  assert.equal(journal.save(first).ok, true);
+  assert.equal(journal.isCurrent(first), true);
+  const newer = structuredClone(first); newer.page.name = 'Updated in another tab';
+  storage.setItem('v3-campaign', JSON.stringify(newer));
+  assert.equal(journal.isCurrent(first), false);
+  assert.equal(journal.isCurrent(newer), true);
+  assert.equal(journal.save(newer).ok, false, 'guard does not adopt the newer raw baseline');
+  storage.entries.delete('v3-campaign');
+  assert.equal(journal.isCurrent(first), false);
+  const blocked = P.createRunPersistence({ getItem() { throw Error('blocked'); }, setItem() {} }, 'v3-');
+  assert.equal(blocked.isCurrent(first), false);
+});

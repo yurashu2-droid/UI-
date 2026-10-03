@@ -1,8 +1,13 @@
 # UI RAID development branch
 
-This continuation of `feat/raid-balance-async` starts from delivery commit `783c2c063291ad7e6bfd4cf631f171f37eab4c47`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
+This continuation of `feat/raid-balance-async` starts from delivery commit `0cb0987ed5ef1a44f2bb62cca803c7a9521ab82f`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the complete scope and limitations. The main branch and public hosting are unchanged.
 
-## This increment
+## Latest additions
+
+- Recheck accepted save snapshots at the active IndexedDB write-transaction boundary; a delayed older mirror cannot replace newer recovery inventory
+- Add an ordinary $28/CPU9 directional-replay navigation example, with actual paid acquisition, retained-inventory overload and HP-dependent matchup caveats
+
+## Current implemented continuation
 
 - Protect legacy campaign/lab saves against stale-tab overwrites, keep rejected writes out of the profile mirror, and provide an explicit reload-latest action
 - Keep a newly reopened story workshop interactive when the previous dialog's queued close event arrives

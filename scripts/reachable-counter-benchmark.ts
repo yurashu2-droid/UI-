@@ -1,11 +1,11 @@
-/** Replays one fixed compact counter and its real paid paths. No search or input injection here. */
+/** Replays fixed small targets and their real paid paths. No search or input injection here. */
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BUILDS } from "../src/builds.js";
 import { BATTLE_RULES_VERSION } from "../src/combat-rules.js";
-import { resources } from "../src/buildlab.js";
+import { resources, type Entrant } from "../src/buildlab.js";
 import { simulateCompositionPath } from "./paid-target-benchmark.js";
 import {
   assessCandidate,
@@ -15,10 +15,59 @@ import {
   type Limits,
 } from "./open-build-search.js";
 
+type ReachableTarget =
+  "search-documents" | "navigation" | "navigation-no-marquee" | "link-defense";
+
+function targetFor(name: ReachableTarget): Entrant {
+  if (name === "link-defense")
+    return {
+      id: "candidate-200912",
+      name: "Frozen $40 link-defense target",
+      build: true,
+      admin: [],
+      layout: [
+        ["ab_link", 16, 24, 96, 24],
+        ["ab_link", 16, 100, 96, 24],
+        ["gov_font", 16, 56, 208, 36],
+        ["ab_hr", 16, 148, 192, 8],
+        ["ab_link", 416, 100, 96, 24],
+        ["ab_link", 624, 24, 96, 24],
+        ["ab_link", 720, 24, 96, 24],
+        ["ab_link", 624, 100, 96, 24],
+        ["ab_link", 720, 100, 96, 24],
+        ["ab_hr", 624, 132, 192, 8],
+        ["ab_guestbook", 24, 216, 320, 132],
+        ["ab_link", 24, 348, 640, 24],
+      ],
+    };
+  assert.ok(
+    ["search-documents", "navigation", "navigation-no-marquee"].includes(name),
+    "Unknown reachable target",
+  );
+  const build = BUILDS.find(
+    (b) =>
+      b.id ===
+      (name === "search-documents"
+        ? "b_search_documents"
+        : "b_navigation_replay"),
+  )!;
+  return {
+    ...build,
+    build: true,
+    ...(name === "navigation-no-marquee"
+      ? {
+          id: "navigation-no-marquee",
+          layout: build.layout.filter(([type]) => type !== "ab_marquee"),
+        }
+      : {}),
+  };
+}
+
 export function runReachableCounter(
   firstSeed = 101,
   seeds = 30,
   opponents: Candidate[] = [],
+  targetName: ReachableTarget = "search-documents",
 ) {
   assert.ok(
     Number.isInteger(firstSeed) &&
@@ -27,8 +76,7 @@ export function runReachableCounter(
       seeds <= 100,
     "Invalid paid cohort",
   );
-  const build = BUILDS.find((b) => b.id === "b_search_documents")!;
-  const target = { ...build, build: true };
+  const target = targetFor(targetName);
   const conditions: Limits = {
     budget: 40,
     capacity: 17,
@@ -39,9 +87,9 @@ export function runReachableCounter(
     combatVersion: BATTLE_RULES_VERSION,
   };
   const candidate: Candidate = {
-    id: build.id,
-    origin: "connected-search-refinement",
-    layout: build.layout,
+    id: target.id,
+    origin: targetName,
+    layout: target.layout,
     admin: [],
   };
   assert.ok(assessCandidate(candidate, conditions).legal);
@@ -161,7 +209,13 @@ if (
     : [];
   console.log(
     JSON.stringify(
-      runReachableCounter(arg("first-seed", 101), arg("seeds", 30), opponents),
+      runReachableCounter(
+        arg("first-seed", 101),
+        arg("seeds", 30),
+        opponents,
+        (process.argv.find((a) => a.startsWith("--target="))?.slice(9) ??
+          "search-documents") as ReachableTarget,
+      ),
       null,
       2,
     ),

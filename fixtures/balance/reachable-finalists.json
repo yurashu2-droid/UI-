@@ -1,0 +1,782 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "description": "Exact frozen finalists selected before b_search_documents and b_navigation_replay were added. Definitions preserve search administrators; reachable-counter-benchmark removes administrators from both sides for its completed comparison.",
+    "sourceReportSha256": "a9959d17d655a78f41ca27db4f647badc082425125fd63d0e799f71dbccf873c",
+    "seed": 303,
+    "rulesVersion": "combat-v4",
+    "iterations": 300,
+    "evaluated": 385,
+    "battles": 35477
+  },
+  "limits": {
+    "budget": 40,
+    "capacity": 17,
+    "hp": 300,
+    "adminSlots": 2,
+    "footprint": 652800,
+    "productionOnly": true,
+    "maxLoad": 17
+  },
+  "finalists": [
+    {
+      "candidate": {
+        "id": "candidate-200912",
+        "origin": "native-link-defense",
+        "layout": [
+          [
+            "ab_link",
+            16,
+            24,
+            96,
+            24
+          ],
+          [
+            "ab_link",
+            16,
+            100,
+            96,
+            24
+          ],
+          [
+            "gov_font",
+            16,
+            56,
+            208,
+            36
+          ],
+          [
+            "ab_hr",
+            16,
+            148,
+            192,
+            8
+          ],
+          [
+            "ab_link",
+            416,
+            100,
+            96,
+            24
+          ],
+          [
+            "ab_link",
+            624,
+            24,
+            96,
+            24
+          ],
+          [
+            "ab_link",
+            720,
+            24,
+            96,
+            24
+          ],
+          [
+            "ab_link",
+            624,
+            100,
+            96,
+            24
+          ],
+          [
+            "ab_link",
+            720,
+            100,
+            96,
+            24
+          ],
+          [
+            "ab_hr",
+            624,
+            132,
+            192,
+            8
+          ],
+          [
+            "ab_guestbook",
+            24,
+            216,
+            320,
+            132
+          ],
+          [
+            "ab_link",
+            24,
+            348,
+            640,
+            24
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-100825",
+        "origin": "six-onestop",
+        "layout": [
+          [
+            "gov_form",
+            16,
+            16,
+            920,
+            300
+          ],
+          [
+            "gov_font",
+            32,
+            156,
+            232,
+            36
+          ],
+          [
+            "gov_onestop",
+            168,
+            108,
+            136,
+            40
+          ],
+          [
+            "gov_onestop",
+            304,
+            108,
+            136,
+            40
+          ],
+          [
+            "gov_onestop",
+            576,
+            108,
+            136,
+            40
+          ],
+          [
+            "ab_link",
+            96,
+            456,
+            640,
+            32
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-100209-drop6-drop8",
+        "origin": "b_links",
+        "layout": [
+          [
+            "ab_link",
+            40,
+            104,
+            192,
+            32,
+            null,
+            "日記"
+          ],
+          [
+            "ab_nav",
+            40,
+            136,
+            192,
+            32,
+            null,
+            "写真館"
+          ],
+          [
+            "ab_link",
+            40,
+            168,
+            192,
+            32,
+            null,
+            "リンク集"
+          ],
+          [
+            "ab_nav",
+            376,
+            72,
+            192,
+            32,
+            null,
+            "キリ番"
+          ],
+          [
+            "ab_link",
+            376,
+            104,
+            192,
+            32,
+            null,
+            "素材"
+          ],
+          [
+            "ab_nav",
+            376,
+            136,
+            192,
+            32,
+            null,
+            "更新履歴"
+          ],
+          [
+            "ab_marquee",
+            40,
+            8,
+            528,
+            28
+          ],
+          [
+            "ab_nav",
+            568,
+            104,
+            112,
+            32
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-100448",
+        "origin": "b_fort_native",
+        "layout": [
+          [
+            "gov_form",
+            488,
+            36,
+            456,
+            360
+          ],
+          [
+            "ab_table",
+            504,
+            92,
+            208,
+            136
+          ],
+          [
+            "gov_pdf",
+            516,
+            168,
+            184,
+            48
+          ],
+          [
+            "gov_pdf",
+            732,
+            168,
+            184,
+            48
+          ],
+          [
+            "gov_font",
+            612,
+            236,
+            208,
+            36
+          ],
+          [
+            "gov_submit",
+            504,
+            284,
+            184,
+            40
+          ],
+          [
+            "ab_table",
+            488,
+            400,
+            208,
+            136
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "b_video-fused-1",
+        "origin": "b_video-fused",
+        "layout": [
+          [
+            "yt_speed",
+            24,
+            346,
+            104,
+            40,
+            "source",
+            ""
+          ],
+          [
+            "yt_autoplay",
+            128,
+            346,
+            176,
+            40,
+            "source",
+            ""
+          ],
+          [
+            "yt_like",
+            392,
+            346,
+            112,
+            40,
+            "source",
+            ""
+          ],
+          [
+            "yt_notify",
+            504,
+            346,
+            72,
+            40,
+            "source",
+            ""
+          ],
+          [
+            "yt_like",
+            752,
+            208,
+            112,
+            40,
+            "source",
+            ""
+          ],
+          [
+            "yt_embed",
+            24,
+            24,
+            600,
+            322,
+            "source",
+            ""
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-185",
+        "origin": "b_fort",
+        "layout": [
+          [
+            "gov_breadcrumb",
+            24,
+            0,
+            912,
+            28
+          ],
+          [
+            "gov_form",
+            24,
+            36,
+            440,
+            380
+          ],
+          [
+            "gov_submit",
+            40,
+            172,
+            184,
+            40
+          ],
+          [
+            "gov_pdf",
+            40,
+            276,
+            408,
+            48,
+            null,
+            "様式第2号"
+          ],
+          [
+            "gov_submit",
+            232,
+            172,
+            184,
+            40,
+            null,
+            "確認する"
+          ],
+          [
+            "ab_heading",
+            484,
+            290,
+            304,
+            56,
+            null,
+            "お知らせ"
+          ],
+          [
+            "ab_hr",
+            24,
+            488,
+            560,
+            16
+          ],
+          [
+            "ab_link",
+            16,
+            568,
+            640,
+            32
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-200019",
+        "origin": "b_echo-fused",
+        "layout": [
+          [
+            "ab_marquee",
+            224,
+            24,
+            440,
+            28,
+            "source",
+            ""
+          ],
+          [
+            "gov_pdf",
+            224,
+            260,
+            440,
+            48,
+            "source",
+            "様式第1号"
+          ],
+          [
+            "go_page",
+            672,
+            260,
+            256,
+            36,
+            "source",
+            ""
+          ],
+          [
+            "gov_font",
+            224,
+            316,
+            232,
+            36,
+            "source",
+            ""
+          ],
+          [
+            "go_suggest",
+            464,
+            316,
+            200,
+            84,
+            "source",
+            ""
+          ],
+          [
+            "ab_table",
+            600,
+            400,
+            336,
+            180,
+            "source",
+            ""
+          ],
+          [
+            "ab_heading",
+            612,
+            446,
+            312,
+            56,
+            "source",
+            "アーカイブ"
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "b_video_checkout-fused-0-drop1",
+        "origin": "b_video_checkout-fused",
+        "layout": [
+          [
+            "yt_embed",
+            24,
+            24,
+            600,
+            300,
+            "source",
+            ""
+          ],
+          [
+            "yt_notify",
+            504,
+            324,
+            72,
+            40,
+            "source",
+            ""
+          ],
+          [
+            "yt_embed",
+            648,
+            24,
+            288,
+            162,
+            "source",
+            ""
+          ],
+          [
+            "yt_speed",
+            648,
+            186,
+            104,
+            40,
+            "source",
+            ""
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-249-drop2",
+        "origin": "four-oneclick",
+        "layout": [
+          [
+            "am_product",
+            24,
+            24,
+            704,
+            300
+          ],
+          [
+            "am_quantity",
+            24,
+            324,
+            80,
+            40
+          ],
+          [
+            "ab_counter",
+            24,
+            372,
+            704,
+            26
+          ],
+          [
+            "am_oneclick",
+            104,
+            324,
+            128,
+            40
+          ],
+          [
+            "am_product",
+            24,
+            414,
+            640,
+            196
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-200298",
+        "origin": "b_cart",
+        "layout": [
+          [
+            "am_product",
+            24,
+            24,
+            560,
+            300
+          ],
+          [
+            "am_buy",
+            136,
+            324,
+            168,
+            40,
+            null,
+            "今すぐ買う"
+          ],
+          [
+            "am_prime",
+            304,
+            324,
+            144,
+            40
+          ],
+          [
+            "am_rating",
+            24,
+            372,
+            560,
+            32
+          ],
+          [
+            "yt_play",
+            608,
+            324,
+            328,
+            184
+          ],
+          [
+            "go_search",
+            608,
+            280,
+            192,
+            44
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-691-drop2",
+        "origin": "b_text-fused",
+        "layout": [
+          [
+            "gov_font",
+            24,
+            0,
+            232,
+            36,
+            "source",
+            ""
+          ],
+          [
+            "go_tabs",
+            264,
+            0,
+            440,
+            36,
+            "source",
+            ""
+          ],
+          [
+            "gov_pdf",
+            264,
+            248,
+            336,
+            48,
+            "source",
+            ""
+          ],
+          [
+            "go_result",
+            24,
+            304,
+            576,
+            96,
+            "source",
+            ""
+          ],
+          [
+            "go_instant",
+            24,
+            40,
+            420,
+            124
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    },
+    {
+      "candidate": {
+        "id": "candidate-264-drop2",
+        "origin": "four-oneclick",
+        "layout": [
+          [
+            "am_product",
+            24,
+            24,
+            704,
+            300
+          ],
+          [
+            "am_quantity",
+            24,
+            324,
+            80,
+            40
+          ],
+          [
+            "ab_counter",
+            24,
+            372,
+            704,
+            26
+          ],
+          [
+            "am_oneclick",
+            104,
+            324,
+            128,
+            40
+          ],
+          [
+            "am_newsletter",
+            40,
+            592,
+            640,
+            60
+          ]
+        ],
+        "admin": [
+          "server",
+          "backup"
+        ]
+      }
+    }
+  ]
+}

@@ -32,8 +32,9 @@ test("QA: all 35 established laboratory opponent indices preserve saved meaning"
   }
 });
 
-test("QA: new compact search/document preset loads without becoming a shifted laboratory opponent", () => {
-  const build=BUILDS.find(b=>b.id==="b_search_documents");
+test("QA: player-only compact presets load without becoming shifted laboratory opponents", () => {
+  for (const id of ["b_search_documents", "b_navigation_replay"]) {
+  const build=BUILDS.find(b=>b.id===id);
   assert.ok(build);
   assert.equal(build.labOpponent,false);
   const run=R.newRun("lab",build.id);
@@ -41,6 +42,7 @@ test("QA: new compact search/document preset loads without becoming a shifted la
   assert.deepEqual(run.owned.map(item=>[item.type,item.x,item.y,item.w,item.h]),build.layout.map(row=>row.slice(0,5)));
   assert.equal(R.validateRun(JSON.parse(JSON.stringify(run))),true);
   assert.equal(R.labEnemies().some(enemy=>enemy.id===build.id),false);
+  }
 });
 
 function appFunction(name, nextName) {
@@ -50,7 +52,7 @@ function appFunction(name, nextName) {
   return transformSync(source.slice(from,to),{loader:"ts",target:"es2022"}).code;
 }
 
-test("QA: generated compact build card exposes player loading without an invalid enemy action", () => {
+test("QA: generated compact build cards expose player loading without invalid enemy actions", () => {
   let markup="";
   vm.runInNewContext(appFunction("buildBook","settings")+"\nbuildBook();",{
     BUILDS,Lab,D,esc:V.esc,modalHead:()=>"",openModal(html){markup=html;},window:{setTimeout(){}},
@@ -58,8 +60,10 @@ test("QA: generated compact build card exposes player loading without an invalid
   const all=node=>[node,...(node.childNodes??[]).flatMap(all)];
   const nodes=all(parseFragment(markup));
   const attr=(node,key)=>node.attrs?.find(a=>a.name===key)?.value;
-  assert.ok(nodes.some(node=>attr(node,"data-build-load")==="b_search_documents"));
-  assert.equal(nodes.some(node=>attr(node,"data-build-foe")==="b_search_documents"),false);
+  for (const id of ["b_search_documents", "b_navigation_replay"]) {
+    assert.ok(nodes.some(node=>attr(node,"data-build-load")===id));
+    assert.equal(nodes.some(node=>attr(node,"data-build-foe")===id),false);
+  }
   assert.ok(nodes.some(node=>attr(node,"data-build-foe")==="b_cart"),"established enemy actions remain available");
 });
 
@@ -68,7 +72,7 @@ test("QA: stale or unknown build enemy actions cannot silently change the select
   let saves=0;
   const context={run,battle:null,R,BUILDS,closeModal(){},save(){saves++;},render(){},toast(){},switchMode(){throw Error("unexpected mode switch");}};
   vm.runInNewContext(appFunction("loadBuild","buildBook"),context);
-  for(const id of ["b_search_documents","removed-old-build"]){
+  for(const id of ["b_search_documents","b_navigation_replay","removed-old-build"]){
     context.invalid=id;
     vm.runInNewContext("loadBuild(undefined,invalid);",context);
     assert.equal(run.stage,19,"unavailable target must leave saved selection unchanged");
@@ -79,7 +83,7 @@ test("QA: stale or unknown build enemy actions cannot silently change the select
   assert.equal(saves,1);
   context.run=R.newRun("campaign");context.run.stage=3;
   const campaign=JSON.stringify(context.run);
-  for(const id of ["b_search_documents","removed-old-build"]){
+  for(const id of ["b_search_documents","b_navigation_replay","removed-old-build"]){
     context.invalid=id;
     vm.runInNewContext("loadBuild(undefined,invalid);",context);
     assert.equal(JSON.stringify(context.run),campaign,"unavailable enemy cannot switch away from a campaign");
