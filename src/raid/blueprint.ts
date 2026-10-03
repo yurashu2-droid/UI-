@@ -1,4 +1,4 @@
-import D from "../data.js";
+import { PARTS, LOAD_LIMIT } from "../part-registry.js";
 import C from "../document.js";
 import {
   RAID_LIMITS,
@@ -320,8 +320,8 @@ export function validateRaidBlueprint(
       !/^component-\d{2}$/.test(comp.componentId) ||
       ids.has(comp.componentId) ||
       typeof comp.canonicalType !== "string" ||
-      !Object.hasOwn(D.PARTS, comp.canonicalType) ||
-      D.PARTS[comp.canonicalType].fused ||
+      !Object.hasOwn(PARTS, comp.canonicalType) ||
+      PARTS[comp.canonicalType].fused ||
       !(approximate
         ? comp.sourceRect === null
         : rect(comp.sourceRect, 960, 680)) ||
@@ -355,7 +355,7 @@ export function validateRaidBlueprint(
       )
         return invalid("コード上のUI要素を確認できません。");
     }
-    const def = D.PARTS[comp.canonicalType],
+    const def = PARTS[comp.canonicalType],
       r = comp.combatRect;
     if (r.w < def.minW || r.w > def.maxW || r.h < def.minH || r.h > def.maxH)
       return invalid("取得UIのサイズが標準UIの範囲外です。");
@@ -373,8 +373,8 @@ export function validateRaidBlueprint(
   const blueprint = value as unknown as RaidBlueprint;
   const board = enemyUnchecked(blueprint);
   if (
-    !board.some((p) => D.PARTS[p.type].kind === "attack") ||
-    C.analyze(board).load > D.LOAD_LIMIT ||
+    !board.some((p) => PARTS[p.type].kind === "attack") ||
+    C.analyze(board).load > LOAD_LIMIT ||
     board.some(
       (p) =>
         !C.canPlace(
@@ -510,8 +510,8 @@ export function createRaidLootItem(reward: RaidReward, id: string): RaidItem {
     reward.rewardId !== `raid:${reward.battleId}:${reward.componentId}`
   )
     throw new Error("回収するUIの形式が正しくありません。");
-  const d = Object.hasOwn(D.PARTS, reward.canonicalType)
-    ? D.PARTS[reward.canonicalType]
+  const d = Object.hasOwn(PARTS, reward.canonicalType)
+    ? PARTS[reward.canonicalType]
     : null;
   if (
     reward.kind !== "raid-ui" ||

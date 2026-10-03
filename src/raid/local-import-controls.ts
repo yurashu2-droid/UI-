@@ -113,7 +113,7 @@ export function mountLocalImportControls(
     clearCss.disabled = !enabled || blocked || (!css && !cssInvalid);
     stop.hidden = !busy;
     section.setAttribute("aria-busy", String(busy));
-    selection.textContent = `HTML: ${html ? "選択済み" : "未選択"} ／ CSS: ${css ? "選択済み" : "なし"}`;
+    selection.textContent = `HTML: ${html ? "選択済み" : "未選択"} ／ CSS: ${cssInvalid ? "選択エラー（再選択するか「CSSなしに戻す」）" : css ? "選択済み" : "なし"}`;
   };
   const setBusy = (value: boolean) => {
     busy = value;

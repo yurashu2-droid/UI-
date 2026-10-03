@@ -1,4 +1,4 @@
-import D from "./data.js";
+import { PARTS as P, WIDTH, HEIGHT } from "./part-registry.js";
 import type {
   CompositionNode,
   DocumentAnalysis,
@@ -10,8 +10,7 @@ import type {
 
 /* Pure spatial document. The composition tree is shared by rendering and combat. */
 
-const P = D.PARTS,
-  EPS = 1;
+const EPS = 1;
 const finite = (n: unknown): n is number => Number.isFinite(n),
   near = (a: number, b: number, t = EPS) => Math.abs(a - b) <= t;
 function makeItem(
@@ -108,8 +107,8 @@ function canPlace(
     h < d.minH ||
     w > d.maxW ||
     h > d.maxH ||
-    x + w > D.WIDTH ||
-    y + h > D.HEIGHT
+    x + w > WIDTH ||
+    y + h > HEIGHT
   )
     return false;
   const n = { ...item, x, y, w, h };
@@ -392,7 +391,7 @@ function analyze(input: Item[]): DocumentAnalysis {
       Object.entries(nearMap).map(([k, v]) => [k, [...v]]),
     ),
     load,
-    freeRatio: Math.max(0, 1 - usedArea / (D.WIDTH * D.HEIGHT)),
+    freeRatio: Math.max(0, 1 - usedArea / (WIDTH * HEIGHT)),
   };
 }
 // How far down a vertical composite (player / product) already extends.
@@ -458,8 +457,8 @@ function snap(
   const r = numericRect(item),
     d = P[item.type],
     candidate: SnapResult = {
-      x: Math.round(Math.max(0, Math.min(D.WIDTH - r.w, x))),
-      y: Math.round(Math.max(0, Math.min(D.HEIGHT - r.h, y))),
+      x: Math.round(Math.max(0, Math.min(WIDTH - r.w, x))),
+      y: Math.round(Math.max(0, Math.min(HEIGHT - r.h, y))),
       w: r.w,
       h: r.h,
       guides: [],
@@ -664,7 +663,7 @@ function snap(
       v = candidate[axis],
       guide = null;
     const size: "w" | "h" = axis === "x" ? "w" : "h";
-    const anchors = [32, axis === "x" ? D.WIDTH - 32 : D.HEIGHT - 24];
+    const anchors = [32, axis === "x" ? WIDTH - 32 : HEIGHT - 24];
     for (const q of others) {
       const s = numericRect(q);
       anchors.push(s[axis], s[axis] + s[size], s[axis] + s[size] / 2);
@@ -676,7 +675,7 @@ function snap(
         if (
           dd < best &&
           value >= 0 &&
-          value + r[size] <= (axis === "x" ? D.WIDTH : D.HEIGHT)
+          value + r[size] <= (axis === "x" ? WIDTH : HEIGHT)
         ) {
           best = dd;
           v = value;
@@ -689,8 +688,8 @@ function snap(
   return candidate;
 }
 function findSpace(board: Item[], item: Item) {
-  for (let y = 16; y + item.h <= D.HEIGHT; y += 16)
-    for (let x = 32; x + item.w <= D.WIDTH; x += 16)
+  for (let y = 16; y + item.h <= HEIGHT; y += 16)
+    for (let x = 32; x + item.w <= WIDTH; x += 16)
       if (canPlace(board, item, x, y)) return { x, y };
   return null;
 }

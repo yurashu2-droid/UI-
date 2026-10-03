@@ -241,3 +241,44 @@ test("disposal cancels work without repainting controls or calling a closed owne
   await settle();
   assert.deepEqual(busy, [true]);
 });
+
+test("invalid CSS stays visibly actionable after a valid HTML reselection", (t) => {
+  const ui = mount(t),
+    invalidCss = localFile("x", { name: "private.css", size: 262145 }),
+    html = localFile("<h1>Replacement</h1>");
+  choose(ui.css, invalidCss);
+  choose(ui.html, html);
+  assert.match(ui.host.textContent, /CSS: 選択エラー/);
+  assert.match(ui.host.textContent, /再選択するか「CSSなしに戻す」/);
+  assert.doesNotMatch(ui.host.textContent, /CSS: なし/);
+  assert.equal(ui.button("ローカルHTMLを近似再構成").disabled, true);
+  assert.equal(html.reads, 0);
+  assert.equal(invalidCss.reads, 0);
+  assert.equal(ui.workers.length, 0);
+  assert.doesNotMatch(ui.host.textContent, /private\.css|private\.html|C:\\/);
+  ui.button("CSSなしに戻す").click();
+  assert.match(ui.host.textContent, /CSS: なし/);
+  assert.doesNotMatch(ui.host.textContent, /CSS: 選択エラー/);
+  assert.equal(ui.button("ローカルHTMLを近似再構成").disabled, false);
+});
+
+test("multiple CSS rejection stays visible until replacement without reading either file", (t) => {
+  const ui = mount(t),
+    first = localFile("a{}", { name: "first.css" }),
+    second = localFile("b{}", { name: "second.css" });
+  ui.css.files = [first, second];
+  ui.css.dispatchEvent(new Event("change"));
+  choose(ui.html, localFile());
+  assert.match(ui.host.textContent, /CSS: 選択エラー/);
+  assert.equal(ui.button("ローカルHTMLを近似再構成").disabled, true);
+  ui.css.files = [];
+  ui.css.dispatchEvent(new Event("cancel"));
+  assert.match(ui.host.textContent, /CSS: 選択エラー/);
+  choose(ui.css, second);
+  assert.match(ui.host.textContent, /CSS: 選択済み/);
+  assert.doesNotMatch(ui.host.textContent, /CSS: 選択エラー/);
+  assert.equal(ui.button("ローカルHTMLを近似再構成").disabled, false);
+  assert.equal(first.reads, 0);
+  assert.equal(second.reads, 0);
+  assert.equal(ui.workers.length, 0);
+});

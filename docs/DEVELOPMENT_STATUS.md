@@ -2,6 +2,17 @@
 
 Ongoing development is delivered on `feat/raid-balance-async`. See [the current checkpoint](../DEVELOPMENT_CHECKPOINT.md) for the incremental history, current scope and verification limits. The main branch and public hosting are unchanged.
 
+## Smaller local-import Worker and clearer control states
+
+The shared `src/part-registry.ts` now owns the unchanged 82-part registry and board constants. `data.ts` remains the same public facade; document geometry and raid blueprint validation import only the shared definitions. The emitted local-import Worker no longer retains the catalog facade or its 23 template modules. Registry values, property ordering/descriptors, shared identity and freezes, combat fingerprint, archive seals and the full 160-result simulation remain unchanged.
+
+Compared with parent `13044530481ee0fece1c5ff110bc1db69b26903a`, the emitted Worker shrinks from 287,398 to 215,053 bytes (25.2%), or 90,572 to 65,557 using Node's default gzip. The aggregate registry/control update changes initial JS from 640,866 to 641,036 bytes, gzip sum 226,044 to 226,949, and entry/modulepreload requests from 10 to 11. CSS remains 396,730 bytes. This is an explicit Worker-payload versus startup-request tradeoff, not a measured browser-time improvement. parse5 remains Worker-only; import size/deadline/cancellation and capture compatibility are unchanged.
+
+- Rejected optional CSS stays visibly marked as a selection error after choosing a new valid HTML file. Players can see why import remains disabled and can replace the CSS or explicitly choose “CSSなしに戻す”. The acceptance policy, delayed file reading, cancellation and private filename handling do not change.
+- Native Reddit-style Up/Down buttons both declare `aria-pressed="false"` initially. Existing preview selection, reversal, deselection, independent vote columns, authored control identity and battle rerender/reset remain intact. No vote is submitted to a service, and combat rules are unchanged.
+
+Focused regressions exercise production controls and emitted modules through Node adapters. Actual browser loading, native picker, layout, Tab order and assistive-technology acceptance remain unverified. Later template and counter-route research is excluded from this increment.
+
 ## PINFIELD discovery-board continuation
 
 PINFIELD appends the 28th template and 42nd laboratory opponent after LEAFNOTE. Exact-prefix registration regressions protect the preceding 27 templates, 41 opponents and all 82 combat definitions; experimental UI definitions remain at 28. The original Pinterest-inspired board uses four ordinary parts at $20/CPU10/103,104px². Moving only native “CC” from `(24,400)` below the video to `(736,24)` beside search trades video 25% piercing for nearby-culture +2 and aligned-form ×1.3, giving a search payload of 13. A 2px vertical offset to `(736,26)` retains proximity but loses the form, giving 10; `(648,480)` disconnects both. CC remains a caption control, not a search-submit button.
