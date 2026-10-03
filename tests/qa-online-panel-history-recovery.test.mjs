@@ -424,6 +424,10 @@ async function fixture(t, rules, duel = false) {
       observe() {}
       disconnect() {}
     },
+    performance,
+    requestAnimationFrame() {
+      return 1;
+    },
     cancelAnimationFrame() {},
     window: { addEventListener() {} },
     Element: ElementAdapter,
@@ -440,7 +444,7 @@ async function fixture(t, rules, duel = false) {
       handle.dispose();
     },
   });
-  const root = host.children[0];
+  let root = host.children[0];
   const button = (kind, predicate = () => true) =>
     root.querySelectorAll(`[data-arena="${kind}"]`).find(predicate);
   const fire = (target) => {
@@ -453,7 +457,9 @@ async function fixture(t, rules, duel = false) {
   };
   await until(() => button("buy") || button("new-guest"), "initial connection");
   return {
-    root,
+    get root() {
+      return root;
+    },
     host,
     button,
     commands,
@@ -525,6 +531,19 @@ async function fixture(t, rules, duel = false) {
           preventDefault() {},
           stopPropagation() {},
         });
+      await idle();
+    },
+    async reopen() {
+      handle.dispose();
+      disposed = false;
+      handle = mount(host, {
+        baseUrl: base,
+        onClose() {
+          disposed = true;
+          handle.dispose();
+        },
+      });
+      root = host.children[0];
       await idle();
     },
     dispose() {
@@ -995,4 +1014,191 @@ test("mounted panel repeated reconnect clicks while receipt delivery is delayed 
   history(h, true, false);
   await h.click("undo");
   history(h, false, true);
+});
+
+test("mounted panel unresolved settlement remains recoverable while verified replay is shown", async (t) => {
+  const h = await fixture(t);
+  // Both real HTTP sessions use the unchanged initial shop and normal purchases.
+  // No snapshots, pool members, results or inventory are inserted into storage.
+  const other = await h.http("/session", {}, "");
+  let opponent = other.body;
+  const command = async (kind, extra = {}) => {
+    const response = await h.http(
+      "/command",
+      {
+        kind,
+        ...extra,
+        commandId: crypto.randomUUID(),
+        expectedRevision: opponent.revision,
+      },
+      other.cookie,
+    );
+    assert.equal(response.status, 200, JSON.stringify(response.body));
+    opponent = response.body;
+  };
+  const type = opponent.run.shop.find(
+    (stock) =>
+      D.PARTS[stock.type]?.kind === "attack" &&
+      D.PARTS[stock.type].price <= opponent.run.cash,
+  ).type;
+  await command("purchase", { type });
+  await command("placement", {
+    items: layout.placementPayload(
+      opponent.run.owned.map((p) => ({ ...p, x: 32, y: 24 })),
+    ),
+  });
+  await command("publish");
+  await h.click(
+    "buy",
+    (button) =>
+      !button.disabled && D.PARTS[button.dataset.type]?.kind === "attack",
+  );
+  await h.click("place");
+  await h.click("match");
+  const matched = await h.state();
+  assert.equal(matched.run.phase, "battle");
+  h.lose();
+  await h.click("settle");
+  const committed = await h.state(),
+    original = h.commands.at(-1);
+  assert.equal(committed.match.settled, true);
+  assert.equal(committed.run.history.length, 1);
+  assert.equal(h.button("settle").disabled, true);
+  assert.ok(h.button("retry"));
+  const attempts = h.commands.length;
+  for (let playback = 0; playback < 2; playback++) {
+    await h.click("replay");
+    await until(
+      () => h.status().includes("保存された記録と一致するリプレイです"),
+      "verified replay after lost settlement",
+    );
+    assert.equal(
+      h.commands.length,
+      attempts,
+      "watching replay cannot submit a gameplay command",
+    );
+    assert.ok(
+      h.button("retry"),
+      "uncertain settlement keeps its visible recovery action during playback",
+    );
+    assert.match(h.status(), /前の操作の結果はまだ確認できていません/);
+    assert.deepEqual((await h.state()).run, committed.run);
+  }
+  assert.equal(h.button("settle").disabled, true);
+  await h.click("retry");
+  assert.deepEqual(
+    h.commands.at(-1),
+    original,
+    "explicit recovery uses the original settlement identity",
+  );
+  assert.deepEqual(
+    (await h.state()).run,
+    committed.run,
+    "settlement is applied exactly once",
+  );
+  assert.equal(
+    h.button("retry"),
+    undefined,
+    "resolved receipt removes pending recovery",
+  );
+  assert.ok(h.button(committed.run.phase === "reward" ? "claim" : "match"));
+});
+
+test("mounted panel unresolved reward claim remains recoverable while verified replay is shown", async (t) => {
+  // Reuse the existing deterministic shop fixture; all purchases, match, winnings,
+  // reward choice and retry still go through the production HTTP service.
+  const h = await duel(t);
+  await h.click("match");
+  assert.equal((await h.state()).match.winner, "player");
+  await h.click("settle");
+  const before = await h.state();
+  h.lose();
+  await h.click("claim", (button) => !!D.PARTS[button.dataset.type]);
+  const committed = await h.state(),
+    original = h.commands.at(-1);
+  assert.equal(committed.run.owned.length, before.run.owned.length + 1);
+  assert.equal(committed.run.cash, before.run.cash);
+  assert.equal(committed.run.stage, 1);
+  const attempts = h.commands.length;
+  for (let playback = 0; playback < 2; playback++) {
+    await h.click("replay");
+    await until(
+      () => h.status().includes("保存された記録と一致するリプレイです"),
+      "verified replay after lost reward claim",
+    );
+    assert.equal(
+      h.commands.length,
+      attempts,
+      "watching replay cannot resubmit the reward claim",
+    );
+    assert.ok(
+      h.button("retry"),
+      "uncertain reward claim keeps its visible recovery action during playback",
+    );
+    assert.match(h.status(), /前の操作の結果はまだ確認できていません/);
+    assert.deepEqual((await h.state()).run, committed.run);
+  }
+  assert.equal(h.button("claim").disabled, true);
+  await h.click("retry");
+  assert.deepEqual(
+    h.commands.at(-1),
+    original,
+    "explicit recovery uses the original reward identity and choice",
+  );
+  assert.deepEqual(
+    (await h.state()).run,
+    committed.run,
+    "reward, round and resources advance exactly once",
+  );
+  history(h, false, false);
+  assert.equal(h.button("retry"), undefined);
+  assert.ok(h.button("match"));
+});
+
+test("mounted panel closes during replay recovery and reopens the saved reward without duplicating settlement", async (t) => {
+  const h = await duel(t);
+  await h.click("match");
+  h.lose();
+  await h.click("settle");
+  const committed = await h.state(),
+    original = h.commands.at(-1);
+  assert.equal(committed.run.phase, "reward");
+  await h.click("replay");
+  await until(
+    () => h.status().includes("保存された記録と一致するリプレイです"),
+    "verified replay before closing recovery",
+  );
+  const hold = h.hold();
+  h.startClick("retry");
+  await hold.seen;
+  assert.deepEqual(h.commands.at(-1), original);
+  h.dispose();
+  assert.equal(h.host.children.length, 0);
+  hold.release();
+  await h.idle();
+  assert.equal(
+    h.host.children.length,
+    0,
+    "late receipt cannot reopen a disposed panel",
+  );
+  await h.reopen();
+  assert.ok(
+    h.button("claim"),
+    "opening the panel reads the committed reward state",
+  );
+  assert.equal(
+    h.button("retry"),
+    undefined,
+    "reopening does not restore old in-memory intent",
+  );
+  assert.deepEqual((await h.state()).run, committed.run);
+  await h.click("claim", (button) => !!D.PARTS[button.dataset.type]);
+  const claimed = await h.state();
+  assert.equal(claimed.run.owned.length, committed.run.owned.length + 1);
+  assert.equal(claimed.run.cash, committed.run.cash);
+  assert.equal(claimed.run.history.length, 1);
+  assert.equal(claimed.run.stage, 1);
+  await h.reopen();
+  assert.ok(h.button("match"));
+  assert.deepEqual((await h.state()).run, claimed.run);
 });

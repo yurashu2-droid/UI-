@@ -2716,6 +2716,7 @@ function previewAction(e: MouseEvent) {
   if (!body || !act) return;
   if (act.tagName === "A") e.preventDefault();
   if (!preview || battle) return;
+  if ("disabled" in act && act.disabled) return;
   const node = act.closest<HTMLElement>(".web-node");
   if (storyActive && storySession && node?.dataset.id === storySession.endingLinkId) {
     const visited=StorySession.commandStorySession(storySession,{type:"visit-restored-page"});
@@ -2744,13 +2745,14 @@ function previewAction(e: MouseEvent) {
     act.classList.toggle("is-on");
   } else if (kind === "play") {
     node?.classList.toggle("video-paused");
-  } else if (["page", "tab", "font"].includes(kind)) {
+  } else if (["tab", "font"].includes(kind)) {
     for (const b of act.parentElement?.querySelectorAll("button") ?? [])
       b.classList.remove("current");
     act.classList.add("current");
   } else if (kind === "accordion") {
     const c = act.closest(".native-accordion"),
       is = c?.classList.toggle("collapsed");
+    if (c) act.setAttribute("aria-expanded", String(!is));
     act.querySelector("span")!.textContent = is ? "＋" : "−";
   } else if (kind === "buy") {
     const cart = body.querySelector(".cart-state");

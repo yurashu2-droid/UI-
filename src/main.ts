@@ -8,6 +8,7 @@ import "./styles/crawler.css";
 import "./styles/wm.css";
 import "./styles/hacksite.css";
 import "./styles/catalog.css";
+import "./styles/pagination.css";
 import "./styles/raid.css";
 import "./styles/features.css";
 import "./styles/server-pressure.css";

@@ -1,6 +1,35 @@
 import D from "../data.js";
+import { targetCaption } from "../catalog/target-caption.js";
 import { validateRaidAppearance, validateRaidBlueprint } from "./blueprint.js";
-import type { RaidAppearance, RaidBlueprint, RaidPrimitive } from "./types.js";
+import type {
+  RaidAppearance,
+  RaidBlueprint,
+  RaidComponent,
+  RaidPrimitive,
+} from "./types.js";
+
+/** The first captured text is the source label, never a live form value or later metadata. */
+function capturedLabel(appearance: RaidAppearance): string {
+  const label = appearance.primitives.find((p) => p.kind === "text");
+  return (label?.kind === "text" ? label.text : "")
+    .replace(/[\t\n\r\f\v]/g, " ")
+    .replace(
+      /[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,
+      "",
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Plain text for scene and reward identity; callers use textContent or setAttribute. */
+export function raidComponentCaption(
+  component: Pick<RaidComponent, "canonicalType" | "appearance">,
+): string {
+  return targetCaption({
+    type: component.canonicalType,
+    label: capturedLabel(component.appearance),
+  });
+}
 
 const FONTS = {
   sans: "Arial, sans-serif",
@@ -91,7 +120,7 @@ export function renderRaidScene(
     node.dataset.appearanceId = c.appearanceId;
     node.setAttribute(
       "aria-label",
-      `${D.PARTS[c.canonicalType].name} / ${D.PARTS[c.canonicalType].desc}`,
+      `${raidComponentCaption(c)} / ${D.PARTS[c.canonicalType].desc}`,
     );
     Object.assign(node.style, {
       position: "absolute",
@@ -111,6 +140,7 @@ import type { Item } from "../types.js";
 function preserveLiveControls(
   host: HTMLElement,
   appearance: RaidAppearance,
+  type: string,
 ): void {
   const layers = [
     [".native-search", "search"],
@@ -130,6 +160,12 @@ function preserveLiveControls(
     root.dataset.raidLive = kind;
     root.style.zIndex = "3";
     const label = appearance.primitives.find((p) => p.kind === "text");
+    // Only this canonical purchase action corresponds to the captured button.
+    // Retain its native children, handlers and game-owned added-state feedback.
+    if (type === "am_buy" && kind === "button" && root.dataset.ui === "buy") {
+      const sourceLabel = capturedLabel(appearance);
+      root.setAttribute("aria-label", sourceLabel || D.PARTS.am_buy.name);
+    }
     if (kind === "checkbox") {
       root
         .querySelector<HTMLInputElement>('input[type="checkbox"]')
@@ -200,6 +236,6 @@ export function applyRaidAppearance(host: HTMLElement, item: Item): boolean {
   });
   host.classList.add("has-raid-skin");
   host.append(overlay);
-  preserveLiveControls(host, appearance);
+  preserveLiveControls(host, appearance, item.type);
   return true;
 }

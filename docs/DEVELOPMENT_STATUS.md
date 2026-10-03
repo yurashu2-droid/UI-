@@ -4,6 +4,11 @@ Ongoing development is delivered on `feat/raid-balance-async`. See [the current 
 
 ## Current user-facing workflows
 
+- Native pagination advances numeric pages with boundary-disabled arrows and current-page semantics; preview remains local-only, while battle feedback keeps numeric wraparound and tab/font behavior
+- Accordion accessible expansion state follows the existing preview and battle collapse/reopen feedback; disabled synthetic clicks cannot pulse or change preview state
+- Captured Books purchase controls retain their visible source action name in accessible labeling; source-plus-canonical scene/reward identity survives victory, durable reward recovery and trophy reload without changing stored IDs or native state
+- Online replay no longer hides recovery for an unresolved settlement or reward claim. Explicit receipt recovery keeps its original command identity, with exactly-once resources and disposal/reopen safeguards
+
 - Stashed items retain edited-label plus canonical identity in bounded visible rows and full title/accessible names; existing IDs, placement, saved labels and ownership stay unchanged
 - Focus owned by a replaced loading Close/retry follows only the same live optional dialog control; online connection rerenders preserve a currently focused Close. Native cancellation disposes pending delivery before its queued close event, while result-save prevention remains intact
 - A genuinely paid routing-only comparison separates charge pooling from stronger conversion and explicitly reports overloaded-opponent, unequal-budget and startup-sensitivity limits

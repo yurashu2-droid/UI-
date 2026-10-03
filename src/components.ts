@@ -1,5 +1,6 @@
 import { RATE_LIMIT } from "./combat-rules.js";
 import { targetCaption } from "./catalog/target-caption.js";
+import { nativePaginationMarkup } from "./catalog/pagination.js";
 import { jobTableMarkup } from "./catalog/server-pressure-render.js";
 import { serviceFormHeader, serviceFormDecor } from "./catalog/service-form-render.js";
 import { projectBoardHeader, projectBoardDecor } from "./catalog/project-board-render.js";
@@ -158,7 +159,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "go_translate":
       return `<label class="native-translate"><b>文<span>A</span></b><select aria-label="翻訳先"><option>日本語 → 英語</option><option>英語 → 日本語</option></select></label>`;
     case "go_page":
-      return `<nav class="native-pagination google-pagination" aria-label="検索結果ページ">${[1, 2, 3, 4, 5, 6].map((n) => `<button type="button" data-ui="page" class="${n === 1 ? "current" : ""}">${n}</button>`).join("")}<button type="button" data-ui="page">次へ ›</button></nav>`;
+      return nativePaginationMarkup(t);
     case "ab_link":
       return `<a class="native-old-link" href="#" data-ui="link">${text(p, "最新情報")}</a>`;
     case "ab_table":
@@ -192,7 +193,7 @@ function markup(p: Item, ctx: { side?: string; theme?: string } = {}) {
     case "gov_accordion":
       return `<section class="native-accordion"><button class="accordion-summary" type="button" data-ui="accordion" aria-expanded="true">${text(p, "手続きのご案内")}<span>−</span></button><div class="empty-container">提出前に必要事項をご確認ください。</div><div class="container-slot"></div></section>`;
     case "gov_page":
-      return `<nav class="native-pagination gov-pagination" aria-label="ページ番号"><button type="button" data-ui="page">‹</button>${[1, 2, 3, 4].map((n) => `<button type="button" data-ui="page" class="${n === 1 ? "current" : ""}">${n}</button>`).join("")}<button type="button" data-ui="page">›</button></nav>`;
+      return nativePaginationMarkup(t);
     case "gov_submit":
       return button(
         `${text(p, "申請を送信")}${icon("arrow")}`,

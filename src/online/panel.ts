@@ -253,11 +253,14 @@ export function mountOnlinePanel(
     const s = guestExpired ? undefined : view?.run,
       build = s?.phase === "build" && !view?.online.requiresNewRun,
       match = view?.match,
+      // Replay status must not hide the unresolved server command's recovery.
+      // An ordinary in-flight save is not yet an uncertain result.
+      needsRecovery = pendingHistory !== null && !busy,
       confirmedBuild = build && !locked() && !error,
       noOpponent = confirmedBuild && view?.outcome?.code === "NO_OPPONENT",
       published = confirmedBuild && !!view?.online.publishedSnapshotId;
     root.innerHTML = `<header class="arena-header"><div><span class="arena-kicker">ASYNC NETWORK</span><h1>保存されたページと対戦</h1><p>他のプレイヤーの公開ビルドと戦います。相手の接続を待つ必要はありません</p></div><button data-arena="close" aria-label="オンラインを閉じる">閉じる ×</button></header>
-      <div class="arena-status ${error ? "is-error" : ""}" role="status">${esc(message)} ${error ? '<button data-arena="retry">結果を確認・再接続</button>' : ""} ${guestExpired ? '<button data-arena="new-guest">新しいゲストで開始</button>' : ""}</div>
+      <div class="arena-status ${error || needsRecovery ? "is-error" : ""}" role="status">${esc(message)} ${needsRecovery ? '<span data-arena-pending-command>前の操作の結果はまだ確認できていません。「結果を確認・再接続」で確認してください。</span>' : ""} ${error || needsRecovery ? '<button data-arena="retry">結果を確認・再接続</button>' : ""} ${guestExpired ? '<button data-arena="new-guest">新しいゲストで開始</button>' : ""}</div>
       ${
         !s
           ? '<div class="arena-loading">オンラインサービスを起動して接続してください。接続先: ' +

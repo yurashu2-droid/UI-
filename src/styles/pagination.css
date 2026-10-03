@@ -1,0 +1,5 @@
+/* Preserve native page dimensions while making unavailable directions visible. */
+.native-pagination button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

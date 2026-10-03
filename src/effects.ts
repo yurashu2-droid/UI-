@@ -12,6 +12,7 @@ import type {
 import type { Battle } from "./engine.js";
 import { applyCombatFeedback, combatFeedback } from "./catalog/combat-feedback.js";
 import { targetCaption } from "./catalog/target-caption.js";
+import { advancePagination } from "./catalog/pagination.js";
 import { applyAudienceFeedback } from "./catalog/audience-feedback.js";
 import { applyHistoryFeedback, historyFeedback } from "./catalog/history-render.js";
 
@@ -284,6 +285,7 @@ class Effects {
     );
   }
   advance(el: HTMLElement) {
+    if (advancePagination(el)) return;
     const btns = [...el.querySelectorAll("button")].filter(
       (b) => !/[‹›]/.test(b.textContent),
     );
@@ -414,12 +416,15 @@ class Effects {
         break;
       case "gov_accordion": {
         const a = q(".native-accordion"),
+          summary = q(".accordion-summary"),
           s = q(".accordion-summary>span");
         if (a) {
           a.classList.add("collapsed");
+          summary?.setAttribute("aria-expanded", "false");
           if (s) s.textContent = "＋";
           setTimeout(() => {
             a.classList.remove("collapsed");
+            summary?.setAttribute("aria-expanded", "true");
             if (s) s.textContent = "−";
           }, 260);
         }

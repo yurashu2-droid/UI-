@@ -1,7 +1,12 @@
 import {previewTransfer} from "./transfer-render.js";
+import {previewPagination} from "./pagination.js";
 /** Cosmetic local demonstration only. This helper has no battle, network or currency access. */
 export function previewCatalogueAction(control: HTMLElement, node: HTMLElement | null): boolean {
   const kind = control.dataset.ui;
+  if (kind === 'page') {
+    previewPagination(control, node);
+    return true;
+  }
   if (kind && ['retweet','favorite','follow','bookmark'].includes(kind)) {
     const pressed = control.getAttribute('aria-pressed') !== 'true';
     control.setAttribute('aria-pressed', String(pressed));

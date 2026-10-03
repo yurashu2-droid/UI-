@@ -2,7 +2,7 @@ import D from "../data.js";
 import { createRaidCaptureSession } from "./capture.js";
 import { createRaidEncounterController } from "./encounter.js";
 import { createFixtureRaid, listRaidFixtures } from "./fixtures.js";
-import { renderRaidScene } from "./render.js";
+import { raidComponentCaption, renderRaidScene } from "./render.js";
 import { verifyRaidBlueprint } from "./blueprint.js";
 import { normalizePublicPageUrl } from "./url.js";
 import type {
@@ -157,7 +157,9 @@ export function mountRaidPanel(
     details.replaceChildren();
     for (const c of b.components) {
       const def = D.PARTS[c.canonicalType];
-      details.append(make("span", "", `${def.name} / CPU ${def.load}`));
+      details.append(
+        make("span", "", `${raidComponentCaption(c)} / CPU ${def.load}`),
+      );
     }
     reference.disabled = b.source.kind !== "fixture";
     reference.textContent =
@@ -184,21 +186,23 @@ export function mountRaidPanel(
       for (const item of scene.querySelectorAll<HTMLElement>(
         "[data-component-id]",
       )) {
+        const component = b.components.find(
+          (c) => c.componentId === item.dataset.componentId,
+        );
+        if (!component) continue;
+        const caption = `${raidComponentCaption(component)}${b.fidelity === "code-approximation" ? "（近似再構成のUI）" : ""}`;
         if (state.phase === "won") {
           item.classList.add("raid-loot-ready");
           item.tabIndex = 0;
           item.setAttribute("role", "button");
-          item.setAttribute(
-            "aria-label",
-            `${D.PARTS[item.dataset.canonicalType!].name}${b.fidelity === "code-approximation" ? "（近似再構成のUI）" : ""}を回収`,
-          );
+          item.setAttribute("aria-label", `${caption}を回収`);
         }
         if (
           state.phase === "claimed" &&
           item.dataset.componentId === claimedComponent
         ) {
           item.classList.add("raid-claimed");
-          item.setAttribute("aria-label", "回収済みのUI");
+          item.setAttribute("aria-label", `${caption} / 回収済みのUI`);
         }
       }
     }
