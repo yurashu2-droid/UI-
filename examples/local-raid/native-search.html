@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>こもれび資料室 | ネイティブ検索の見本</title>
+    <style>
+      body { color: #213d39; background: #f7f3e8; font-family: sans-serif; }
+      h1 { color: #245e55; font-size: 24px; }
+      search { background: #e5eee5; border: 2px solid #537a6c; padding: 8px; border-radius: 8px; }
+      .shelf-search { color: #563a60; background: #f2eaf3; border: 2px solid #74597a; padding: 6px; }
+      .check-caption { color: #375c52; }
+      a { color: #265887; }
+    </style>
+  </head>
+  <body>
+    <h1>こもれび資料室</h1>
+    <p>検索欄の構造を比べる、架空の静的な見本です。</p>
+    <search>
+      <p><label>資料の題名 <input type="SEARCH" placeholder="例：紙のノート" /></label></p>
+      <p><label>分類 <input type="search" placeholder="例：つくり方" /></label></p>
+      <p>この二つの欄は、一つの検索領域として近似されます。</p>
+    </search>
+    <p>
+      <label>別の棚を探す <input class="shelf-search" type="search" placeholder="例：小さな本棚" /></label>
+    </p>
+    <p>
+      <label class="check-caption"><input type="checkbox" />紙の資料だけ</label>
+    </p>
+    <p><a href="#notes">この見本の読み方</a></p>
+    <footer id="notes">
+      <p>検索欄はどちらも「検索」という一般名になります。入力値やplaceholderは取り込みません。</p>
+      <p>実際の検索・送信・保存は行いません。JavaScriptや外部素材はありません。</p>
+    </footer>
+  </body>
+</html>

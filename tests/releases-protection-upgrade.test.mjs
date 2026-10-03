@@ -42,7 +42,7 @@ test('Releases upgrade preserves the exact existing identity, default four parts
  assert.notEqual(t.layout,base.layout,'upgrade owns its independent layout array');
  assert.deepEqual([r.parts,r.acquisitionValue,r.load,r.footprint,r.legal],[4,24,10,106304,true]);
  assert.deepEqual(r.experimental,['gh_commit','gh_transfer','go_cache']);
- assert.equal(SITE_TEMPLATES.length,28);assert.equal(Object.keys(D.PARTS).length,82);
+ assert.equal(SITE_TEMPLATES.length,29);assert.equal(Object.keys(D.PARTS).length,82);
  assert.strictEqual(SITE_TEMPLATES[15],t,'upgrade replaces the existing entry in place');
 });
 

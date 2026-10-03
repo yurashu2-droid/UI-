@@ -5,4 +5,6 @@ export interface SiteTemplate extends EnemyDefinition {
   inspiredBy: string;
   references: string[];
   counterplay: string;
+  /** A player-only laboratory lesson preserves the existing opponent indices. */
+  labOpponent?: boolean;
 }

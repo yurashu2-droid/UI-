@@ -1,6 +1,7 @@
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 import { utf8Bytes, rawSourceHash } from "./code-source.js";
 import { parseBoundedLocalHtml } from "./local-parser.js";
+import { localNativeSearchNodes } from "./local-native-search.js";
 import { canonicalTypeFor, sealRaidBlueprint } from "./blueprint.js";
 import type { RaidBlueprint, RaidComponent, RaidPrimitive } from "./types.js";
 import type { Rect } from "../types.js";
@@ -310,6 +311,18 @@ function analyzeCode(
   const localPurchases = local
     ? localInputPurchaseLabels(nodes, hidden)
     : undefined;
+  const localSearches = local
+    ? localNativeSearchNodes(
+        nodes,
+        hidden,
+        omit,
+        (n) =>
+          attr(n, "role") === "search" ||
+          descendants(n).some(
+            (c) => tag(c) === "input" && attr(c, "type") === "search",
+          ),
+      )
+    : undefined;
   const candidates: Candidate[] = [];
   let count = 0,
     order = 0,
@@ -325,8 +338,9 @@ function analyzeCode(
   ) {
     const name = tag(n),
       current = ++order,
-      inputLabel = localPurchases?.get(n);
-    if ((omit.has(name) && !inputLabel) || hidden(n)) return;
+      inputLabel = localPurchases?.get(n),
+      nativeSearch = localSearches?.has(n);
+    if ((omit.has(name) && !inputLabel && !nativeSearch) || hidden(n)) return;
     const style = { ...styleFor(n, inherited) };
     if (name === "title") {
       title = clean(rawText(n)) || title;
@@ -395,7 +409,10 @@ function analyzeCode(
       /add to (?:basket|cart)|buy|購入|カート|かご/i.test(label)
     )
       kind = "purchase";
-    else if (
+    else if (nativeSearch) {
+      kind = "search";
+      label = "検索";
+    } else if (
       name === "form" &&
       (attr(n, "role") === "search" ||
         descendants(n).some(

@@ -1,0 +1,23 @@
+/* Original fixed lesson only; no native-control, vote-state or typography overrides. */
+.reddit-sidebar-title,
+.reddit-sidebar-thread-note,
+.reddit-sidebar-lesson,
+.reddit-sidebar-font-seat,
+.reddit-sidebar-reading-note,
+.reddit-sidebar-detached-note,
+.reddit-sidebar-footnote {
+  box-sizing: border-box;
+  height: 100%;
+  margin: 0;
+  pointer-events: none;
+  color: #344451;
+  background: #f4f7f8;
+  font: 11px/16px Arial, sans-serif;
+}
+.reddit-sidebar-title { font-weight: 700; }
+.reddit-sidebar-lesson { padding: 10px 12px; border-radius: 8px; }
+.reddit-sidebar-lesson h2 { margin: 0; font: 700 14px/20px Arial, sans-serif; }
+.reddit-sidebar-lesson p { margin: 0; }
+.reddit-sidebar-font-seat { font-weight: 700; }
+.reddit-sidebar-detached-note { padding: 0; }
+.reddit-sidebar-footnote { padding-top: 4px; }

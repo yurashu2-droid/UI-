@@ -135,7 +135,7 @@ const BUILD_ENEMIES: EnemyDefinition[] = BUILDS.filter((b) => b.labOpponent !== 
   decor: [],
 }));
 function labEnemies(): EnemyDefinition[] {
-  return [...D.ENEMIES, ...BUILD_ENEMIES, ...SITE_TEMPLATES];
+  return [...D.ENEMIES, ...BUILD_ENEMIES, ...SITE_TEMPLATES.filter(site => site.labOpponent !== false)];
 }
 function pageDecor(run: Run) {
   return SITE_TEMPLATES.find(template => template.id === run.page.templateId)?.decor ?? [];

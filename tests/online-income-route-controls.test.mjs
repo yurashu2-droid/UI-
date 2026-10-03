@@ -818,6 +818,9 @@ test("delayed route responses do not steal deliberate focus or reopen a disposed
   h.dispatch("change", h.route());
   await closing.seen;
   h.dispatch("click", h.node("close"));
+  assert.equal(h.host.children.length, 1, "pending route keeps its recovery until closure is acknowledged");
+  assert.ok(h.node("close-anyway"), "pending route requires an explicit close choice");
+  h.dispatch("click", h.node("close-anyway"));
   closing.release();
   await h.flush();
   assert.equal(h.host.children.length, 0);

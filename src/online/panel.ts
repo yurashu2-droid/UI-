@@ -71,6 +71,7 @@ export function mountOnlinePanel(
     message = "サーバーに接続しています…",
     error = false;
   let guestExpired = false;
+  let closeWarning = false;
   let routeFocus: { runId: string; sourceId: string } | null = null;
   let pendingHistory: PendingHistory | null = null;
   let selected: string | null = null,
@@ -105,6 +106,25 @@ export function mountOnlinePanel(
     view.run.phase === "build" &&
     !locked() &&
     !view.online.requiresNewRun;
+  function focusControl(kind: string, preventScroll = true) {
+    if (disposed || !root.isConnected || !host.contains(root)) return;
+    const dialog = root.closest<HTMLDialogElement>("dialog"),
+      control = root.querySelector<HTMLButtonElement>(`[data-arena="${kind}"]`);
+    if ((!dialog || dialog.open) && control?.isConnected && !control.disabled)
+      control.focus({ preventScroll });
+  }
+  function requestClose() {
+    if (disposed) return;
+    if (!pendingHistory) {
+      options.onClose();
+      return;
+    }
+    // Aborting fetch cannot undo a committed command. Keep its receipt identity
+    // until resolution or an explicit choice to discard this panel's recovery.
+    closeWarning = true;
+    render();
+    focusControl("keep-recovering", false);
+  }
   function stopReplay() {
     replayEpoch++;
     cancelAnimationFrame(raf);
@@ -250,8 +270,10 @@ export function mountOnlinePanel(
   }
   function render() {
     if (disposed) return;
-    const previousClose = root.querySelector<HTMLButtonElement>('[data-arena="close"]');
-    const followClose = !!previousClose && document.activeElement === previousClose;
+    const followControl = ["close", "keep-recovering", "close-anyway"].find(
+      (kind) => document.activeElement === root.querySelector(`[data-arena="${kind}"]`),
+    );
+    if (!pendingHistory) closeWarning = false;
     if (routeFocus) {
       const active = document.activeElement;
       if (
@@ -273,6 +295,7 @@ export function mountOnlinePanel(
       noOpponent = confirmedBuild && view?.outcome?.code === "NO_OPPONENT",
       published = confirmedBuild && !!view?.online.publishedSnapshotId;
     root.innerHTML = `<header class="arena-header"><div><span class="arena-kicker">ASYNC NETWORK</span><h1>保存されたページと対戦</h1><p>他のプレイヤーの公開ビルドと戦います。相手の接続を待つ必要はありません</p></div><button data-arena="close" aria-label="オンラインを閉じる">閉じる ×</button></header>
+      ${closeWarning ? `<div class="arena-status is-error" data-arena-close-warning role="alert"><p>${busy ? "操作の応答を待っています。この画面を開いたまま、応答を待ってください。" : "前の操作の結果はまだ確認できていません。この画面に戻り、「結果を確認・再接続」で確認してください。"}</p><p>この画面を閉じると、同じ操作を再確認するための記録は失われます。サーバーで確定済みの操作は取り消されません。開き直すと保存済みの状態を読みますが、この操作の再送は引き継げません。ページの再読込でも、この記録は失われます。</p><button data-arena="keep-recovering">画面に戻る</button><button data-arena="close-anyway">確認せず閉じる</button></div>` : ""}
       <div class="arena-status ${error || needsRecovery ? "is-error" : ""}" role="status">${esc(message)} ${needsRecovery ? '<span data-arena-pending-command>前の操作の結果はまだ確認できていません。サーバーでは確定済みの可能性があります。「結果を確認・再接続」で確認してください。</span>' : ""} ${error || needsRecovery ? '<button data-arena="retry">結果を確認・再接続</button>' : ""} ${guestExpired ? '<button data-arena="new-guest">新しいゲストで開始</button>' : ""}</div>
       ${
         !s
@@ -379,13 +402,10 @@ export function mountOnlinePanel(
         control.focus({ preventScroll: true });
       routeFocus = null;
     }
-    // Connection readiness can replace the Close just handed off by the host.
-    if (followClose && !disposed && root.isConnected && host.contains(root) && document.activeElement === document.body) {
-      const dialog = root.closest<HTMLDialogElement>("dialog");
-      const close = root.querySelector<HTMLButtonElement>('[data-arena="close"]');
-      if ((!dialog || dialog.open) && close?.isConnected && !close.disabled)
-        close.focus({ preventScroll: true });
-    }
+    // Follow a replaced Close/warning choice only while focus was not moved.
+    // Receipt arrival removes the warning; it never authorizes dismissal.
+    if (followControl && document.activeElement === document.body)
+      focusControl(closeWarning ? followControl : "close");
   }
   function routeControls(p: Item) {
     const owned = view!.run.owned;
@@ -467,7 +487,20 @@ export function mountOnlinePanel(
       if (!button) return;
       const kind = button.dataset.arena;
       if (kind === "close") {
-        options.onClose();
+        requestClose();
+        return;
+      }
+      if (kind === "keep-recovering" || kind === "close-anyway") {
+        if (
+          disposed || !closeWarning ||
+          button !== root.querySelector(`[data-arena="${kind}"]`)
+        ) return;
+        closeWarning = false;
+        if (kind === "close-anyway") options.onClose();
+        else {
+          render();
+          focusControl(busy ? "close" : "retry");
+        }
         return;
       }
       if (kind === "retry") {
@@ -765,7 +798,7 @@ export function mountOnlinePanel(
       if (e.key === "Escape") {
         e.preventDefault();
         if (drag) cancelDrag();
-        else options.onClose();
+        else requestClose();
       }
       if (
         (e.ctrlKey || e.metaKey) &&
@@ -879,6 +912,7 @@ export function mountOnlinePanel(
       }
     });
   return {
+    requestClose,
     dispose() {
       if (disposed) return;
       disposed = true;

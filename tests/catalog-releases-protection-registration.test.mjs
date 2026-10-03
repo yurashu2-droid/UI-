@@ -12,7 +12,7 @@ import {ElementAdapter} from './support/raid-dom-adapter.mjs';
 const base=RELEASE_TEMPLATES[0], upgraded=RELEASE_PROTECTION_TEMPLATES[0];
 test('Releases teaching upgrade replaces exactly one existing entry without changing gameplay or indices',()=>{
   assert.strictEqual(SITE_TEMPLATES[15],upgraded);
-  assert.equal(SITE_TEMPLATES.length,28);
+  assert.equal(SITE_TEMPLATES.length,29);
   assert.equal(SITE_TEMPLATES.filter(t=>t.id===base.id).length,1);
   assert.equal(R.labEnemies().length,42);
   assert.strictEqual(R.labEnemies()[29],upgraded);

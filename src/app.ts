@@ -1647,9 +1647,11 @@ function celebrateFusions() {
 
 /* ---------- Modals ---------- */
 let modalFeatureDispose: (() => void) | undefined;
+let modalFeatureRequestClose: (() => void) | undefined;
 let localRaidReturn: { run: Run; store: NonNullable<typeof profileStore>; selection: LocalRaidSelection } | undefined;
 function openModal(html: string) {
   modalFeatureDispose?.(); modalFeatureDispose = undefined;
+  modalFeatureRequestClose = undefined;
   $("#modal").classList.remove("feature-modal");
   $("#modal-content").innerHTML = html;
   if (!$<HTMLDialogElement>("#modal").open)
@@ -1658,12 +1660,14 @@ function openModal(html: string) {
 function closeModal() {
   if (pendingStorySettlement) return;
   modalFeatureDispose?.(); modalFeatureDispose = undefined;
+  modalFeatureRequestClose = undefined;
   $<HTMLDialogElement>("#modal").close();
 }
 $("#modal").addEventListener("close", () => {
   // A queued close from the previous panel may arrive after a story hub reopens.
   if ($<HTMLDialogElement>("#modal").open) return;
   modalFeatureDispose?.(); modalFeatureDispose = undefined;
+  modalFeatureRequestClose = undefined;
   // Story transactions can repaint the inspector while the dialog is open.
   // Recompute its controls after actual dismissal, including native Escape.
   renderSide();
@@ -1842,8 +1846,18 @@ function onlinePanel() {
     return panel;
   }, ({ mountOnlinePanel }) => {
     const panel = mountOnlinePanel(host, { baseUrl: "/api/arena", onClose: closeModal });
+    // Native dialog cancel can originate outside the panel's keydown handler.
+    // Preserve the active command's recovery choice before any disposal occurs.
+    const requestClose = () => {
+      if (modalFeatureDispose === feature.dispose && host.isConnected && $<HTMLDialogElement>("#modal").open)
+        panel.requestClose();
+    };
+    modalFeatureRequestClose = requestClose;
     loadingHead.remove();
-    return panel;
+    return { dispose() {
+      if (modalFeatureRequestClose === requestClose) modalFeatureRequestClose = undefined;
+      panel.dispose();
+    } };
   }, { loadingHead, closeSelector: '[data-arena="close"]' });
   modalFeatureDispose = feature.dispose;
   void feature.start();
@@ -3460,6 +3474,7 @@ document.addEventListener("keydown", (e) => {
 });
 $<HTMLDialogElement>("#modal").addEventListener("cancel", (event) => {
   if (pendingStorySettlement) { event.preventDefault(); return; }
+  if (modalFeatureRequestClose) { event.preventDefault(); modalFeatureRequestClose(); return; }
   modalFeatureDispose?.(); modalFeatureDispose = undefined;
   if (battle?.result) setTimeout(leaveBattle, 0);
 });

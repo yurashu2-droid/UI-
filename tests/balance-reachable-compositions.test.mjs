@@ -175,7 +175,7 @@ test("the compact search/document example is loadable, paid-reachable and connec
   ];
   assert.deepEqual(
     R.labEnemies().map((e) => e.id),
-    [...original, ...SITE_TEMPLATES.map((t) => t.id)],
+    [...original, ...SITE_TEMPLATES.filter((t) => t.labOpponent !== false).map((t) => t.id)],
   );
   const info = E.analyze(board(b.layout, "c"));
   for (const p of info.board.filter((p) =>
